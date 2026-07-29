@@ -13,6 +13,7 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { materializeBundle } from "./materialize.mjs";
 
 const STARTERS_REPO = "aotter/mantle-starters";
 const DEFAULT_REPORT = ".mantle/update-report.json";
@@ -36,25 +37,61 @@ async function main() {
   const features = readJson(join(root, ".mantle", "features.json"));
   const targetRef = flags.ref ?? stringField(features.registry, "version");
   if (!targetRef) throw new Error("Pass --ref <starters-ref> or set .mantle/features.json registry.version.");
+  const sourceRef = stringField(launchState, "starter_ref");
+  if (!sourceRef) throw new Error(".mantle/launch-state.json is missing starter_ref.");
   const archetype = launchArchetype(launchState, features);
 
   const tempRoot = mkdtempSync(join(tmpdir(), "mantle-update-"));
   try {
-    const bundle = await fetchBundle(targetRef, archetype);
-    materializeBundle(tempRoot, bundle, placeholders({ launchState, features, targetRef }), root);
-    const report = compare(root, tempRoot, {
+    const sourceRoot = join(tempRoot, "source");
+    const targetRoot = join(tempRoot, "target");
+    mkdirSync(sourceRoot);
+    mkdirSync(targetRoot);
+    const sourceBundle = await fetchBundle(sourceRef, archetype);
+    const targetBundle = sourceRef === targetRef
+      ? sourceBundle
+      : await fetchBundle(targetRef, archetype);
+    materializeBundle(
+      sourceRoot,
+      sourceBundle,
+      placeholders({ launchState, features, targetRef: sourceRef }),
+    );
+    materializeBundle(
+      targetRoot,
+      targetBundle,
+      placeholders({ launchState, features, targetRef }),
+    );
+    const upstream = compare(sourceRoot, targetRoot, { includeRemoved: true });
+    const local = compare(root, sourceRoot);
+    const report = {
+      schema_version: 2,
       generated_at: new Date().toISOString(),
+      source_ref: sourceRef,
       target_ref: targetRef,
-      bundle_version: bundle.version ?? null,
-    });
+      bundle_version: targetBundle.version ?? null,
+      upstream,
+      local,
+      next_step: "Port reviewed upstream changes only; preserve local code, instance config, and state.",
+    };
     const reportPath = resolve(root, flags.report ?? DEFAULT_REPORT);
     mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, JSON.stringify(report, null, 2) + "\n");
     console.log(`mantle:update report: ${relative(root, reportPath) || reportPath}`);
     console.log(
-      `target ${targetRef}: ${report.differing.length} differing, ${report.missing_current.length} missing`,
+      `${sourceRef} → ${targetRef}: ${upstream.differing.length} changed, `
+      + `${upstream.missing_current.length} added, ${upstream.removed_upstream.length} removed; `
+      + `local: ${local.differing.length} modified, ${local.missing_current.length} missing`,
     );
-    if (flags.strict && (report.differing.length || report.missing_current.length)) process.exit(2);
+    if (
+      flags.strict
+      && (
+        upstream.differing.length
+        || upstream.missing_current.length
+        || upstream.removed_upstream.length
+        || local.differing.length
+        || local.missing_current.length
+      )
+    ) process.exit(2);
   } finally {
     if (!flags.keepTemp) rmSync(tempRoot, { recursive: true, force: true });
   }
@@ -88,16 +125,6 @@ async function fetchBundle(ref, archetype) {
     throw new Error(`Invalid provision bundle at ${url}`);
   }
   return bundle;
-}
-
-function materializeBundle(root, bundle, values, currentRoot) {
-  for (const [path, raw] of Object.entries(bundle.files)) {
-    const target = join(root, path.replace(/\.template$/, ""));
-    mkdirSync(dirname(target), { recursive: true });
-    writeFileSync(target, substitute(String(raw), values), "utf8");
-  }
-  applyProjectNameToWrangler(root, values.PROJECT_NAME, values.SITE_URL);
-  copyWranglerStringVar(currentRoot, root, "TURNSTILE_SITE_KEY");
 }
 
 function placeholders({ launchState, features, targetRef }) {
@@ -160,14 +187,7 @@ function afterLaunchSkillUrl({ repoUrl, siteUrl, archetype, locale, purpose }) {
   return url.toString();
 }
 
-function substitute(text, values) {
-  return text.replace(/\{\{([A-Z_][A-Z0-9_]*)\}\}/g, (match, key) => {
-    if (key in values) return values[key];
-    throw new Error(`Unknown placeholder ${match}`);
-  });
-}
-
-function compare(currentRoot, upstreamRoot, meta) {
+function compare(currentRoot, upstreamRoot, options = {}) {
   const upstreamFiles = listFiles(upstreamRoot);
   const differing = [];
   const missingCurrent = [];
@@ -184,16 +204,20 @@ function compare(currentRoot, upstreamRoot, meta) {
       differing.push({ path, current_sha256: currentSha, upstream_sha256: upstreamSha });
     }
   }
+  const removedUpstream = options.includeRemoved
+    ? listFiles(currentRoot)
+      .filter((path) => !existsSync(join(upstreamRoot, path)))
+      .map((path) => ({ path, current_sha256: sha256(join(currentRoot, path)) }))
+    : [];
   return {
-    schema_version: 1,
-    ...meta,
     counts: {
       differing: differing.length,
       missing_current: missingCurrent.length,
+      removed_upstream: removedUpstream.length,
     },
     differing,
     missing_current: missingCurrent,
-    next_step: "Triage each path with the repo-local mantle:update skill; never copy instance config or state wholesale.",
+    removed_upstream: removedUpstream,
   };
 }
 
@@ -243,45 +267,4 @@ function requiredValue(argv, index, flag) {
   return value;
 }
 
-function applyProjectNameToWrangler(root, projectName, siteUrl) {
-  const path = join(root, "wrangler.toml");
-  if (!existsSync(path)) return;
-  let text = readFileSync(path, "utf8")
-    .replace(/^name = ".*"$/m, `name = ${JSON.stringify(projectName)}`)
-    .replace(/^database_name = ".*"$/m, `database_name = ${JSON.stringify(`${projectName}-db`)}`);
-  text = upsertWranglerStringVar(text, "PUBLIC_ORIGIN", siteUrl);
-  writeFileSync(path, text, "utf8");
-}
-
-function upsertWranglerStringVar(text, name, value) {
-  const line = `${name} = ${JSON.stringify(value)}`;
-  const existing = new RegExp(`^\\s*#?\\s*${name}\\s*=.*$`, "m");
-  if (existing.test(text)) return text.replace(existing, line);
-  const vars = text.match(/^\[vars\]\s*$/m);
-  if (!vars || vars.index === undefined) return `${text.trimEnd()}\n\n[vars]\n${line}\n`;
-  const insertAt = vars.index + vars[0].length;
-  return `${text.slice(0, insertAt)}\n${line}${text.slice(insertAt)}`;
-}
-
-function copyWranglerStringVar(currentRoot, targetRoot, name) {
-  if (!currentRoot) return;
-  const currentPath = join(currentRoot, "wrangler.toml");
-  const targetPath = join(targetRoot, "wrangler.toml");
-  if (!existsSync(currentPath) || !existsSync(targetPath)) return;
-  const match = readFileSync(currentPath, "utf8")
-    .match(new RegExp(`^\\s*${name}\\s*=\\s*(\".*\")\\s*$`, "m"));
-  if (!match) return;
-  let value;
-  try {
-    value = JSON.parse(match[1]);
-  } catch {
-    return;
-  }
-  writeFileSync(
-    targetPath,
-    upsertWranglerStringVar(readFileSync(targetPath, "utf8"), name, value),
-    "utf8",
-  );
-}
-
-export { compare, materializeBundle, placeholders };
+export { compare, placeholders };

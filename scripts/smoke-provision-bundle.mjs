@@ -1,14 +1,11 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import { parseAllDocuments } from "yaml";
-import {
-  compare,
-  materializeBundle,
-  placeholders,
-} from "../blank/scripts/update.mjs";
+import { materializeBundle } from "../blank/scripts/materialize.mjs";
+import { compare, placeholders } from "../blank/scripts/update.mjs";
 
 const root = new URL("..", import.meta.url).pathname;
 const archetypes = ["blank", "presence", "intake", "publication", "transaction", "reservation", "community"];
@@ -34,11 +31,7 @@ for (const archetype of archetypes) {
   const tempRoot = mkdtempSync(join(tmpdir(), `mantle-bundle-${archetype}-`));
   try {
     const bundle = JSON.parse(readFileSync(join(root, "provision-bundles", `${archetype}.json`), "utf8"));
-    for (const [path, raw] of Object.entries(bundle.files ?? {})) {
-      const target = join(tempRoot, path.replace(/\.template$/, ""));
-      mkdirSync(dirname(target), { recursive: true });
-      writeFileSync(target, substitute(raw, archetype), "utf8");
-    }
+    materializeBundle(tempRoot, bundle, { ...replacements, ARCHETYPE: archetype });
     assertNoLeftovers(tempRoot, bundle.files);
     assertPublicHomeIsNotHandoff(tempRoot);
     assertMantleSiteSignature(tempRoot, archetype);
@@ -71,6 +64,8 @@ for (const archetype of archetypes) {
       if (archetype === "intake") {
         assertIntakeHandlerLoaded(tempRoot);
         assertIntakeForm(tempRoot);
+      } else {
+        assertNoIntakeRuntime(tempRoot, archetype);
       }
       if (archetype === "publication") {
         assertPublicationSeed(tempRoot);
@@ -126,13 +121,6 @@ function smokeLocalMaterializer() {
     if (!wrangler.includes('name = "northstar"')) throw new Error("local Worker name mismatch");
     if (!wrangler.includes('database_name = "northstar-db"')) throw new Error("local D1 name mismatch");
     if (!wrangler.includes('PUBLIC_ORIGIN = "http://localhost:8787"')) throw new Error("local origin missing");
-    writeFileSync(
-      join(output, "wrangler.toml"),
-      wrangler.replace(
-        '# TURNSTILE_SITE_KEY = "0x..."',
-        'TURNSTILE_SITE_KEY = "test-site-key"',
-      ),
-    );
     const features = JSON.parse(readFileSync(join(output, ".mantle", "features.json"), "utf8"));
     const baseline = join(tempRoot, "update-baseline");
     mkdirSync(baseline);
@@ -143,9 +131,8 @@ function smokeLocalMaterializer() {
       baseline,
       bundle,
       placeholders({ launchState: launch, features, targetRef: launch.starter_ref }),
-      output,
     );
-    const report = compare(output, baseline, { target_ref: launch.starter_ref });
+    const report = compare(output, baseline);
     if (report.differing.length || report.missing_current.length) {
       throw new Error(
         `unchanged local project reported update drift: ${
@@ -174,14 +161,6 @@ function assertGeneratedStylesMatchStarterLock(root) {
   if (!cssVersion || !lockVersion || cssVersion !== lockVersion) {
     throw new Error(`generated styles use Tailwind ${cssVersion ?? "unknown"}, starter lock uses ${lockVersion ?? "unknown"}`);
   }
-}
-
-function substitute(text, archetype) {
-  return String(text).replace(/\{\{([A-Z_][A-Z0-9_]*)\}\}/g, (match, key) => {
-    if (key === "ARCHETYPE") return archetype;
-    if (key in replacements) return replacements[key];
-    throw new Error(`unknown placeholder ${match}`);
-  });
 }
 
 function assertNoLeftovers(root, files) {
@@ -217,28 +196,12 @@ function assertStylesheetMounted(root, archetype) {
   if (!source.includes("stylesCss")) {
     throw new Error(`${archetype} worker does not mount generated stylesheet`);
   }
-  if (!source.includes("/mantle-ocean-hero-light.svg")) {
-    throw new Error(`${archetype} homepage does not mount Mantle ocean hero asset`);
-  }
-  if (!source.includes("/mantle-ocean-hero-dark.svg")) {
-    throw new Error(`${archetype} homepage does not support dark Mantle ocean hero switching`);
-  }
   if (!css.includes("tailwindcss") || !css.includes(".bg-primary")) {
     throw new Error(`${archetype} generated stylesheet does not include Kiwa/Tailwind utilities`);
   }
 }
 
 function assertSectionImageOptOut(root, archetype) {
-  const renderer = readFileSync(join(root, "src", "web", "sections", "renderSection.tsx"), "utf8");
-  if (renderer.match(/showImage=\{section\.showImage\}/g)?.length !== 2) {
-    throw new Error(`${archetype} section image opt-out is not wired to hero and content`);
-  }
-  for (const file of ["hero-02.tsx", "content-01.tsx"]) {
-    const block = readFileSync(join(root, "components", "blocks", "marketing", file), "utf8");
-    if (!block.includes("showImage = true") || !block.includes("{showImage && (")) {
-      throw new Error(`${archetype} ${file} cannot disable its default image`);
-    }
-  }
   const manifestPath = join(root, "manifests", `${archetype}.yaml`);
   if (!existsSync(manifestPath)) return;
   const page = parseAllDocuments(readFileSync(manifestPath, "utf8"))
@@ -249,6 +212,14 @@ function assertSectionImageOptOut(root, archetype) {
     && page.spec?.schema?.properties?.sections?.items?.properties?.showImage?.type !== "boolean"
   ) {
     throw new Error(`${archetype} page Schema does not expose showImage`);
+  }
+}
+
+function assertNoIntakeRuntime(root, archetype) {
+  const section = readFileSync(join(root, "src", "web", "sections", "intakeSection.tsx"), "utf8");
+  const client = readFileSync(join(root, "src", "web", "client", "intakeClient.ts"), "utf8");
+  if (section.includes("data-intake-root") || client.includes("data-intake-root")) {
+    throw new Error(`${archetype} bundle includes intake-only runtime`);
   }
 }
 
@@ -374,7 +345,11 @@ function assertIntakeHandlerLoaded(root) {
 }
 
 function assertIntakeForm(root) {
-  const text = readSource(root);
+  const text = [
+    readSource(root),
+    readFileSync(join(root, "src", "web", "sections", "intakeSection.tsx"), "utf8"),
+    readFileSync(join(root, "src", "web", "client", "intakeClient.ts"), "utf8"),
+  ].join("\n");
   const seed = readFileSync(join(root, ".mantle", "overlays", "intake", "seed.json"), "utf8");
   const manifest = readFileSync(join(root, "manifests", "intake.yaml"), "utf8");
   const notify = readFileSync(

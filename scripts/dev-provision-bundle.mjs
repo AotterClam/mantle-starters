@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, symlinkSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { basename, delimiter, dirname, join, resolve } from "node:path";
+import { basename, delimiter, join, resolve } from "node:path";
+import { materializeBundle } from "../blank/scripts/materialize.mjs";
 
 const root = new URL("..", import.meta.url).pathname;
 const archetype = process.argv[2];
@@ -34,14 +35,9 @@ const replacements = output
   ? localLaunch(archetype, targetRoot, bundle.version)
   : sampleLaunch(archetype);
 
-for (const [path, raw] of Object.entries(bundle.files ?? {})) {
-  const target = join(targetRoot, path.replace(/\.template$/, ""));
-  mkdirSync(dirname(target), { recursive: true });
-  writeFileSync(target, substitute(raw, replacements), "utf8");
-}
+materializeBundle(targetRoot, bundle, replacements);
 
 if (output) {
-  finishLocalProject(targetRoot, replacements.PROJECT_NAME);
   console.log(`materialized ${archetype} bundle at ${targetRoot}`);
   process.exit(0);
 }
@@ -92,13 +88,6 @@ function prepareTarget(path) {
   }
   mkdirSync(target, { recursive: true });
   return target;
-}
-
-function substitute(text, replacements) {
-  return String(text).replace(/\{\{([A-Z_][A-Z0-9_]*)\}\}/g, (match, key) => {
-    if (key in replacements) return replacements[key];
-    throw new Error(`unknown placeholder ${match}`);
-  });
 }
 
 function localLaunch(type, targetRoot, version) {
@@ -159,33 +148,6 @@ function sampleLaunch(type) {
     AFTER_LAUNCH_SKILL_URL: "https://mantle.tools/skill/after-launch?id=local",
     INSTALL_TIMESTAMP: new Date(0).toISOString(),
   };
-}
-
-function finishLocalProject(targetRoot, projectName) {
-  const launchPath = join(targetRoot, ".mantle", "launch-state.json");
-  const launch = JSON.parse(readFileSync(launchPath, "utf8"));
-  writeFileSync(
-    launchPath,
-    `${JSON.stringify({ ...launch, authMode: "self-managed" }, null, 2)}\n`,
-    "utf8",
-  );
-
-  const wranglerPath = join(targetRoot, "wrangler.toml");
-  let wrangler = readFileSync(wranglerPath, "utf8")
-    .replace(/^name = ".*"$/m, `name = ${JSON.stringify(projectName)}`)
-    .replace(/^database_name = ".*"$/m, `database_name = ${JSON.stringify(`${projectName}-db`)}`);
-  wrangler = upsertWranglerStringVar(wrangler, "PUBLIC_ORIGIN", `http://localhost:${port}`);
-  writeFileSync(wranglerPath, wrangler, "utf8");
-}
-
-function upsertWranglerStringVar(text, name, value) {
-  const line = `${name} = ${JSON.stringify(value)}`;
-  const existing = new RegExp(`^\\s*#?\\s*${name}\\s*=.*$`, "m");
-  if (existing.test(text)) return text.replace(existing, line);
-  const vars = text.match(/^\[vars\]\s*$/m);
-  if (!vars || vars.index === undefined) return `${text.trimEnd()}\n\n[vars]\n${line}\n`;
-  const insertAt = vars.index + vars[0].length;
-  return `${text.slice(0, insertAt)}\n${line}${text.slice(insertAt)}`;
 }
 
 function slug(value) {
