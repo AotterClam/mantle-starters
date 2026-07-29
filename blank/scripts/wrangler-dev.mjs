@@ -1,9 +1,14 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
-import { mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = process.cwd();
+const wranglerConfig = resolve(root, "wrangler.toml");
+const configuredPort = existsSync(wranglerConfig)
+  ? readFileSync(wranglerConfig, "utf8")
+      .match(/^PUBLIC_ORIGIN\s*=\s*"http:\/\/localhost:(\d+)"$/m)?.[1]
+  : undefined;
 const home = resolve(root, ".wrangler-home");
 const cache = resolve(home, "cache");
 const config = resolve(home, "config");
@@ -33,7 +38,7 @@ const args = [
   "--ip",
   process.env.WRANGLER_DEV_IP ?? "localhost",
   "--port",
-  process.env.WRANGLER_DEV_PORT ?? "8787",
+  process.env.WRANGLER_DEV_PORT ?? configuredPort ?? "8787",
   "--inspector-port",
   process.env.WRANGLER_INSPECTOR_PORT ?? "0",
   "--persist-to",

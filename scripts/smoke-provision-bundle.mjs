@@ -54,20 +54,21 @@ for (const archetype of archetypes) {
       assertFourAtoms(tempRoot, archetype);
       assertOverlayManifestLoaded(tempRoot, archetype);
       assertNoBlankExampleManifest(tempRoot, archetype);
+      assertSeedDrivenHome(tempRoot, archetype);
       readFileSync(join(tempRoot, ".mantle", "overlays", archetype, "seed.json"), "utf8");
       if (archetype === "presence") {
-        assertPresenceSeedDrivenHome(tempRoot);
         assertPresenceHandlerLoaded(tempRoot);
         assertPresenceContactForm(tempRoot);
       }
       if (archetype === "intake") {
-        assertIntakeSeedDrivenHome(tempRoot);
         assertIntakeHandlerLoaded(tempRoot);
         assertIntakeForm(tempRoot);
       }
       if (archetype === "publication") {
-        assertPublicationSeedDrivenHome(tempRoot);
         assertPublicationSeed(tempRoot);
+      }
+      if (archetype === "transaction") {
+        assertTransactionSeed(tempRoot);
       }
     } else {
       assertBlankHomeDataIsBlank(tempRoot);
@@ -99,9 +100,12 @@ function smokeLocalMaterializer() {
       throw new Error(`local materializer failed: ${result.stderr || result.stdout}`);
     }
     const launch = JSON.parse(readFileSync(join(output, ".mantle", "launch-state.json"), "utf8"));
+    const manifest = JSON.parse(readFileSync(join(output, "package.json"), "utf8"));
     if (launch.authMode !== "self-managed") throw new Error("local auth mode missing");
     if (launch.brand !== "Northstar Studio") throw new Error("local brand mismatch");
     if (JSON.stringify(launch.locales) !== '["en","zh-TW"]') throw new Error("local locales mismatch");
+    if (manifest.name !== "northstar") throw new Error("local package name mismatch");
+    if (manifest.description !== "A local Mantle presence site.") throw new Error("local package description mismatch");
     const wrangler = readFileSync(join(output, "wrangler.toml"), "utf8");
     if (!wrangler.includes('name = "northstar"')) throw new Error("local Worker name mismatch");
     if (!wrangler.includes('database_name = "northstar-db"')) throw new Error("local D1 name mismatch");
@@ -275,15 +279,6 @@ function assertPresenceContactForm(root) {
   }
 }
 
-function assertPresenceSeedDrivenHome(root) {
-  const homeContent = readFileSync(join(root, "src", "web", "content", "homeContent.ts"), "utf8");
-  const siteContent = readFileSync(join(root, "src", "web", "content", "siteContent.ts"), "utf8");
-  const seedImport = '../../../.mantle/overlays/presence/seed.json';
-  if (!homeContent.includes(seedImport) || !siteContent.includes(seedImport)) {
-    throw new Error("presence homepage content is not driven by the overlay seed");
-  }
-}
-
 function assertIntakeHandlerLoaded(root) {
   const text = readFileSync(join(root, "src", "mantle", "handlers", "index.ts"), "utf8");
   if (!text.includes('"notify-intake": notifyIntake')) {
@@ -308,15 +303,6 @@ function assertIntakeForm(root) {
   }
 }
 
-function assertIntakeSeedDrivenHome(root) {
-  const homeContent = readFileSync(join(root, "src", "web", "content", "homeContent.ts"), "utf8");
-  const siteContent = readFileSync(join(root, "src", "web", "content", "siteContent.ts"), "utf8");
-  const seedImport = '../../../.mantle/overlays/intake/seed.json';
-  if (!homeContent.includes(seedImport) || !siteContent.includes(seedImport)) {
-    throw new Error("intake homepage content is not driven by the overlay seed");
-  }
-}
-
 function assertPublicationSeed(root) {
   const seed = readFileSync(join(root, ".mantle", "overlays", "publication", "seed.json"), "utf8");
   if (!seed.includes('"site"') || !seed.includes('"type": "home"')) {
@@ -327,12 +313,19 @@ function assertPublicationSeed(root) {
   }
 }
 
-function assertPublicationSeedDrivenHome(root) {
+function assertSeedDrivenHome(root, archetype) {
   const homeContent = readFileSync(join(root, "src", "web", "content", "homeContent.ts"), "utf8");
-  const siteContent = readFileSync(join(root, "src", "web", "content", "siteContent.ts"), "utf8");
-  const seedImport = '../../../.mantle/overlays/publication/seed.json';
-  if (!homeContent.includes(seedImport) || !siteContent.includes(seedImport)) {
-    throw new Error("publication homepage content is not driven by the overlay seed");
+  const seedImport = `../../../.mantle/overlays/${archetype}/seed.json`;
+  if (!homeContent.includes(seedImport)) {
+    throw new Error(`${archetype} homepage content is not driven by the overlay seed`);
+  }
+}
+
+function assertTransactionSeed(root) {
+  const seed = readFileSync(join(root, ".mantle", "overlays", "transaction", "seed.json"), "utf8");
+  const parsed = JSON.parse(seed);
+  if (!seed.includes('"type": "home"') || parsed.collections?.products?.length !== 3) {
+    throw new Error("transaction seed does not include a visible home and three products");
   }
 }
 

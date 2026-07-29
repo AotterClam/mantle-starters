@@ -76,6 +76,12 @@ export type HomeResult = {
   readonly when?: HomeCondition;
 };
 
+export type HomeFormMessages = {
+  readonly pending?: string;
+  readonly success?: string;
+  readonly error?: string;
+};
+
 export type HomeSection = {
   readonly type:
     | "hero"
@@ -103,6 +109,7 @@ export type HomeSection = {
   readonly fields?: readonly HomeField[];
   readonly steps?: readonly HomeStep[];
   readonly results?: readonly HomeResult[];
+  readonly formMessages?: HomeFormMessages;
 };
 
 export type HomeContent = {

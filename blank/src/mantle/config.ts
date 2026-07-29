@@ -40,7 +40,7 @@ export function buildCmsConfig(env: Env, auth: Auth): CmsConfig {
       brand: "{{BRAND}}",
       title: "{{BRAND}}",
       description: "{{DESCRIPTION}}",
-      origin: "https://example.com",
+      origin: env.PUBLIC_ORIGIN ?? "http://localhost:8787",
       // `{{LOCALES}}` is substituted while materializing the provision bundle.
       // JSON.parse keeps this file TS-valid pre-substitution
       // so contributors can `pnpm typecheck` the starter directly; the runtime

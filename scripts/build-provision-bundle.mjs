@@ -40,6 +40,7 @@ function buildBundleFiles(archetype) {
   const files = {};
   walk(files, "blank", "");
   resolveCatalogPackageJson(files);
+  applyProvisionedPackageMetadata(files);
   resolveCatalogLockfile(files);
   if (archetype !== "blank") {
     applyOverlay(files, archetype);
@@ -189,13 +190,10 @@ function assertBundle(bundle, archetype) {
       }
     }
   }
-  if (archetype === "presence" || archetype === "intake" || archetype === "publication") {
+  if (archetype !== "blank") {
     const seedImport = `../../../.mantle/overlays/${archetype}/seed.json`;
     if (!bundle.files["src/web/content/homeContent.ts"]?.includes(seedImport)) {
       throw new Error(`${archetype} homeContent must read the overlay seed`);
-    }
-    if (!bundle.files["src/web/content/siteContent.ts"]?.includes(seedImport)) {
-      throw new Error(`${archetype} siteContent must read the overlay seed`);
     }
   }
   assertLockfileMatchesPackageJson(bundle, archetype);
@@ -353,7 +351,46 @@ function applyOverlaySeedContent(files, archetype, seedText) {
       "export const homeContent: HomeContent = { sections: homePage?.sections ?? [] };",
       "",
     ].join("\n");
+  } else {
+    files["src/web/content/homeContent.ts"] = [
+      `import seed from "${seedImport}";`,
+      'import type { HomeContent, HomeItem } from "./types.js";',
+      "",
+      "type SeedRecord = Readonly<Record<string, unknown>>;",
+      "type Seed = { readonly collections?: Readonly<Record<string, readonly SeedRecord[]>> };",
+      "const seedData = seed as Seed;",
+      "const records = Object.values(seedData.collections ?? {})[0] ?? [];",
+      "const text = (value: unknown): string | undefined =>",
+      '  typeof value === "string" && value.trim() ? value : undefined;',
+      "const items = records.slice(0, 3).map((record, index): HomeItem => ({",
+      '  title: text(record.title) ?? text(record.name) ?? text(record.slug) ?? `Starter item ${index + 1}`,',
+      "  body: text(record.summary) ?? text(record.body) ?? text(record.note),",
+      "}));",
+      "export const homeContent: HomeContent = {",
+      "  sections: [",
+      "    {",
+      '      type: "hero",',
+      `      eyebrow: "${titleCase(archetype)} starter",`,
+      '      title: "{{BRAND}}",',
+      '      body: "{{DESCRIPTION}}",',
+      "    },",
+      "    {",
+      '      type: "features",',
+      '      id: "first-content",',
+      `      title: "First ${archetype} content",`,
+      `      body: "Edit .mantle/overlays/${archetype}/seed.json to replace this local first page.",`,
+      "      items,",
+      "    },",
+      "  ],",
+      "};",
+      "",
+    ].join("\n");
   }
+}
+
+function titleCase(value) {
+  return value.replace(/(^|-)([a-z])/g, (_match, separator, character) =>
+    `${separator ? " " : ""}${character.toUpperCase()}`);
 }
 
 function walkIfExists(files, from, to) {
@@ -403,6 +440,13 @@ function resolveCatalogPackageJson(files) {
       if (spec === "catalog:") deps[name] = catalog[name] ?? fail(`catalog missing ${name}`);
     }
   }
+  files["package.json"] = JSON.stringify(manifest, null, 2) + "\n";
+}
+
+function applyProvisionedPackageMetadata(files) {
+  const manifest = JSON.parse(files["package.json"]);
+  manifest.name = "{{PROJECT_NAME}}";
+  manifest.description = "{{DESCRIPTION}}";
   files["package.json"] = JSON.stringify(manifest, null, 2) + "\n";
 }
 

@@ -1,5 +1,7 @@
 # Transaction seed prompt
 
-Create three simple product records for `{{BRAND}}`. Use integer
-`priceMinor`, one currency, short summaries, and no fake payment claims.
-Create one sample product inquiry only if the user wants a form smoke.
+Use `.mantle/overlays/transaction/seed.json` as the local, auth-free first
+content surface. Replace its three products and matching homepage cards for
+`{{BRAND}}`; keep integer `priceMinor`, one currency, short summaries, and no
+fake payment claims. Runtime content authoring moves to Staff MCP after auth is
+configured. Create a sample inquiry only if the user wants a form smoke.

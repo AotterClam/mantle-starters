@@ -245,6 +245,9 @@ function FormSection({
             class="flex flex-col gap-5"
             data-contact-form="true"
             data-mantle-form="true"
+            data-mantle-pending-message={section.formMessages?.pending}
+            data-mantle-success-message={section.formMessages?.success}
+            data-mantle-error-message={section.formMessages?.error}
           >
             <div class="grid gap-5 sm:grid-cols-2">
               {fields.slice(0, 2).map((field) => (
@@ -328,6 +331,9 @@ function IntakeSection({
             class="grid gap-6"
             data-intake-form="true"
             data-mantle-form="true"
+            data-mantle-pending-message={section.formMessages?.pending}
+            data-mantle-success-message={section.formMessages?.success}
+            data-mantle-error-message={section.formMessages?.error}
           >
             <input
               type="hidden"
