@@ -292,14 +292,37 @@ function assertIntakeHandlerLoaded(root) {
 function assertIntakeForm(root) {
   const text = readSource(root);
   const seed = readFileSync(join(root, ".mantle", "overlays", "intake", "seed.json"), "utf8");
+  const manifest = readFileSync(join(root, "manifests", "intake.yaml"), "utf8");
+  const notify = readFileSync(
+    join(root, "src", "worker", "features", "intake", "notifyIntake.ts"),
+    "utf8",
+  );
   if (!text.includes("data-intake-form")) {
     throw new Error("intake homepage does not render the intake form surface");
   }
   if (!text.includes("mantle:form-success")) {
     throw new Error("intake homepage does not render a saved-response result state");
   }
+  if (
+    !text.includes("data-intake-progress-template")
+    || !text.includes("dataset.intakeProgressTemplate")
+  ) {
+    throw new Error("intake progress copy is not seed-driven");
+  }
+  if (!text.includes('name="replyLocale"')) {
+    throw new Error("intake form does not submit its reply language");
+  }
   if (!seed.includes('"type": "intake"') || !seed.includes('"/api/intake"')) {
     throw new Error("intake seed does not define the intake section");
+  }
+  if (!seed.includes('"intakeLabels"') || !seed.includes('"replyLocale"')) {
+    throw new Error("intake seed does not define localized chrome and reply language");
+  }
+  if (!manifest.includes("required: [name, email, attendance, resultKey, replyLocale]")) {
+    throw new Error("intake manifest does not persist reply language");
+  }
+  if (!notify.includes("Reply language:")) {
+    throw new Error("intake notification does not expose reply language");
   }
 }
 

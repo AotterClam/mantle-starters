@@ -51,6 +51,15 @@ spec:
               properties:
                 label: { type: string }
                 href: { type: string }
+            replyLocale:
+              type: string
+            intakeLabels:
+              type: object
+              properties:
+                back: { type: string }
+                next: { type: string }
+                submit: { type: string }
+                progressTemplate: { type: string }
             items:
               type: array
               items:
@@ -151,7 +160,7 @@ spec:
   description: Visitor responses submitted through the public intake flow.
   schema:
     type: object
-    required: [name, email, attendance, resultKey]
+    required: [name, email, attendance, resultKey, replyLocale]
     properties:
       name:
         type: string
@@ -171,6 +180,8 @@ spec:
         type: string
       resultKey:
         type: string
+      replyLocale:
+        type: string
       createdAt:
         type: number
         x-mantle-bind: now
@@ -183,7 +194,7 @@ metadata:
 spec:
   input:
     type: object
-    required: [name, email, attendance, resultKey]
+    required: [name, email, attendance, resultKey, replyLocale]
     properties:
       name: { type: string }
       email: { type: string, format: email }
@@ -193,6 +204,7 @@ spec:
       updates: { type: string }
       note: { type: string }
       resultKey: { type: string }
+      replyLocale: { type: string }
       "cf-turnstile-response": { type: string }
       turnstileToken: { type: string }
   output:
@@ -255,6 +267,7 @@ spec:
       email: { type: string }
       attendance: { type: string }
       resultKey: { type: string }
+      replyLocale: { type: string }
       note: { type: string }
   output:
     type: object

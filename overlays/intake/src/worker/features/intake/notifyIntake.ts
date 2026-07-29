@@ -34,6 +34,7 @@ export async function notifyIntake(
     email?: string;
     attendance?: string;
     resultKey?: string;
+    replyLocale?: string;
     note?: string;
   },
   ctx: HandlerContext,
@@ -44,6 +45,7 @@ export async function notifyIntake(
       name: input.name,
       email: input.email,
       resultKey: input.resultKey,
+      replyLocale: input.replyLocale,
     });
     return { ok: true };
   }
@@ -57,6 +59,7 @@ export async function notifyIntake(
       `Email: ${input.email ?? ""}`,
       `Attendance: ${input.attendance ?? ""}`,
       `Result: ${input.resultKey ?? ""}`,
+      `Reply language: ${input.replyLocale ?? ""}`,
       "",
       input.note ?? "",
     ].join("\n"),

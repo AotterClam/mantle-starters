@@ -82,6 +82,13 @@ export type HomeFormMessages = {
   readonly error?: string;
 };
 
+export type HomeIntakeLabels = {
+  readonly back?: string;
+  readonly next?: string;
+  readonly submit?: string;
+  readonly progressTemplate?: string;
+};
+
 export type HomeSection = {
   readonly type:
     | "hero"
@@ -110,6 +117,8 @@ export type HomeSection = {
   readonly steps?: readonly HomeStep[];
   readonly results?: readonly HomeResult[];
   readonly formMessages?: HomeFormMessages;
+  readonly intakeLabels?: HomeIntakeLabels;
+  readonly replyLocale?: string;
 };
 
 export type HomeContent = {

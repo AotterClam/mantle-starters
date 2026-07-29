@@ -296,6 +296,8 @@ function IntakeSection({
     body: section.body,
   }];
   const fields = section.fields ?? [];
+  const intakeLabels = section.intakeLabels;
+  const progressTemplate = intakeLabels?.progressTemplate ?? "Step {current} of {total}";
   return (
     <section id={section.id} class="py-16 md:py-24">
       <div class="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.82fr_1.18fr] lg:px-8">
@@ -341,8 +343,17 @@ function IntakeSection({
               value={section.results?.[0]?.key ?? "submitted"}
               data-intake-result-key
             />
-            <p class="text-sm font-medium text-primary" data-intake-progress>
-              Step 1 of {steps.length}
+            {section.replyLocale && (
+              <input type="hidden" name="replyLocale" value={section.replyLocale} />
+            )}
+            <p
+              class="text-sm font-medium text-primary"
+              data-intake-progress
+              data-intake-progress-template={progressTemplate}
+            >
+              {progressTemplate
+                .replace("{current}", "1")
+                .replace("{total}", String(steps.length))}
             </p>
             {steps.map((step, index) => (
               <div data-intake-step-panel data-step-id={step.id} hidden={index !== 0}>
@@ -362,13 +373,13 @@ function IntakeSection({
             )}
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <Button type="button" variant="outline" class="w-full sm:w-auto" data-intake-prev>
-                Back
+                {intakeLabels?.back ?? "Back"}
               </Button>
               <Button type="button" class="w-full sm:w-auto" data-intake-next>
-                Next
+                {intakeLabels?.next ?? "Next"}
               </Button>
               <Button type="submit" class="w-full sm:w-auto" data-intake-submit hidden>
-                {section.action?.label ?? "Submit"}
+                {intakeLabels?.submit ?? section.action?.label ?? "Submit"}
               </Button>
             </div>
             <p
