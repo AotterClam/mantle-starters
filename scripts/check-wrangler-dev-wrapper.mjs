@@ -51,6 +51,10 @@ for (const wrapper of wrappers) {
       join(bin, "wrangler.cmd"),
       `@echo off\r\n"${process.execPath}" "%~dp0wrangler" %*\r\n`,
     );
+    writeFileSync(
+      join(temp, "wrangler.toml"),
+      '[vars]\nPUBLIC_ORIGIN = "http://localhost:8793"\n',
+    );
 
     const result = spawnSync(
       process.execPath,
@@ -73,7 +77,7 @@ for (const wrapper of wrappers) {
 
     const captured = JSON.parse(readFileSync(capture, "utf8"));
     assertArg(captured.argv, "--ip", "localhost", wrapper);
-    assertArg(captured.argv, "--port", "8787", wrapper);
+    assertArg(captured.argv, "--port", "8793", wrapper);
     assertArg(captured.argv, "--inspector-port", "0", wrapper);
     assertArg(captured.argv, "--persist-to", ".wrangler", wrapper);
     if (!captured.argv.includes("--local-protocol")) {

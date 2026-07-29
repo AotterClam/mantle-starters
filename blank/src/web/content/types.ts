@@ -76,6 +76,19 @@ export type HomeResult = {
   readonly when?: HomeCondition;
 };
 
+export type HomeFormMessages = {
+  readonly pending?: string;
+  readonly success?: string;
+  readonly error?: string;
+};
+
+export type HomeIntakeLabels = {
+  readonly back?: string;
+  readonly next?: string;
+  readonly submit?: string;
+  readonly progressTemplate?: string;
+};
+
 export type HomeSection = {
   readonly type:
     | "hero"
@@ -94,6 +107,7 @@ export type HomeSection = {
   readonly eyebrow?: string;
   readonly title: string;
   readonly body?: string;
+  readonly showImage?: boolean;
   readonly action?: HomeAction;
   readonly secondaryAction?: HomeAction;
   readonly footerTitle?: string;
@@ -103,6 +117,8 @@ export type HomeSection = {
   readonly fields?: readonly HomeField[];
   readonly steps?: readonly HomeStep[];
   readonly results?: readonly HomeResult[];
+  readonly formMessages?: HomeFormMessages;
+  readonly intakeLabels?: HomeIntakeLabels;
 };
 
 export type HomeContent = {

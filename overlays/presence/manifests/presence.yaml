@@ -46,6 +46,8 @@ spec:
             body:
               type: string
               x-mcp-hint: markdown
+            showImage:
+              type: boolean
             action:
               type: object
               properties:
@@ -166,6 +168,7 @@ metadata:
 spec:
   input:
     type: object
+    additionalProperties: false
     required: [name, email, message]
     properties:
       name:

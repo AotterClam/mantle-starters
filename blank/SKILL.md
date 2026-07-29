@@ -16,9 +16,10 @@ Before editing:
 1. Read `AGENTS.md`, `.mantle/launch-state.json`, `.mantle/features.json`, and
    `.mantle/handoff.md`.
 2. Read the repo-local Mantle skills under `.agent/skills/` or
-   `.claude/skills/`.
-3. After installing dependencies, use the matching embedded docs under
-   `node_modules/@aotter/mantle/docs/`.
+   `.claude/skills/` for project workflow and updater recovery.
+3. After installing dependencies, use the installed package version and
+   matching docs under `node_modules/@aotter/mantle/docs/` for runtime/API
+   behavior.
 4. Run `pnpm validate` and `pnpm typecheck` before changing code.
 
 Local preview is the first gate. GitHub, Cloudflare, and auth setup are

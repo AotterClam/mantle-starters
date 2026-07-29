@@ -1,12 +1,144 @@
 {
   "locale": "{{CANONICAL_LOCALE}}",
+  "site": {
+    "brand": "{{BRAND}}",
+    "description": "{{DESCRIPTION}}",
+    "navLinks": [
+      { "label": "Products", "href": "#products" },
+      { "label": "How it works", "href": "#how-it-works" },
+      { "label": "Questions", "href": "#questions" }
+    ],
+    "navAction": { "label": "Browse products", "href": "#products" },
+    "footer": {
+      "tagline": "A small catalog ready for real products.",
+      "copyright": "Copyright {{BRAND}}.",
+      "columns": [
+        {
+          "title": "Shop",
+          "links": [
+            { "label": "Products", "href": "#products" },
+            { "label": "How it works", "href": "#how-it-works" }
+          ]
+        }
+      ],
+      "socialLinks": [],
+      "bottomLinks": [
+        { "label": "Questions", "href": "#questions" }
+      ]
+    }
+  },
   "collections": {
+    "page": [
+      {
+        "type": "home",
+        "title": "{{BRAND}}",
+        "summary": "{{DESCRIPTION}}",
+        "status": "published",
+        "sections": [
+          {
+            "type": "hero",
+            "eyebrow": "New catalog",
+            "title": "A focused first storefront for {{BRAND}}",
+            "body": "{{DESCRIPTION}}",
+            "action": { "label": "Browse products", "href": "#products" },
+            "secondaryAction": { "label": "See how it works", "href": "#how-it-works" }
+          },
+          {
+            "type": "features",
+            "id": "products",
+            "eyebrow": "Products",
+            "title": "Three offers to replace with the real catalog",
+            "body": "Edit this seed locally before setting up auth or a production checkout.",
+            "items": [
+              {
+                "icon": "sparkles",
+                "title": "{{BRAND}} Starter",
+                "body": "A simple entry offer. USD 29.00; replace this copy and price with a real product."
+              },
+              {
+                "icon": "layout",
+                "title": "{{BRAND}} Plus",
+                "body": "A broader option for customers who need more. USD 59.00; no checkout is implied."
+              },
+              {
+                "icon": "check",
+                "title": "{{BRAND}} Complete",
+                "body": "The highest starter tier for comparing demand. USD 99.00; connect payment only when requested."
+              }
+            ]
+          },
+          {
+            "type": "content",
+            "id": "how-it-works",
+            "eyebrow": "How it works",
+            "title": "Start with a catalog and one clear intent path",
+            "body": "This transaction shape deliberately stops before cart, payment, inventory, and accounts.",
+            "items": [
+              {
+                "title": "Shape the offer",
+                "body": "Replace the seed products and homepage cards with the first real catalog."
+              },
+              {
+                "title": "Validate demand",
+                "body": "Add a lightweight inquiry flow only when the owner wants to collect purchase intent."
+              },
+              {
+                "title": "Choose checkout later",
+                "body": "Select a payment provider after the public product surface is useful."
+              }
+            ]
+          },
+          {
+            "type": "faq",
+            "id": "questions",
+            "eyebrow": "Questions",
+            "title": "Decisions before adding commerce code",
+            "items": [
+              {
+                "title": "Can I edit this without GitHub OAuth?",
+                "body": "Yes. Edit this seed for the local first page; Staff MCP becomes the authoring path after auth is configured."
+              },
+              {
+                "title": "Is checkout already enabled?",
+                "body": "No. The starter avoids fake payment claims and keeps checkout as an explicit next decision."
+              },
+              {
+                "title": "Where does the product model live?",
+                "body": "The products Schema and public-products View live in manifests/transaction.yaml."
+              }
+            ]
+          },
+          {
+            "type": "cta",
+            "title": "Turn this seed into the real {{BRAND}} catalog",
+            "body": "Replace the three products, refine the visual direction, then decide whether inquiry or checkout is the next useful workflow.",
+            "action": { "label": "Browse products", "href": "#products" }
+          }
+        ]
+      }
+    ],
     "products": [
       {
-        "slug": "starter-offer",
-        "title": "{{BRAND}} starter offer",
-        "summary": "{{DESCRIPTION}}",
-        "priceMinor": 0,
+        "slug": "starter",
+        "title": "{{BRAND}} Starter",
+        "summary": "A simple entry offer for the first catalog.",
+        "priceMinor": 2900,
+        "currency": "USD",
+        "status": "published"
+      },
+      {
+        "slug": "plus",
+        "title": "{{BRAND}} Plus",
+        "summary": "A broader option for customers who need more.",
+        "priceMinor": 5900,
+        "currency": "USD",
+        "status": "published"
+      },
+      {
+        "slug": "complete",
+        "title": "{{BRAND}} Complete",
+        "summary": "The highest starter tier for comparing demand.",
+        "priceMinor": 9900,
         "currency": "USD",
         "status": "published"
       }

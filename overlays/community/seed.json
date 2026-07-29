@@ -1,6 +1,47 @@
 {
   "locale": "{{CANONICAL_LOCALE}}",
   "collections": {
+    "page": [
+      {
+        "type": "home",
+        "title": "{{BRAND}}",
+        "sections": [
+          {
+            "type": "hero",
+            "eyebrow": "Community starter",
+            "title": "{{BRAND}}",
+            "body": "{{DESCRIPTION}}"
+          },
+          {
+            "type": "features",
+            "id": "updates",
+            "title": "A useful first community page",
+            "body": "Replace this seed with the first real updates, events, or ways to participate.",
+            "items": [
+              {
+                "icon": "sparkles",
+                "title": "Publish an update",
+                "body": "Edit the welcome update in this seed before auth is configured."
+              },
+              {
+                "icon": "handshake",
+                "title": "Invite participation",
+                "body": "Connect the signup procedure when the community is ready to collect interest."
+              }
+            ]
+          },
+          {
+            "type": "cta",
+            "title": "Shape the first real community action",
+            "body": "Keep the launch focused on one useful reason to return or participate.",
+            "action": {
+              "label": "Read the welcome update",
+              "href": "#updates"
+            }
+          }
+        ]
+      }
+    ],
     "community-updates": [
       {
         "slug": "welcome",

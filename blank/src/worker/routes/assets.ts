@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import stylesCss from "../../../styles/generated.css";
 import { homeClientJs } from "../../web/client/homeClient.js";
 import { kiwaEnhanceAssets } from "../../web/client/kiwaEnhanceAssets.js";
-import { mantleOceanHeroDarkSvg, mantleOceanHeroLightSvg } from "../../web/mantleOceanHero.js";
 
 const ASSET_CACHE_CONTROL = "public, max-age=300";
 
@@ -25,9 +24,6 @@ export function createAssetsRoutes(): Hono {
       },
     }),
   );
-  app.get("/mantle-ocean-hero-light.svg", () => svgResponse(mantleOceanHeroLightSvg));
-  app.get("/mantle-ocean-hero-dark.svg", () => svgResponse(mantleOceanHeroDarkSvg));
-
   return app;
 }
 
@@ -46,13 +42,4 @@ export function createEnhanceRoutes(): Hono {
     });
   });
   return app;
-}
-
-function svgResponse(svg: string): Response {
-  return new Response(svg, {
-    headers: {
-      "cache-control": ASSET_CACHE_CONTROL,
-      "content-type": "image/svg+xml; charset=utf-8",
-    },
-  });
 }
