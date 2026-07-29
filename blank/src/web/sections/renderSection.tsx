@@ -49,7 +49,12 @@ const featureIcons: Record<string, FC<{ class?: string }>> = {
   sparkles: SparklesIcon,
 };
 
-export function renderSection(section: HomeSection, index: number, turnstileSiteKey?: string): Child {
+export function renderSection(
+  section: HomeSection,
+  index: number,
+  turnstileSiteKey?: string,
+  locale?: string,
+): Child {
   const key = `${section.type}-${section.id ?? index}`;
   switch (section.type) {
     case "hero":
@@ -191,7 +196,14 @@ export function renderSection(section: HomeSection, index: number, turnstileSite
     case "form":
       return <FormSection key={key} section={section} turnstileSiteKey={turnstileSiteKey} />;
     case "intake":
-      return <IntakeSection key={key} section={section} turnstileSiteKey={turnstileSiteKey} />;
+      return (
+        <IntakeSection
+          key={key}
+          section={section}
+          turnstileSiteKey={turnstileSiteKey}
+          locale={locale}
+        />
+      );
     case "cta":
       return withAnchor(
         section,
@@ -286,9 +298,11 @@ function FormSection({
 function IntakeSection({
   section,
   turnstileSiteKey,
+  locale,
 }: {
   readonly section: HomeSection;
   readonly turnstileSiteKey?: string;
+  readonly locale?: string;
 }) {
   const steps = section.steps?.length ? section.steps : [{
     id: "intake",
@@ -343,8 +357,8 @@ function IntakeSection({
               value={section.results?.[0]?.key ?? "submitted"}
               data-intake-result-key
             />
-            {section.replyLocale && (
-              <input type="hidden" name="replyLocale" value={section.replyLocale} />
+            {locale && (
+              <input type="hidden" name="replyLocale" value={locale} />
             )}
             <p
               class="text-sm font-medium text-primary"

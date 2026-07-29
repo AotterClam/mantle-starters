@@ -345,10 +345,14 @@ function applyOverlaySeedContent(files, archetype, seedText) {
       'import type { HomeContent, HomeSection } from "./types.js";',
       "",
       "type SeedPage = { readonly type?: string; readonly sections?: readonly HomeSection[] };",
-      "type Seed = { readonly collections?: { readonly page?: readonly SeedPage[] } };",
+      "type Seed = {",
+      "  readonly locale?: string;",
+      "  readonly collections?: { readonly page?: readonly SeedPage[] };",
+      "};",
       "const seedData = seed as Seed;",
       'const homePage = (seedData.collections?.page ?? []).find((page) => page.type === "home");',
       "export const homeContent: HomeContent = { sections: homePage?.sections ?? [] };",
+      "export const homeLocale = seedData.locale;",
       "",
     ].join("\n");
   } else {
@@ -357,7 +361,10 @@ function applyOverlaySeedContent(files, archetype, seedText) {
       'import type { HomeContent, HomeItem } from "./types.js";',
       "",
       "type SeedRecord = Readonly<Record<string, unknown>>;",
-      "type Seed = { readonly collections?: Readonly<Record<string, readonly SeedRecord[]>> };",
+      "type Seed = {",
+      "  readonly locale?: string;",
+      "  readonly collections?: Readonly<Record<string, readonly SeedRecord[]>>;",
+      "};",
       "const seedData = seed as Seed;",
       "const records = Object.values(seedData.collections ?? {})[0] ?? [];",
       "const text = (value: unknown): string | undefined =>",
@@ -383,6 +390,7 @@ function applyOverlaySeedContent(files, archetype, seedText) {
       "    },",
       "  ],",
       "};",
+      "export const homeLocale = seedData.locale;",
       "",
     ].join("\n");
   }

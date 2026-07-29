@@ -104,7 +104,6 @@
             "title": "Reserve a seat or ask for updates",
             "body": "This seeded workshop RSVP shows how intake can branch without becoming a full quiz engine.",
             "action": { "label": "Submit RSVP", "href": "/api/intake" },
-            "replyLocale": "{{CANONICAL_LOCALE}}",
             "intakeLabels": {
               "back": "Back",
               "next": "Next",

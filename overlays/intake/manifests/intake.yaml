@@ -51,8 +51,6 @@ spec:
               properties:
                 label: { type: string }
                 href: { type: string }
-            replyLocale:
-              type: string
             intakeLabels:
               type: object
               properties:

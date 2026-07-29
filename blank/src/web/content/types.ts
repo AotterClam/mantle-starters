@@ -118,7 +118,6 @@ export type HomeSection = {
   readonly results?: readonly HomeResult[];
   readonly formMessages?: HomeFormMessages;
   readonly intakeLabels?: HomeIntakeLabels;
-  readonly replyLocale?: string;
 };
 
 export type HomeContent = {

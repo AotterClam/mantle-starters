@@ -11,15 +11,19 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 
 const STARTERS_REPO = "aotter/mantle-starters";
 const DEFAULT_REPORT = ".mantle/update-report.json";
 const IGNORE_DIRS = new Set([".git", "node_modules", ".wrangler", ".wrangler-test", "dist"]);
+const IGNORE_FILES = new Set([".mantle/features.json", ".mantle/launch-state.json"]);
 
-main().catch((err) => {
-  console.error(`mantle:update: ${err instanceof Error ? err.message : String(err)}`);
-  process.exit(1);
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((err) => {
+    console.error(`mantle:update: ${err instanceof Error ? err.message : String(err)}`);
+    process.exit(1);
+  });
+}
 
 async function main() {
   const flags = parseArgs(process.argv.slice(2));
@@ -33,7 +37,7 @@ async function main() {
   const tempRoot = mkdtempSync(join(tmpdir(), "mantle-update-"));
   try {
     const bundle = await fetchBundle(targetRef, archetype);
-    materializeBundle(tempRoot, bundle, placeholders({ launchState, features, targetRef }));
+    materializeBundle(tempRoot, bundle, placeholders({ launchState, features, targetRef }), root);
     const report = compare(root, tempRoot, {
       generated_at: new Date().toISOString(),
       target_ref: targetRef,
@@ -81,19 +85,24 @@ async function fetchBundle(ref, archetype) {
   return bundle;
 }
 
-function materializeBundle(root, bundle, values) {
+function materializeBundle(root, bundle, values, currentRoot) {
   for (const [path, raw] of Object.entries(bundle.files)) {
     const target = join(root, path.replace(/\.template$/, ""));
     mkdirSync(dirname(target), { recursive: true });
     writeFileSync(target, substitute(String(raw), values), "utf8");
   }
+  applyProjectNameToWrangler(root, values.PROJECT_NAME, values.SITE_URL);
+  copyWranglerStringVar(currentRoot, root, "TURNSTILE_SITE_KEY");
 }
 
 function placeholders({ launchState, features, targetRef }) {
   const github = recordField(launchState, "github");
   const repo = recordField(launchState, "repo");
+  const siteOwner = recordField(launchState, "site_owner");
   const locales = arrayField(launchState, "locales");
-  const owner = stringField(repo, "owner") ?? stringField(github, "owner") ?? "unknown-owner";
+  const owner = optionalStringField(repo, "owner")
+    ?? optionalStringField(github, "owner")
+    ?? "unknown-owner";
   const projectName = stringField(launchState, "project_name") ?? stringField(repo, "name") ?? "mantle-site";
   const archetype = launchArchetype(launchState, features);
   const siteUrl = stringField(launchState, "site_url") ?? "https://example.com";
@@ -107,7 +116,12 @@ function placeholders({ launchState, features, targetRef }) {
     CANONICAL_LOCALE: stringField(launchState, "canonical_locale") ?? locales[0] ?? "en",
     STARTER_REF: targetRef,
     GITHUB_OWNER: owner,
-    ADMIN_GITHUB_LOGIN: stringField(github, "admin_login") ?? owner,
+    ADMIN_GITHUB_LOGIN:
+      optionalStringField(github, "admin_login")
+      ?? optionalStringField(siteOwner, "github_login")
+      ?? owner,
+    SITE_OWNER_EMAIL: optionalStringField(siteOwner, "email") ?? "",
+    AUTH_MODE: stringField(launchState, "authMode") ?? "self-managed",
     SITE_URL: siteUrl,
     AFTER_LAUNCH_SKILL_URL:
       stringField(launchState, "after_launch_skill_url") ??
@@ -184,7 +198,7 @@ function listFiles(root, prefix = "") {
     if (IGNORE_DIRS.has(entry.name)) continue;
     const path = prefix ? `${prefix}/${entry.name}` : entry.name;
     if (entry.isDirectory()) files.push(...listFiles(root, path));
-    else if (entry.isFile()) files.push(path);
+    else if (entry.isFile() && !IGNORE_FILES.has(path)) files.push(path);
   }
   return files.sort();
 }
@@ -208,6 +222,11 @@ function stringField(value, key) {
   return typeof field === "string" && field.trim() ? field.trim() : null;
 }
 
+function optionalStringField(value, key) {
+  const field = value && typeof value === "object" && !Array.isArray(value) ? value[key] : null;
+  return typeof field === "string" ? field.trim() : null;
+}
+
 function arrayField(value, key) {
   const field = value && typeof value === "object" && !Array.isArray(value) ? value[key] : null;
   return Array.isArray(field) ? field.filter((item) => typeof item === "string") : [];
@@ -218,3 +237,46 @@ function requiredValue(argv, index, flag) {
   if (!value || value.startsWith("--")) throw new Error(`${flag} requires a value`);
   return value;
 }
+
+function applyProjectNameToWrangler(root, projectName, siteUrl) {
+  const path = join(root, "wrangler.toml");
+  if (!existsSync(path)) return;
+  let text = readFileSync(path, "utf8")
+    .replace(/^name = ".*"$/m, `name = ${JSON.stringify(projectName)}`)
+    .replace(/^database_name = ".*"$/m, `database_name = ${JSON.stringify(`${projectName}-db`)}`);
+  text = upsertWranglerStringVar(text, "PUBLIC_ORIGIN", siteUrl);
+  writeFileSync(path, text, "utf8");
+}
+
+function upsertWranglerStringVar(text, name, value) {
+  const line = `${name} = ${JSON.stringify(value)}`;
+  const existing = new RegExp(`^\\s*#?\\s*${name}\\s*=.*$`, "m");
+  if (existing.test(text)) return text.replace(existing, line);
+  const vars = text.match(/^\[vars\]\s*$/m);
+  if (!vars || vars.index === undefined) return `${text.trimEnd()}\n\n[vars]\n${line}\n`;
+  const insertAt = vars.index + vars[0].length;
+  return `${text.slice(0, insertAt)}\n${line}${text.slice(insertAt)}`;
+}
+
+function copyWranglerStringVar(currentRoot, targetRoot, name) {
+  if (!currentRoot) return;
+  const currentPath = join(currentRoot, "wrangler.toml");
+  const targetPath = join(targetRoot, "wrangler.toml");
+  if (!existsSync(currentPath) || !existsSync(targetPath)) return;
+  const match = readFileSync(currentPath, "utf8")
+    .match(new RegExp(`^\\s*${name}\\s*=\\s*(\".*\")\\s*$`, "m"));
+  if (!match) return;
+  let value;
+  try {
+    value = JSON.parse(match[1]);
+  } catch {
+    return;
+  }
+  writeFileSync(
+    targetPath,
+    upsertWranglerStringVar(readFileSync(targetPath, "utf8"), name, value),
+    "utf8",
+  );
+}
+
+export { compare, materializeBundle, placeholders };

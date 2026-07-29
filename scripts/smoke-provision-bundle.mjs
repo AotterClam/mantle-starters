@@ -3,6 +3,11 @@ import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
+import {
+  compare,
+  materializeBundle,
+  placeholders,
+} from "../blank/scripts/update.mjs";
 
 const root = new URL("..", import.meta.url).pathname;
 const archetypes = ["blank", "presence", "intake", "publication", "transaction", "reservation", "community"];
@@ -110,6 +115,33 @@ function smokeLocalMaterializer() {
     if (!wrangler.includes('name = "northstar"')) throw new Error("local Worker name mismatch");
     if (!wrangler.includes('database_name = "northstar-db"')) throw new Error("local D1 name mismatch");
     if (!wrangler.includes('PUBLIC_ORIGIN = "http://localhost:8787"')) throw new Error("local origin missing");
+    writeFileSync(
+      join(output, "wrangler.toml"),
+      wrangler.replace(
+        '# TURNSTILE_SITE_KEY = "0x..."',
+        'TURNSTILE_SITE_KEY = "test-site-key"',
+      ),
+    );
+    const features = JSON.parse(readFileSync(join(output, ".mantle", "features.json"), "utf8"));
+    const baseline = join(tempRoot, "update-baseline");
+    mkdirSync(baseline);
+    const bundle = JSON.parse(
+      readFileSync(join(root, "provision-bundles", "presence.json"), "utf8"),
+    );
+    materializeBundle(
+      baseline,
+      bundle,
+      placeholders({ launchState: launch, features, targetRef: launch.starter_ref }),
+      output,
+    );
+    const report = compare(output, baseline, { target_ref: launch.starter_ref });
+    if (report.differing.length || report.missing_current.length) {
+      throw new Error(
+        `unchanged local project reported update drift: ${
+          report.differing.map(({ path }) => path).join(", ")
+        }`,
+      );
+    }
     assertGeneratedStylesMatchStarterLock(output);
     const overwrite = spawnSync(process.execPath, [
       "scripts/dev-provision-bundle.mjs",
@@ -309,13 +341,17 @@ function assertIntakeForm(root) {
   ) {
     throw new Error("intake progress copy is not seed-driven");
   }
-  if (!text.includes('name="replyLocale"')) {
-    throw new Error("intake form does not submit its reply language");
+  if (!text.includes('name="replyLocale"') || !text.includes("value={locale}")) {
+    throw new Error("intake form does not submit its rendered locale");
   }
   if (!seed.includes('"type": "intake"') || !seed.includes('"/api/intake"')) {
     throw new Error("intake seed does not define the intake section");
   }
-  if (!seed.includes('"intakeLabels"') || !seed.includes('"replyLocale"')) {
+  if (
+    !seed.includes('"locale": "en"')
+    || !seed.includes('"intakeLabels"')
+    || !seed.includes('"replyLocale"')
+  ) {
     throw new Error("intake seed does not define localized chrome and reply language");
   }
   if (!manifest.includes("required: [name, email, attendance, resultKey, replyLocale]")) {

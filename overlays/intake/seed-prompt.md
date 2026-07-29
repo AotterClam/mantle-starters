@@ -14,9 +14,10 @@ Use the RSVP/application shape unless the owner asks for quiz scoring:
 name, email, one decision question, conditional follow-up fields, and
 result copy keyed by the decision answer.
 
-Keep the visitor's reply language in `replyLocale`. Do not add `locale` to
-`intake-submissions`: it is a non-localized Schema, and Mantle reserves
-`data.locale` for localized entries.
+Keep `seed.locale` aligned with the page being rendered; the intake form
+submits that render context as `replyLocale`. If routing selects a locale at
+request time, pass it to `HomePage`. Do not add `locale` to
+`intake-submissions`: Mantle reserves `data.locale` for localized entries.
 
 Also create one sample `intake-submissions` draft that demonstrates the
 expected response shape. Keep visitor-facing copy separate from
