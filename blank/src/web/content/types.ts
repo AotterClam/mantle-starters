@@ -107,6 +107,7 @@ export type HomeSection = {
   readonly eyebrow?: string;
   readonly title: string;
   readonly body?: string;
+  readonly showImage?: boolean;
   readonly action?: HomeAction;
   readonly secondaryAction?: HomeAction;
   readonly footerTitle?: string;

@@ -66,6 +66,7 @@ export function renderSection(
           primaryCta={section.action}
           secondaryCta={section.secondaryAction}
           image={heroImage}
+          showImage={section.showImage}
         />
       );
     case "socialProof":
@@ -89,6 +90,7 @@ export function renderSection(
           title={section.title}
           description={section.body}
           paragraphs={items(section).map((item) => item.body ?? "").filter(Boolean)}
+          showImage={section.showImage}
         />,
       );
     case "features":

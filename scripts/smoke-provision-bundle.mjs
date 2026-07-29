@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { parseAllDocuments } from "yaml";
@@ -43,6 +43,7 @@ for (const archetype of archetypes) {
     assertPublicHomeIsNotHandoff(tempRoot);
     assertMantleSiteSignature(tempRoot, archetype);
     assertStylesheetMounted(tempRoot, archetype);
+    assertSectionImageOptOut(tempRoot, archetype);
     assertAuthSwitchUsesSelectedProvider(tempRoot, archetype);
     assertRuntimeHasNoKiwaDemoCopy(tempRoot, archetype);
     const launchState = JSON.parse(readFileSync(join(tempRoot, ".mantle", "launch-state.json"), "utf8"));
@@ -224,6 +225,30 @@ function assertStylesheetMounted(root, archetype) {
   }
   if (!css.includes("tailwindcss") || !css.includes(".bg-primary")) {
     throw new Error(`${archetype} generated stylesheet does not include Kiwa/Tailwind utilities`);
+  }
+}
+
+function assertSectionImageOptOut(root, archetype) {
+  const renderer = readFileSync(join(root, "src", "web", "sections", "renderSection.tsx"), "utf8");
+  if (renderer.match(/showImage=\{section\.showImage\}/g)?.length !== 2) {
+    throw new Error(`${archetype} section image opt-out is not wired to hero and content`);
+  }
+  for (const file of ["hero-02.tsx", "content-01.tsx"]) {
+    const block = readFileSync(join(root, "components", "blocks", "marketing", file), "utf8");
+    if (!block.includes("showImage = true") || !block.includes("{showImage && (")) {
+      throw new Error(`${archetype} ${file} cannot disable its default image`);
+    }
+  }
+  const manifestPath = join(root, "manifests", `${archetype}.yaml`);
+  if (!existsSync(manifestPath)) return;
+  const page = parseAllDocuments(readFileSync(manifestPath, "utf8"))
+    .map((document) => document.toJSON())
+    .find((atom) => atom?.kind === "Schema" && atom?.metadata?.name === "page");
+  if (
+    page
+    && page.spec?.schema?.properties?.sections?.items?.properties?.showImage?.type !== "boolean"
+  ) {
+    throw new Error(`${archetype} page Schema does not expose showImage`);
   }
 }
 
