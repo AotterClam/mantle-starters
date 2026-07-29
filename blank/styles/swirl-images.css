@@ -1,13 +1,6 @@
 :root {
-  --swirl-1: url("/assets/mantle-ocean-hero-light.svg?v=mantle-starter-assets-20260629-theme-svg");
-  --swirl-2: url("/assets/mantle-ocean-hero-light.svg?v=mantle-starter-assets-20260629-theme-svg");
-  --swirl-3: url("/assets/mantle-ocean-hero-light.svg?v=mantle-starter-assets-20260629-theme-svg");
-  --swirl-4: url("/assets/mantle-ocean-hero-light.svg?v=mantle-starter-assets-20260629-theme-svg");
-}
-
-.dark {
-  --swirl-1: url("/assets/mantle-ocean-hero-dark.svg?v=mantle-starter-assets-20260629-theme-svg");
-  --swirl-2: url("/assets/mantle-ocean-hero-dark.svg?v=mantle-starter-assets-20260629-theme-svg");
-  --swirl-3: url("/assets/mantle-ocean-hero-dark.svg?v=mantle-starter-assets-20260629-theme-svg");
-  --swirl-4: url("/assets/mantle-ocean-hero-dark.svg?v=mantle-starter-assets-20260629-theme-svg");
+  --swirl-1: linear-gradient(135deg, var(--muted), var(--card));
+  --swirl-2: linear-gradient(225deg, var(--accent), var(--muted));
+  --swirl-3: linear-gradient(45deg, var(--card), var(--secondary));
+  --swirl-4: linear-gradient(315deg, var(--muted), var(--background));
 }

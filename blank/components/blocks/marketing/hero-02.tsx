@@ -18,6 +18,7 @@ type Hero02Props = {
     src: string
     alt: string
   }
+  showImage?: boolean
   class?: string
 }
 
@@ -27,11 +28,12 @@ export const Hero02: FC<Hero02Props> = ({
   primaryCta,
   secondaryCta,
   image,
+  showImage = true,
   class: className,
 }) => (
   <section class={cn('py-24', className)}>
     <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-      <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      <div class={cn('grid items-center gap-12', showImage && 'lg:grid-cols-2 lg:gap-16')}>
         <div>
           <h1 class="max-w-2xl text-4xl tracking-tight sm:text-5xl lg:text-6xl">
             {title}
@@ -62,17 +64,19 @@ export const Hero02: FC<Hero02Props> = ({
             </div>
           )}
         </div>
-        <div>
-          {image ? (
-            <img
-              src={image.src}
-              alt={image.alt}
-              class="w-full rounded-2xl bg-card shadow-md"
-            />
-          ) : (
-            <PlaceholderGradient variant={2} class="aspect-[4/3] w-full" />
-          )}
-        </div>
+        {showImage && (
+          <div>
+            {image ? (
+              <img
+                src={image.src}
+                alt={image.alt}
+                class="w-full rounded-2xl bg-card shadow-md"
+              />
+            ) : (
+              <PlaceholderGradient variant={2} class="aspect-[4/3] w-full" />
+            )}
+          </div>
+        )}
       </div>
     </div>
   </section>

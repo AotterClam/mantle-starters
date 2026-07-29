@@ -45,7 +45,6 @@ src/
     pages/HomePage.tsx        # public page body
     content/                  # seed-driven site/home content modules
     client/                   # browser behavior served as /assets/kiwa-home.js
-    mantleOceanHero.ts        # Mantle SVG assets
   mantle/
     config.ts                 # CmsConfig/env/bindings
     manifests.ts              # loads root manifests/*.yaml
@@ -72,7 +71,8 @@ ALL  /mcp                         User/read MCP JSON-RPC dispatcher
 
 No public read routes (`/{locale}/...`, `/sitemap.xml`, `.md` mirrors,
 `llms.txt`). Add `mountPublicRoutes` from
-`@aotter/mantle/cloudflare` if you change your mind.
+`@aotter/mantle/cloudflare` only together with matching templates and a
+`publicPathResolver`; Core does not auto-publish every Schema.
 
 ### Auth
 

@@ -9,6 +9,7 @@ type Content01Props = {
   paragraphs?: string[]
   image?: string
   imagePosition?: 'left' | 'right'
+  showImage?: boolean
   showHeader?: boolean
   class?: string
 }
@@ -20,6 +21,7 @@ export const Content01: FC<Content01Props> = ({
   paragraphs = [],
   image,
   imagePosition = 'right',
+  showImage = true,
   showHeader = true,
   class: className,
 }) => (
@@ -27,8 +29,9 @@ export const Content01: FC<Content01Props> = ({
     <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
       <div
         class={cn(
-          'grid items-center gap-8 lg:grid-cols-2 lg:gap-16',
-          imagePosition === 'left' && 'lg:[&>*:first-child]:order-2',
+          'grid items-center gap-8',
+          showImage && 'lg:grid-cols-2 lg:gap-16',
+          showImage && imagePosition === 'left' && 'lg:[&>*:first-child]:order-2',
         )}
       >
         <div class="flex flex-col gap-6">
@@ -58,20 +61,22 @@ export const Content01: FC<Content01Props> = ({
           )}
         </div>
 
-        <div>
-          {image ? (
-            <img
-              src={image}
-              alt=""
-              class="aspect-[4/3] w-full rounded-2xl object-cover shadow-sm"
-            />
-          ) : (
-            <PlaceholderGradient
-              variant={1}
-              class="aspect-[4/3] w-full shadow-sm"
-            />
-          )}
-        </div>
+        {showImage && (
+          <div>
+            {image ? (
+              <img
+                src={image}
+                alt=""
+                class="aspect-[4/3] w-full rounded-2xl object-cover shadow-sm"
+              />
+            ) : (
+              <PlaceholderGradient
+                variant={1}
+                class="aspect-[4/3] w-full shadow-sm"
+              />
+            )}
+          </div>
+        )}
       </div>
     </div>
   </section>

@@ -1,6 +1,79 @@
 {
   "locale": "{{CANONICAL_LOCALE}}",
   "collections": {
+    "page": [
+      {
+        "type": "home",
+        "title": "{{BRAND}}",
+        "sections": [
+          {
+            "type": "hero",
+            "eyebrow": "Reservation starter",
+            "title": "{{BRAND}}",
+            "body": "{{DESCRIPTION}}"
+          },
+          {
+            "type": "features",
+            "id": "availability",
+            "title": "Make the reservation promise explicit",
+            "body": "Replace these starter notes with real availability, party limits, and confirmation expectations.",
+            "items": [
+              {
+                "icon": "clock",
+                "title": "Choose a time",
+                "body": "Start with a request flow; add live inventory only when the business needs it."
+              },
+              {
+                "icon": "check",
+                "title": "Confirm manually",
+                "body": "The starter records intent and does not imply an automatic booking."
+              }
+            ]
+          },
+          {
+            "type": "form",
+            "id": "request",
+            "eyebrow": "Request a reservation",
+            "title": "Tell us what you need",
+            "body": "Submitting this form records a request for the owner to review.",
+            "action": {
+              "label": "Send request",
+              "href": "/api/reservation-requests"
+            },
+            "fields": [
+              {
+                "name": "name",
+                "label": "Name",
+                "autocomplete": "name",
+                "required": true
+              },
+              {
+                "name": "email",
+                "label": "Email",
+                "type": "email",
+                "autocomplete": "email",
+                "required": true
+              },
+              {
+                "name": "requestedFor",
+                "label": "Requested date or time",
+                "required": true
+              },
+              {
+                "name": "partySize",
+                "label": "Party size",
+                "type": "number"
+              },
+              {
+                "name": "note",
+                "label": "Note",
+                "multiline": true
+              }
+            ]
+          }
+        ]
+      }
+    ],
     "reservation-requests": [
       {
         "name": "{{BRAND}} sample guest",

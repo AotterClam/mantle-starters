@@ -1,14 +1,15 @@
 import { Footer02 } from "@/components/blocks/marketing/footer-02";
 import { Nav02 } from "@/components/blocks/marketing/nav-02";
-import { homeContent } from "../content/homeContent.js";
+import { homeContent, homeLocale } from "../content/homeContent.js";
 import { siteContent } from "../content/siteContent.js";
 import { renderSection } from "../sections/renderSection.js";
 
 type HomePageProps = {
   readonly turnstileSiteKey?: string;
+  readonly locale?: string;
 };
 
-export function HomePage({ turnstileSiteKey }: HomePageProps) {
+export function HomePage({ turnstileSiteKey, locale = homeLocale }: HomePageProps) {
   const siteKey = turnstileSiteKey?.trim();
   const hasNavigation = siteContent.navLinks.length > 0 || Boolean(siteContent.navAction);
   const hasFooter = Boolean(
@@ -35,7 +36,11 @@ export function HomePage({ turnstileSiteKey }: HomePageProps) {
           ctaHref={siteContent.navAction?.href}
         />
       )}
-      <main>{homeContent.sections.map((section, index) => renderSection(section, index, siteKey))}</main>
+      <main>
+        {homeContent.sections.map((section, index) =>
+          renderSection(section, index, siteKey, locale)
+        )}
+      </main>
       {hasFooter && (
         <Footer02
           logo={{ text: siteContent.brand }}

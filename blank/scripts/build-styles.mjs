@@ -8,6 +8,7 @@ const args = process.argv.slice(2);
 const checkOnly = args.includes("--check");
 const rootArg = valueAfter("--root") ?? ".";
 const root = resolve(rootArg);
+const extraContent = valueAfter("--content");
 const inputPath = join(root, "styles", "globals.css");
 const outputPath = join(root, "styles", "generated.css");
 const require = createRequire(import.meta.url);
@@ -28,7 +29,7 @@ const compiler = await compile(readFileSync(inputPath, "utf8"), {
   },
 });
 
-const css = compiler.build(collectCandidates(root));
+const css = compiler.build(collectCandidates(root, extraContent));
 
 if (checkOnly) {
   const current = existsSync(outputPath) ? readFileSync(outputPath, "utf8") : "";
@@ -52,11 +53,12 @@ function resolveStylesheet(id, base) {
   return require.resolve(id, { paths: [baseDir] });
 }
 
-function collectCandidates(root) {
+function collectCandidates(root, extra) {
   const candidates = new Set();
   for (const dir of ["src", "components"]) {
     collectFromDir(join(root, dir), candidates);
   }
+  if (extra) collectFromDir(resolve(extra), candidates);
   return [...candidates].sort();
 }
 
@@ -68,7 +70,6 @@ function collectFromDir(dir, candidates) {
       collectFromDir(path, candidates);
       continue;
     }
-    if (name.name === "mantleOceanHero.ts") continue;
     if (![".js", ".jsx", ".ts", ".tsx"].includes(extname(name.name))) continue;
     for (const token of readFileSync(path, "utf8").match(/[A-Za-z0-9_!:[\]./%#(),=>*+-]+/g) ?? []) {
       candidates.add(token);

@@ -40,6 +40,7 @@ function buildBundleFiles(archetype) {
   const files = {};
   walk(files, "blank", "");
   resolveCatalogPackageJson(files);
+  applyProvisionedPackageMetadata(files);
   resolveCatalogLockfile(files);
   if (archetype !== "blank") {
     applyOverlay(files, archetype);
@@ -57,6 +58,7 @@ function buildBundleFiles(archetype) {
     '  "purpose": "{{DESCRIPTION}}",',
     '  "description": "{{DESCRIPTION}}",',
     '  "summary": "{{INSTALL_SUMMARY}}",',
+    '  "authMode": "{{AUTH_MODE}}",',
     '  "site_url": "{{SITE_URL}}",',
     '  "after_launch_skill_url": "{{AFTER_LAUNCH_SKILL_URL}}",',
     '  "locales": {{LOCALES}},',
@@ -143,30 +145,14 @@ function assertBundle(bundle, archetype) {
     "src/web/content/types.ts",
     "kiwa/manifest.json",
     "styles/generated.css",
-    "src/web/mantleOceanHero.ts",
   ]) {
     if (!bundle.files[required]) throw new Error(`${archetype} bundle missing ${required}`);
   }
   if (!bundle.files["src/worker/routes/assets.ts"]?.includes("/styles.css")) {
     throw new Error(`${archetype} bundle missing generated stylesheet route`);
   }
-  if (!bundle.files["src/worker/routes/assets.ts"]?.includes("/mantle-ocean-hero-light.svg")) {
-    throw new Error(`${archetype} bundle missing Mantle ocean hero asset route`);
-  }
-  if (!bundle.files["src/worker/routes/assets.ts"]?.includes("/mantle-ocean-hero-dark.svg")) {
-    throw new Error(`${archetype} bundle missing dark Mantle ocean hero asset route`);
-  }
-  if (!bundle.files["src/web/sections/renderSection.tsx"]?.includes("/assets/mantle-ocean-hero-light.svg")) {
-    throw new Error(`${archetype} homepage missing Mantle ocean hero image`);
-  }
-  if (!bundle.files["src/web/client/homeClient.ts"]?.includes("/assets/mantle-ocean-hero-light.svg', '/assets/mantle-ocean-hero-dark.svg")) {
-    throw new Error(`${archetype} homepage hero image must support manual theme switching`);
-  }
   if (!bundle.files["src/web/assets.ts"]?.includes("assetBuild")) {
     throw new Error(`${archetype} homepage assets must be cache-busted`);
-  }
-  if (!bundle.files["styles/swirl-images.css"]?.includes("?v=")) {
-    throw new Error(`${archetype} swirl images must be cache-busted`);
   }
   if (!bundle.files["src/worker/routes/assets.ts"]?.includes('const ASSET_CACHE_CONTROL = "public, max-age=300"')) {
     throw new Error(`${archetype} homepage asset routes must avoid immutable caching`);
@@ -189,13 +175,10 @@ function assertBundle(bundle, archetype) {
       }
     }
   }
-  if (archetype === "presence" || archetype === "intake" || archetype === "publication") {
+  if (archetype !== "blank") {
     const seedImport = `../../../.mantle/overlays/${archetype}/seed.json`;
     if (!bundle.files["src/web/content/homeContent.ts"]?.includes(seedImport)) {
       throw new Error(`${archetype} homeContent must read the overlay seed`);
-    }
-    if (!bundle.files["src/web/content/siteContent.ts"]?.includes(seedImport)) {
-      throw new Error(`${archetype} siteContent must read the overlay seed`);
     }
   }
   assertLockfileMatchesPackageJson(bundle, archetype);
@@ -278,7 +261,13 @@ function assertProvisionedReadme(bundle, archetype) {
 }
 
 function ensureStarterStyles() {
-  const args = [join(root, "blank", "scripts", "build-styles.mjs"), "--root", join(root, "blank")];
+  const args = [
+    join(root, "blank", "scripts", "build-styles.mjs"),
+    "--root",
+    join(root, "blank"),
+    "--content",
+    join(root, "overlays"),
+  ];
   if (checkOnly) args.push("--check");
   const result = spawnSync(process.execPath, args, { stdio: "inherit" });
   if (result.status !== 0) process.exit(result.status ?? 1);
@@ -318,12 +307,7 @@ function applyOverlay(files, archetype) {
 }
 
 function applyOverlaySeedContent(files, archetype, seedText) {
-  let seed;
-  try {
-    seed = JSON.parse(seedText);
-  } catch {
-    return;
-  }
+  const seed = JSON.parse(seedText);
   const seedImport = `../../../.mantle/overlays/${archetype}/seed.json`;
   if (seed?.site) {
     files["src/web/content/siteContent.ts"] = [
@@ -341,19 +325,24 @@ function applyOverlaySeedContent(files, archetype, seedText) {
       "",
     ].join("\n");
   }
-  if (Array.isArray(seed?.collections?.page)) {
-    files["src/web/content/homeContent.ts"] = [
-      `import seed from "${seedImport}";`,
-      'import type { HomeContent, HomeSection } from "./types.js";',
-      "",
-      "type SeedPage = { readonly type?: string; readonly sections?: readonly HomeSection[] };",
-      "type Seed = { readonly collections?: { readonly page?: readonly SeedPage[] } };",
-      "const seedData = seed as Seed;",
-      'const homePage = (seedData.collections?.page ?? []).find((page) => page.type === "home");',
-      "export const homeContent: HomeContent = { sections: homePage?.sections ?? [] };",
-      "",
-    ].join("\n");
+  if (!Array.isArray(seed?.collections?.page)) {
+    throw new Error(`${archetype} seed must define collections.page`);
   }
+  files["src/web/content/homeContent.ts"] = [
+    `import seed from "${seedImport}";`,
+    'import type { HomeContent, HomeSection } from "./types.js";',
+    "",
+    "type SeedPage = { readonly type?: string; readonly sections?: readonly HomeSection[] };",
+    "type Seed = {",
+    "  readonly locale?: string;",
+    "  readonly collections?: { readonly page?: readonly SeedPage[] };",
+    "};",
+    "const seedData = seed as Seed;",
+    'const homePage = (seedData.collections?.page ?? []).find((page) => page.type === "home");',
+    "export const homeContent: HomeContent = { sections: homePage?.sections ?? [] };",
+    "export const homeLocale = seedData.locale;",
+    "",
+  ].join("\n");
 }
 
 function walkIfExists(files, from, to) {
@@ -403,6 +392,13 @@ function resolveCatalogPackageJson(files) {
       if (spec === "catalog:") deps[name] = catalog[name] ?? fail(`catalog missing ${name}`);
     }
   }
+  files["package.json"] = JSON.stringify(manifest, null, 2) + "\n";
+}
+
+function applyProvisionedPackageMetadata(files) {
+  const manifest = JSON.parse(files["package.json"]);
+  manifest.name = "{{PROJECT_NAME}}";
+  manifest.description = "{{DESCRIPTION}}";
   files["package.json"] = JSON.stringify(manifest, null, 2) + "\n";
 }
 

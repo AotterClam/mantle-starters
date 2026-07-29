@@ -16,9 +16,10 @@ Read [`.mantle/launch-state.json`](.mantle/launch-state.json) and
 
 ## Agent handoff
 
-Use these repo-local Mantle skills. They are vendored copies of Core skills
-from `@aotter/mantle`; `.mantle/*` files provide context, not a separate
-skill contract.
+Use these repo-local Mantle skills for project workflow and updater recovery.
+Use the installed package version and `node_modules/@aotter/mantle/docs/` for
+runtime/API behavior. `.mantle/*` files provide context, not a separate
+contract.
 
 - [`.agent/skills/mantle-develop/SKILL.md`](.agent/skills/mantle-develop/SKILL.md)
 - [`.agent/skills/mantle-plugin/SKILL.md`](.agent/skills/mantle-plugin/SKILL.md)

@@ -5,21 +5,30 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  realpathSync,
   readdirSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { materializeBundle } from "./materialize.mjs";
 
 const STARTERS_REPO = "aotter/mantle-starters";
 const DEFAULT_REPORT = ".mantle/update-report.json";
 const IGNORE_DIRS = new Set([".git", "node_modules", ".wrangler", ".wrangler-test", "dist"]);
+const IGNORE_FILES = new Set([".mantle/features.json", ".mantle/launch-state.json"]);
 
-main().catch((err) => {
-  console.error(`mantle:update: ${err instanceof Error ? err.message : String(err)}`);
-  process.exit(1);
-});
+if (
+  process.argv[1]
+  && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))
+) {
+  main().catch((err) => {
+    console.error(`mantle:update: ${err instanceof Error ? err.message : String(err)}`);
+    process.exit(1);
+  });
+}
 
 async function main() {
   const flags = parseArgs(process.argv.slice(2));
@@ -28,25 +37,61 @@ async function main() {
   const features = readJson(join(root, ".mantle", "features.json"));
   const targetRef = flags.ref ?? stringField(features.registry, "version");
   if (!targetRef) throw new Error("Pass --ref <starters-ref> or set .mantle/features.json registry.version.");
+  const sourceRef = stringField(launchState, "starter_ref");
+  if (!sourceRef) throw new Error(".mantle/launch-state.json is missing starter_ref.");
   const archetype = launchArchetype(launchState, features);
 
   const tempRoot = mkdtempSync(join(tmpdir(), "mantle-update-"));
   try {
-    const bundle = await fetchBundle(targetRef, archetype);
-    materializeBundle(tempRoot, bundle, placeholders({ launchState, features, targetRef }));
-    const report = compare(root, tempRoot, {
+    const sourceRoot = join(tempRoot, "source");
+    const targetRoot = join(tempRoot, "target");
+    mkdirSync(sourceRoot);
+    mkdirSync(targetRoot);
+    const sourceBundle = await fetchBundle(sourceRef, archetype);
+    const targetBundle = sourceRef === targetRef
+      ? sourceBundle
+      : await fetchBundle(targetRef, archetype);
+    materializeBundle(
+      sourceRoot,
+      sourceBundle,
+      placeholders({ launchState, features, targetRef: sourceRef }),
+    );
+    materializeBundle(
+      targetRoot,
+      targetBundle,
+      placeholders({ launchState, features, targetRef }),
+    );
+    const upstream = compare(sourceRoot, targetRoot, { includeRemoved: true });
+    const local = compare(root, sourceRoot);
+    const report = {
+      schema_version: 2,
       generated_at: new Date().toISOString(),
+      source_ref: sourceRef,
       target_ref: targetRef,
-      bundle_version: bundle.version ?? null,
-    });
+      bundle_version: targetBundle.version ?? null,
+      upstream,
+      local,
+      next_step: "Port reviewed upstream changes only; preserve local code, instance config, and state.",
+    };
     const reportPath = resolve(root, flags.report ?? DEFAULT_REPORT);
     mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, JSON.stringify(report, null, 2) + "\n");
     console.log(`mantle:update report: ${relative(root, reportPath) || reportPath}`);
     console.log(
-      `target ${targetRef}: ${report.differing.length} differing, ${report.missing_current.length} missing`,
+      `${sourceRef} → ${targetRef}: ${upstream.differing.length} changed, `
+      + `${upstream.missing_current.length} added, ${upstream.removed_upstream.length} removed; `
+      + `local: ${local.differing.length} modified, ${local.missing_current.length} missing`,
     );
-    if (flags.strict && (report.differing.length || report.missing_current.length)) process.exit(2);
+    if (
+      flags.strict
+      && (
+        upstream.differing.length
+        || upstream.missing_current.length
+        || upstream.removed_upstream.length
+        || local.differing.length
+        || local.missing_current.length
+      )
+    ) process.exit(2);
   } finally {
     if (!flags.keepTemp) rmSync(tempRoot, { recursive: true, force: true });
   }
@@ -56,12 +101,13 @@ function parseArgs(argv) {
   const flags = { ref: null, report: null, strict: false, keepTemp: false };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
+    if (arg === "--") continue;
     if (arg === "--strict") flags.strict = true;
     else if (arg === "--keep-temp") flags.keepTemp = true;
     else if (arg === "--ref") flags.ref = requiredValue(argv, ++i, arg);
     else if (arg === "--report") flags.report = requiredValue(argv, ++i, arg);
     else if (arg === "--help" || arg === "-h") {
-      console.log(`Usage: pnpm run mantle:update -- --ref <starters-ref> [--report ${DEFAULT_REPORT}] [--strict]`);
+      console.log(`Usage: pnpm mantle:update --ref <starters-ref> [--report ${DEFAULT_REPORT}] [--strict]`);
       process.exit(0);
     } else {
       throw new Error(`Unknown argument: ${arg}`);
@@ -81,19 +127,14 @@ async function fetchBundle(ref, archetype) {
   return bundle;
 }
 
-function materializeBundle(root, bundle, values) {
-  for (const [path, raw] of Object.entries(bundle.files)) {
-    const target = join(root, path.replace(/\.template$/, ""));
-    mkdirSync(dirname(target), { recursive: true });
-    writeFileSync(target, substitute(String(raw), values), "utf8");
-  }
-}
-
 function placeholders({ launchState, features, targetRef }) {
   const github = recordField(launchState, "github");
   const repo = recordField(launchState, "repo");
+  const siteOwner = recordField(launchState, "site_owner");
   const locales = arrayField(launchState, "locales");
-  const owner = stringField(repo, "owner") ?? stringField(github, "owner") ?? "unknown-owner";
+  const owner = optionalStringField(repo, "owner")
+    ?? optionalStringField(github, "owner")
+    ?? "unknown-owner";
   const projectName = stringField(launchState, "project_name") ?? stringField(repo, "name") ?? "mantle-site";
   const archetype = launchArchetype(launchState, features);
   const siteUrl = stringField(launchState, "site_url") ?? "https://example.com";
@@ -107,7 +148,12 @@ function placeholders({ launchState, features, targetRef }) {
     CANONICAL_LOCALE: stringField(launchState, "canonical_locale") ?? locales[0] ?? "en",
     STARTER_REF: targetRef,
     GITHUB_OWNER: owner,
-    ADMIN_GITHUB_LOGIN: stringField(github, "admin_login") ?? owner,
+    ADMIN_GITHUB_LOGIN:
+      optionalStringField(github, "admin_login")
+      ?? optionalStringField(siteOwner, "github_login")
+      ?? owner,
+    SITE_OWNER_EMAIL: optionalStringField(siteOwner, "email") ?? "",
+    AUTH_MODE: stringField(launchState, "authMode") ?? "self-managed",
     SITE_URL: siteUrl,
     AFTER_LAUNCH_SKILL_URL:
       stringField(launchState, "after_launch_skill_url") ??
@@ -141,14 +187,7 @@ function afterLaunchSkillUrl({ repoUrl, siteUrl, archetype, locale, purpose }) {
   return url.toString();
 }
 
-function substitute(text, values) {
-  return text.replace(/\{\{([A-Z_][A-Z0-9_]*)\}\}/g, (match, key) => {
-    if (key in values) return values[key];
-    throw new Error(`Unknown placeholder ${match}`);
-  });
-}
-
-function compare(currentRoot, upstreamRoot, meta) {
+function compare(currentRoot, upstreamRoot, options = {}) {
   const upstreamFiles = listFiles(upstreamRoot);
   const differing = [];
   const missingCurrent = [];
@@ -165,16 +204,20 @@ function compare(currentRoot, upstreamRoot, meta) {
       differing.push({ path, current_sha256: currentSha, upstream_sha256: upstreamSha });
     }
   }
+  const removedUpstream = options.includeRemoved
+    ? listFiles(currentRoot)
+      .filter((path) => !existsSync(join(upstreamRoot, path)))
+      .map((path) => ({ path, current_sha256: sha256(join(currentRoot, path)) }))
+    : [];
   return {
-    schema_version: 1,
-    ...meta,
     counts: {
       differing: differing.length,
       missing_current: missingCurrent.length,
+      removed_upstream: removedUpstream.length,
     },
     differing,
     missing_current: missingCurrent,
-    next_step: "Review differences manually; mantle:update never overwrites user-owned files.",
+    removed_upstream: removedUpstream,
   };
 }
 
@@ -184,7 +227,7 @@ function listFiles(root, prefix = "") {
     if (IGNORE_DIRS.has(entry.name)) continue;
     const path = prefix ? `${prefix}/${entry.name}` : entry.name;
     if (entry.isDirectory()) files.push(...listFiles(root, path));
-    else if (entry.isFile()) files.push(path);
+    else if (entry.isFile() && !IGNORE_FILES.has(path)) files.push(path);
   }
   return files.sort();
 }
@@ -208,6 +251,11 @@ function stringField(value, key) {
   return typeof field === "string" && field.trim() ? field.trim() : null;
 }
 
+function optionalStringField(value, key) {
+  const field = value && typeof value === "object" && !Array.isArray(value) ? value[key] : null;
+  return typeof field === "string" ? field.trim() : null;
+}
+
 function arrayField(value, key) {
   const field = value && typeof value === "object" && !Array.isArray(value) ? value[key] : null;
   return Array.isArray(field) ? field.filter((item) => typeof item === "string") : [];
@@ -218,3 +266,5 @@ function requiredValue(argv, index, flag) {
   if (!value || value.startsWith("--")) throw new Error(`${flag} requires a value`);
   return value;
 }
+
+export { compare, placeholders };
