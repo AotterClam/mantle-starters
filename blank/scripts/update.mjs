@@ -64,12 +64,13 @@ function parseArgs(argv) {
   const flags = { ref: null, report: null, strict: false, keepTemp: false };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
+    if (arg === "--") continue;
     if (arg === "--strict") flags.strict = true;
     else if (arg === "--keep-temp") flags.keepTemp = true;
     else if (arg === "--ref") flags.ref = requiredValue(argv, ++i, arg);
     else if (arg === "--report") flags.report = requiredValue(argv, ++i, arg);
     else if (arg === "--help" || arg === "-h") {
-      console.log(`Usage: pnpm run mantle:update -- --ref <starters-ref> [--report ${DEFAULT_REPORT}] [--strict]`);
+      console.log(`Usage: pnpm mantle:update --ref <starters-ref> [--report ${DEFAULT_REPORT}] [--strict]`);
       process.exit(0);
     } else {
       throw new Error(`Unknown argument: ${arg}`);
@@ -192,7 +193,7 @@ function compare(currentRoot, upstreamRoot, meta) {
     },
     differing,
     missing_current: missingCurrent,
-    next_step: "Review differences manually; mantle:update never overwrites user-owned files.",
+    next_step: "Triage each path with the repo-local mantle:update skill; never copy instance config or state wholesale.",
   };
 }
 

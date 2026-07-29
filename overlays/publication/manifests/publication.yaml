@@ -149,6 +149,7 @@ metadata:
 spec:
   input:
     type: object
+    additionalProperties: false
     required: [title, email]
     properties:
       title: { type: string }

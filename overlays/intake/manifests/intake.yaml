@@ -192,6 +192,7 @@ metadata:
 spec:
   input:
     type: object
+    additionalProperties: false
     required: [name, email, attendance, resultKey, replyLocale]
     properties:
       name: { type: string }

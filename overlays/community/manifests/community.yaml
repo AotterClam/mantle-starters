@@ -68,6 +68,7 @@ metadata:
 spec:
   input:
     type: object
+    additionalProperties: false
     required: [name, email]
     properties:
       name: { type: string }

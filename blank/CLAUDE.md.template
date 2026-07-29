@@ -7,7 +7,8 @@ This is a generated blank Mantle site. Start from:
 3. [`.mantle/handoff.md`](.mantle/handoff.md)
 4. [`AGENTS.md`](AGENTS.md)
 
-Repo-local skills are vendored copies from `@aotter/mantle`:
+Repo-local Core skills govern project workflow and updater recovery; the
+installed package version and embedded docs govern runtime/API behavior:
 
 - `.claude/skills/mantle-develop/SKILL.md`
 - `.claude/skills/mantle-plugin/SKILL.md`

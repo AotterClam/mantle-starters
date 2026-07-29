@@ -73,6 +73,7 @@ metadata:
 spec:
   input:
     type: object
+    additionalProperties: false
     required: [productSlug, email]
     properties:
       productSlug: { type: string }

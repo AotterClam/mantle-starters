@@ -3,6 +3,7 @@ import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
+import { parseAllDocuments } from "yaml";
 import {
   compare,
   materializeBundle,
@@ -57,6 +58,7 @@ for (const archetype of archetypes) {
     if (archetype !== "blank") {
       if (!features?.archetype?.appliedAt) throw new Error(`${archetype} overlay not marked applied`);
       assertFourAtoms(tempRoot, archetype);
+      assertPublicMutationInputsStrict(tempRoot, archetype);
       assertOverlayManifestLoaded(tempRoot, archetype);
       assertNoBlankExampleManifest(tempRoot, archetype);
       assertSeedDrivenHome(tempRoot, archetype);
@@ -111,6 +113,14 @@ function smokeLocalMaterializer() {
     if (JSON.stringify(launch.locales) !== '["en","zh-TW"]') throw new Error("local locales mismatch");
     if (manifest.name !== "northstar") throw new Error("local package name mismatch");
     if (manifest.description !== "A local Mantle presence site.") throw new Error("local package description mismatch");
+    const updateHelp = spawnSync(
+      "corepack",
+      ["pnpm@9.15.0", "mantle:update", "--", "--help"],
+      { cwd: output, encoding: "utf8" },
+    );
+    if (updateHelp.status !== 0 || !updateHelp.stdout.includes("pnpm mantle:update --ref")) {
+      throw new Error(`pnpm 9 update help failed: ${updateHelp.stderr || updateHelp.stdout}`);
+    }
     const wrangler = readFileSync(join(output, "wrangler.toml"), "utf8");
     if (!wrangler.includes('name = "northstar"')) throw new Error("local Worker name mismatch");
     if (!wrangler.includes('database_name = "northstar-db"')) throw new Error("local D1 name mismatch");
@@ -280,6 +290,23 @@ function assertFourAtoms(root, archetype) {
   for (const atom of ["Schema", "View", "Procedure", "Trigger"]) {
     if (!new RegExp(`kind:\\s*${atom}\\b`).test(text)) {
       throw new Error(`${archetype} manifest missing ${atom}`);
+    }
+  }
+}
+
+function assertPublicMutationInputsStrict(root, archetype) {
+  const text = readFileSync(join(root, "manifests", `${archetype}.yaml`), "utf8");
+  const publicMutations = parseAllDocuments(text)
+    .map((document) => document.toJSON())
+    .filter((atom) =>
+      atom?.kind === "Procedure"
+      && atom?.spec?.handler?.kind === "builtin"
+      && atom?.spec?.handler?.op === "create"
+    );
+  if (!publicMutations.length) throw new Error(`${archetype} missing public mutation`);
+  for (const procedure of publicMutations) {
+    if (procedure.spec.input?.additionalProperties !== false) {
+      throw new Error(`${procedure.metadata?.name} silently accepts undeclared fields`);
     }
   }
 }

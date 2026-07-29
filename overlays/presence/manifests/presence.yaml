@@ -166,6 +166,7 @@ metadata:
 spec:
   input:
     type: object
+    additionalProperties: false
     required: [name, email, message]
     properties:
       name:
