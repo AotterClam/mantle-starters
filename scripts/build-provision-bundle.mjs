@@ -160,6 +160,9 @@ function assertBundle(bundle, archetype) {
   if (!bundle.files["pnpm-workspace.yaml"]?.includes('  - "."')) {
     throw new Error(`${archetype} bundle missing root package workspace entry`);
   }
+  if (!bundle.files["wrangler.toml"]?.includes("https://platform.mantle.tools/api/auth")) {
+    throw new Error(`${archetype} bundle must use the canonical Platform auth issuer`);
+  }
   if (archetype !== "blank" && !bundle.files[`manifests/${archetype}.yaml`]) {
     throw new Error(`${archetype} bundle missing applied manifest`);
   }
