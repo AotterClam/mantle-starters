@@ -101,8 +101,9 @@ function hostedAuthSetupComplete(env: Env): boolean {
 }
 
 function normalizedPlatformIssuer(env: Env): string | null {
-  const issuer = env.MANTLE_PLATFORM_AUTH_ISSUER?.trim();
-  return issuer ? issuer.replace(/\/+$/, "") : null;
+  const issuer = env.MANTLE_PLATFORM_AUTH_ISSUER?.trim().replace(/\/+$/, "");
+  if (!issuer) return null;
+  return issuer.endsWith("/api/auth") ? issuer : `${issuer}/api/auth`;
 }
 
 export function shouldBlockWhenAuthIncomplete(pathname: string): boolean {
