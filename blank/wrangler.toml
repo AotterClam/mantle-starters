@@ -8,7 +8,7 @@ compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
 # client metadata here. Secrets stay in Cloudflare via `wrangler secret put`.
 #
 # Mantle Platform hosted auth:
-# MANTLE_PLATFORM_AUTH_ISSUER = "https://platform.mantle.tools"
+# MANTLE_PLATFORM_AUTH_ISSUER = "https://platform.mantle.tools/api/auth"
 # MANTLE_PLATFORM_AUTH_CLIENT_ID = "..."
 # MANTLE_SITE_OWNER_EMAIL = "owner@example.com"
 #
