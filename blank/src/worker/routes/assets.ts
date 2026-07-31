@@ -3,7 +3,7 @@ import stylesCss from "../../../styles/generated.css";
 import { homeClientJs } from "../../web/client/homeClient.js";
 import { kiwaEnhanceAssets } from "../../web/client/kiwaEnhanceAssets.js";
 
-const ASSET_CACHE_CONTROL = "public, max-age=300";
+const ASSET_CACHE_CONTROL = "public, max-age=31536000, immutable";
 
 export function createAssetsRoutes(): Hono {
   const app = new Hono();

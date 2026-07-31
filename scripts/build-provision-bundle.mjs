@@ -154,8 +154,8 @@ function assertBundle(bundle, archetype) {
   if (!bundle.files["src/web/assets.ts"]?.includes("assetBuild")) {
     throw new Error(`${archetype} homepage assets must be cache-busted`);
   }
-  if (!bundle.files["src/worker/routes/assets.ts"]?.includes('const ASSET_CACHE_CONTROL = "public, max-age=300"')) {
-    throw new Error(`${archetype} homepage asset routes must avoid immutable caching`);
+  if (!bundle.files["src/worker/routes/assets.ts"]?.includes("max-age=31536000, immutable")) {
+    throw new Error(`${archetype} versioned homepage assets must be immutable`);
   }
   if (!bundle.files["pnpm-workspace.yaml"]?.includes('  - "."')) {
     throw new Error(`${archetype} bundle missing root package workspace entry`);
