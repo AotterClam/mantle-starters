@@ -43,6 +43,12 @@ spec:
               x-mcp-hint: markdown
             showImage:
               type: boolean
+            image:
+              type: object
+              required: [src, alt]
+              properties:
+                src: { type: string }
+                alt: { type: string }
             action:
               type: object
               properties:
@@ -142,7 +148,7 @@ spec:
       createdAt:
         type: number
         x-mantle-bind: now
-  lifecycle: simple
+  lifecycle: none
 ---
 apiVersion: cms.mantle.aotter.net/v1
 kind: Procedure

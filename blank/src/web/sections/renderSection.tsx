@@ -51,6 +51,7 @@ export function renderSection(
           description={section.body}
           primaryCta={section.action}
           secondaryCta={section.secondaryAction}
+          image={section.image}
           showImage={section.showImage}
         />
       );

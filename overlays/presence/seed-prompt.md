@@ -10,6 +10,6 @@ using these section types when they are useful:
 hero, socialProof, content, features, bento, metrics, testimonials, faq,
 contact, form, and cta.
 
-Also create one sample `contact` draft that demonstrates the expected
+Also create one sample `contact` record that demonstrates the expected
 message shape. Keep visitor-facing copy separate from handoff/setup
 instructions, and keep all copy easy to replace by the site owner.
