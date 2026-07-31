@@ -17,9 +17,9 @@
   "scripts": {
     "build": "corepack pnpm@9.15.0 -r --filter './packages/**' build",
     "build:provision-bundle": "node scripts/build-provision-bundle.mjs",
-    "build:styles": "node blank/scripts/build-styles.mjs --root blank --content overlays",
+    "build:styles": "node blank/scripts/build-styles.mjs --root blank",
     "check:provision-bundle": "node scripts/build-provision-bundle.mjs --check",
-    "check:styles": "node blank/scripts/build-styles.mjs --root blank --content overlays --check",
+    "check:styles": "node blank/scripts/build-styles.mjs --root blank --check",
     "dev:bundle": "node scripts/dev-provision-bundle.mjs",
     "materialize": "node scripts/dev-provision-bundle.mjs",
     "smoke:provision-bundle": "node scripts/smoke-provision-bundle.mjs",
