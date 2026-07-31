@@ -1,7 +1,14 @@
 name = "mantle-blank"
 main = "src/index.ts"
-compatibility_date = "2025-01-01"
+compatibility_date = "2026-07-31"
 compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
+
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+[cache]
+enabled = true
 
 [vars]
 # Post-deploy provisioning writes PUBLIC_ORIGIN and the chosen auth

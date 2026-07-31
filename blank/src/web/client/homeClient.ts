@@ -1,8 +1,9 @@
 import { intakeClientJs } from "./intakeClient.js";
+import { asset } from "../assets.js";
 
 export const homeClientJs = [
-  "import { collapsible } from '/enhance/collapsible.js';",
-  "import { accordion } from '/enhance/accordion.js';",
+  `import { collapsible } from '${asset("/enhance/collapsible.js")}';`,
+  `import { accordion } from '${asset("/enhance/accordion.js")}';`,
   "collapsible();",
   "accordion();",
   "const THEME_KEY = 'mantle-theme';",
