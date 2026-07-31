@@ -13,9 +13,9 @@ export function FieldControl({ field }: { readonly field: HomeField }) {
       data-intake-when-field={field.when?.field}
       data-intake-when-value={conditionValue(field.when)}
     >
-      <Label for={controlId}>{field.label}</Label>
       {field.options?.length ? (
-        <div class="grid gap-2">
+        <fieldset class="grid min-w-0 gap-2">
+          <legend class="mb-2 text-sm leading-none font-medium">{field.label}</legend>
           {field.options.map((option, index) => (
             <label class="flex gap-3 rounded-lg border border-border-subtle bg-background p-3 text-sm">
               <input
@@ -32,24 +32,29 @@ export function FieldControl({ field }: { readonly field: HomeField }) {
               </span>
             </label>
           ))}
-        </div>
-      ) : field.multiline ? (
-        <Textarea
-          id={controlId}
-          name={field.name}
-          placeholder={field.placeholder}
-          class="min-h-32"
-          required={field.required}
-        />
+        </fieldset>
       ) : (
-        <Input
-          id={controlId}
-          name={field.name}
-          type={field.type ?? "text"}
-          autocomplete={field.autocomplete}
-          placeholder={field.placeholder}
-          required={field.required}
-        />
+        <>
+          <Label for={controlId}>{field.label}</Label>
+          {field.multiline ? (
+            <Textarea
+              id={controlId}
+              name={field.name}
+              placeholder={field.placeholder}
+              class="min-h-32"
+              required={field.required}
+            />
+          ) : (
+            <Input
+              id={controlId}
+              name={field.name}
+              type={field.type ?? "text"}
+              autocomplete={field.autocomplete}
+              placeholder={field.placeholder}
+              required={field.required}
+            />
+          )}
+        </>
       )}
     </div>
   );

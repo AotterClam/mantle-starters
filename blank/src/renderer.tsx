@@ -21,6 +21,7 @@ export const renderer = jsxRenderer(({ children }) => (
       <title>{siteContent.brand}</title>
       <meta name="description" content={siteContent.description} />
       <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
+      <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
       <link rel="stylesheet" href={asset("/assets/styles.css")} />
     </head>
     <body class="min-h-screen bg-background text-foreground antialiased">

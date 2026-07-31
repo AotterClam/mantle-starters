@@ -199,6 +199,9 @@ function assertStylesheetMounted(root, archetype) {
   if (!css.includes("tailwindcss") || !css.includes(".bg-primary")) {
     throw new Error(`${archetype} generated stylesheet does not include Kiwa/Tailwind utilities`);
   }
+  if (css.includes("@import")) {
+    throw new Error(`${archetype} generated stylesheet contains a late CSS import`);
+  }
 }
 
 function assertSectionImageOptOut(root, archetype) {
@@ -350,6 +353,10 @@ function assertIntakeForm(root) {
     readFileSync(join(root, "src", "web", "sections", "intakeSection.tsx"), "utf8"),
     readFileSync(join(root, "src", "web", "client", "intakeClient.ts"), "utf8"),
   ].join("\n");
+  const fieldControl = readFileSync(
+    join(root, "src", "web", "sections", "fieldControl.tsx"),
+    "utf8",
+  );
   const seed = readFileSync(join(root, ".mantle", "overlays", "intake", "seed.json"), "utf8");
   const manifest = readFileSync(join(root, "manifests", "intake.yaml"), "utf8");
   const notify = readFileSync(
@@ -370,6 +377,9 @@ function assertIntakeForm(root) {
   }
   if (!text.includes('name="replyLocale"') || !text.includes("value={locale}")) {
     throw new Error("intake form does not submit its rendered locale");
+  }
+  if (!fieldControl.includes("<fieldset") || !fieldControl.includes("<legend")) {
+    throw new Error("intake option groups do not use fieldset and legend semantics");
   }
   if (!seed.includes('"type": "intake"') || !seed.includes('"/api/intake"')) {
     throw new Error("intake seed does not define the intake section");
