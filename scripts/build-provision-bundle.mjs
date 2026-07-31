@@ -1,6 +1,16 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
-import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join, posix } from "node:path";
 import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
 
@@ -48,6 +58,7 @@ function buildBundleFiles(archetype) {
     delete files["manifests/example.yaml"];
   }
   walk(files, "kiwa", "kiwa");
+  compileBundleStyles(files, archetype);
 
   files[".mantle/launch-state.json.template"] = [
     "{",
@@ -125,6 +136,31 @@ function buildBundleFiles(archetype) {
   ].join("\n");
   applyProvisionedReadme(files, archetype);
   return files;
+}
+
+function compileBundleStyles(files, archetype) {
+  const tempRoot = mkdtempSync(join(tmpdir(), `mantle-${archetype}-styles-`));
+  try {
+    for (const [path, content] of Object.entries(files)) {
+      if (!["components/", "src/", "styles/"].some((prefix) => path.startsWith(prefix))) {
+        continue;
+      }
+      const target = join(tempRoot, path);
+      mkdirSync(dirname(target), { recursive: true });
+      writeFileSync(target, content);
+    }
+    symlinkSync(join(root, "blank", "node_modules"), join(tempRoot, "node_modules"), "dir");
+    const result = spawnSync(process.execPath, [
+      join(root, "blank", "scripts", "build-styles.mjs"),
+      "--root",
+      tempRoot,
+    ], { stdio: "inherit" });
+    if (result.status !== 0) throw new Error(`failed to build ${archetype} styles`);
+    files["styles/generated.css"] = readFileSync(join(tempRoot, "styles", "generated.css"), "utf8");
+    files["src/web/assets.ts"] = readFileSync(join(tempRoot, "src", "web", "assets.ts"), "utf8");
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
 }
 
 function assertBundle(bundle, archetype) {
@@ -268,8 +304,6 @@ function ensureStarterStyles() {
     join(root, "blank", "scripts", "build-styles.mjs"),
     "--root",
     join(root, "blank"),
-    "--content",
-    join(root, "overlays"),
   ];
   if (checkOnly) args.push("--check");
   const result = spawnSync(process.execPath, args, { stdio: "inherit" });

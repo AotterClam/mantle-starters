@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parseAllDocuments } from "yaml";
@@ -21,8 +21,8 @@ const replacements = {
   PROJECT_NAME: "bundle-smoke",
   ARCHETYPE: "publication",
   AUTH_MODE: "hosted",
-  BRAND: "Bundle Smoke",
-  DESCRIPTION: "Bundle smoke test.",
+  BRAND: "grid",
+  DESCRIPTION: "rotate-45",
   INSTALL_SUMMARY: "Smoke generated from provision bundle.",
   LOCALES: "[\"en\"]",
   CANONICAL_LOCALE: "en",
@@ -41,6 +41,7 @@ for (const archetype of archetypes) {
     const bundle = JSON.parse(readFileSync(join(root, "provision-bundles", `${archetype}.json`), "utf8"));
     materializeBundle(tempRoot, bundle, { ...replacements, ARCHETYPE: archetype });
     assertNoLeftovers(tempRoot, bundle.files);
+    assertGeneratedStylesCurrent(tempRoot, archetype);
     assertPublicHomeIsNotHandoff(tempRoot);
     assertMantleSiteSignature(tempRoot, archetype);
     assertStylesheetMounted(tempRoot, archetype);
@@ -170,6 +171,19 @@ function assertGeneratedStylesMatchStarterLock(root) {
   const lockVersion = lock.match(/^\s+tailwindcss:\n\s+specifier:[^\n]+\n\s+version:\s+([^\s]+)/m)?.[1];
   if (!cssVersion || !lockVersion || cssVersion !== lockVersion) {
     throw new Error(`generated styles use Tailwind ${cssVersion ?? "unknown"}, starter lock uses ${lockVersion ?? "unknown"}`);
+  }
+}
+
+function assertGeneratedStylesCurrent(targetRoot, archetype) {
+  symlinkSync(join(root, "blank", "node_modules"), join(targetRoot, "node_modules"), "dir");
+  const result = spawnSync(process.execPath, [
+    join(root, "blank", "scripts", "build-styles.mjs"),
+    "--root",
+    targetRoot,
+    "--check",
+  ], { encoding: "utf8" });
+  if (result.status !== 0) {
+    throw new Error(`${archetype} generated styles are stale: ${result.stderr || result.stdout}`);
   }
 }
 
