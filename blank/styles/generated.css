@@ -272,6 +272,9 @@
   .mt-auto {
     margin-top: auto;
   }
+  .mb-2 {
+    margin-bottom: calc(var(--spacing) * 2);
+  }
   .block {
     display: block;
   }
@@ -1103,7 +1106,6 @@
     }
   }
 }
-@import url("https://rsms.me/inter/inter.css");
 :root {
   --swirl-1: linear-gradient(135deg, var(--muted), var(--card));
   --swirl-2: linear-gradient(225deg, var(--accent), var(--muted));
