@@ -45,7 +45,7 @@ spec:
       createdAt:
         type: number
         x-mantle-bind: now
-  lifecycle: simple
+  lifecycle: none
 ---
 apiVersion: cms.mantle.aotter.net/v1
 kind: View

@@ -152,6 +152,10 @@ jobs:
         if: steps.released.outputs.done != 'true'
         run: pnpm refresh:starter-locks
 
+      - name: Sync repo-local Core skills
+        if: steps.released.outputs.done != 'true'
+        run: pnpm sync:core-skills --source blank/node_modules/@aotter/mantle
+
       - name: Regenerate provision bundles
         if: steps.released.outputs.done != 'true'
         run: pnpm build:provision-bundle

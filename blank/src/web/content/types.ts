@@ -108,6 +108,10 @@ export type HomeSection = {
   readonly title: string;
   readonly body?: string;
   readonly showImage?: boolean;
+  readonly image?: {
+    readonly src: string;
+    readonly alt: string;
+  };
   readonly action?: HomeAction;
   readonly secondaryAction?: HomeAction;
   readonly footerTitle?: string;
