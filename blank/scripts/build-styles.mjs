@@ -9,7 +9,6 @@ const args = process.argv.slice(2);
 const checkOnly = args.includes("--check");
 const rootArg = valueAfter("--root") ?? ".";
 const root = resolve(rootArg);
-const extraContent = valueAfter("--content");
 const inputPath = join(root, "styles", "globals.css");
 const outputPath = join(root, "styles", "generated.css");
 const assetVersionPath = join(root, "src", "web", "assets.ts");
@@ -31,7 +30,7 @@ const compiler = await compile(readFileSync(inputPath, "utf8"), {
   },
 });
 
-const css = compiler.build(collectCandidates(root, extraContent));
+const css = compiler.build(collectCandidates(root));
 const assetVersion = generatedAssetVersion(css);
 
 if (checkOnly) {
@@ -82,23 +81,28 @@ function resolveStylesheet(id, base) {
   return require.resolve(id, { paths: [baseDir] });
 }
 
-function collectCandidates(root, extra) {
+function collectCandidates(root) {
   const candidates = new Set();
+  const ignored = new Set([
+    join(root, "src", "mantle", "config.ts"),
+    join(root, "src", "web", "content", "siteContent.ts"),
+  ]);
   for (const dir of ["src", "components"]) {
-    collectFromDir(join(root, dir), candidates);
+    collectFromDir(join(root, dir), candidates, ignored);
   }
-  if (extra) collectFromDir(resolve(extra), candidates);
   return [...candidates].sort();
 }
 
-function collectFromDir(dir, candidates) {
+function collectFromDir(dir, candidates, ignored) {
   if (!existsSync(dir)) return;
   for (const name of readdirSync(dir, { withFileTypes: true })) {
     const path = join(dir, name.name);
     if (name.isDirectory()) {
-      collectFromDir(path, candidates);
+      collectFromDir(path, candidates, ignored);
       continue;
     }
+    // Provisioned site copy is data, even when it happens to spell a utility.
+    if (ignored.has(path)) continue;
     if (![".js", ".jsx", ".ts", ".tsx"].includes(extname(name.name))) continue;
     for (const token of readFileSync(path, "utf8").match(/[A-Za-z0-9_!:[\]./%#(),=>*+-]+/g) ?? []) {
       candidates.add(token);
