@@ -70,7 +70,10 @@ export const Hero02: FC<Hero02Props> = ({
               <img
                 src={image.src}
                 alt={image.alt}
-                class="w-full rounded-2xl bg-card shadow-md"
+                width="1200"
+                height="900"
+                fetchpriority="high"
+                class="aspect-[4/3] w-full rounded-2xl bg-card object-cover shadow-md"
               />
             ) : (
               <PlaceholderGradient variant={2} class="aspect-[4/3] w-full" />

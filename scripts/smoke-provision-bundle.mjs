@@ -44,6 +44,7 @@ for (const archetype of archetypes) {
     assertPublicHomeIsNotHandoff(tempRoot);
     assertMantleSiteSignature(tempRoot, archetype);
     assertStylesheetMounted(tempRoot, archetype);
+    assertEdgeCacheContract(tempRoot, archetype);
     assertSectionImageContract(tempRoot, archetype);
     assertAuthSwitchUsesSelectedProvider(tempRoot, archetype);
     assertRuntimeHasNoKiwaDemoCopy(tempRoot, archetype);
@@ -210,6 +211,42 @@ function assertStylesheetMounted(root, archetype) {
   }
   if (css.includes("@import")) {
     throw new Error(`${archetype} generated stylesheet contains a late CSS import`);
+  }
+}
+
+function assertEdgeCacheContract(root, archetype) {
+  const wrangler = readFileSync(join(root, "wrangler.toml"), "utf8");
+  const source = readSource(root);
+  for (const required of [
+    'compatibility_date = "2026-07-31"',
+    "[observability]",
+    "[cache]",
+    "enabled = true",
+  ]) {
+    if (!wrangler.includes(required)) {
+      throw new Error(`${archetype} wrangler config missing ${required}`);
+    }
+  }
+  if (wrangler.includes("cross_version_cache")) {
+    throw new Error(`${archetype} must keep the default per-version Workers cache`);
+  }
+  if (source.includes("rsms.me/inter")) {
+    throw new Error(`${archetype} still loads the render-blocking remote Inter font`);
+  }
+  for (const required of [
+    "public, max-age=0, s-maxage=300",
+    "public, max-age=31536000, immutable",
+    "private, no-store",
+    'width="1200"',
+    'height="900"',
+    'fetchpriority="high"',
+  ]) {
+    if (!source.includes(required)) {
+      throw new Error(`${archetype} cache/LCP contract missing ${required}`);
+    }
+  }
+  if (!source.includes("?v=${assetBuild}")) {
+    throw new Error(`${archetype} immutable assets are not content-versioned`);
   }
 }
 
@@ -526,12 +563,15 @@ function readSource(root) {
   return [
     "src/index.ts",
     "src/renderer.tsx",
+    "src/worker/auth.ts",
     "src/worker/app.ts",
     "src/worker/routes/assets.ts",
     "src/worker/routes/home.tsx",
+    "src/web/assets.ts",
     "src/web/client/homeClient.ts",
     "src/web/pages/HomePage.tsx",
     "src/web/sections/renderSection.tsx",
+    "components/blocks/marketing/hero-02.tsx",
   ]
     .map((path) => {
       try {

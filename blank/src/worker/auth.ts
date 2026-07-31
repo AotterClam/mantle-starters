@@ -123,6 +123,6 @@ export function shouldBlockWhenAuthIncomplete(pathname: string): boolean {
 export function setupIncompleteResponse(): Response {
   return Response.json(AUTH_NOT_CONFIGURED, {
     status: 503,
-    headers: { "cache-control": "no-store" },
+    headers: { "cache-control": "private, no-store" },
   });
 }
