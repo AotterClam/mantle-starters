@@ -287,8 +287,7 @@
       {
         "name": "Sample Visitor",
         "email": "hello@example.com",
-        "message": "I would like to learn more about {{BRAND}}.",
-        "status": "draft"
+        "message": "I would like to learn more about {{BRAND}}."
       }
     ]
   }

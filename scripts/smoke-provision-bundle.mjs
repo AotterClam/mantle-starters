@@ -9,6 +9,14 @@ import { compare, placeholders } from "../blank/scripts/update.mjs";
 
 const root = new URL("..", import.meta.url).pathname;
 const archetypes = ["blank", "presence", "intake", "publication", "transaction", "reservation", "community"];
+const operationalCollections = {
+  presence: "contact",
+  intake: "intake-submissions",
+  publication: "post-suggestions",
+  transaction: "product-inquiries",
+  reservation: "reservation-requests",
+  community: "community-signups",
+};
 const replacements = {
   PROJECT_NAME: "bundle-smoke",
   ARCHETYPE: "publication",
@@ -36,7 +44,7 @@ for (const archetype of archetypes) {
     assertPublicHomeIsNotHandoff(tempRoot);
     assertMantleSiteSignature(tempRoot, archetype);
     assertStylesheetMounted(tempRoot, archetype);
-    assertSectionImageOptOut(tempRoot, archetype);
+    assertSectionImageContract(tempRoot, archetype);
     assertAuthSwitchUsesSelectedProvider(tempRoot, archetype);
     assertRuntimeHasNoKiwaDemoCopy(tempRoot, archetype);
     const launchState = JSON.parse(readFileSync(join(tempRoot, ".mantle", "launch-state.json"), "utf8"));
@@ -53,6 +61,7 @@ for (const archetype of archetypes) {
       if (!features?.archetype?.appliedAt) throw new Error(`${archetype} overlay not marked applied`);
       assertFourAtoms(tempRoot, archetype);
       assertPublicMutationInputsStrict(tempRoot, archetype);
+      assertOperationalCollection(tempRoot, archetype);
       assertOverlayManifestLoaded(tempRoot, archetype);
       assertNoBlankExampleManifest(tempRoot, archetype);
       assertSeedDrivenHome(tempRoot, archetype);
@@ -204,7 +213,11 @@ function assertStylesheetMounted(root, archetype) {
   }
 }
 
-function assertSectionImageOptOut(root, archetype) {
+function assertSectionImageContract(root, archetype) {
+  const renderer = readFileSync(join(root, "src", "web", "sections", "renderSection.tsx"), "utf8");
+  if (!renderer.includes("image={section.image}")) {
+    throw new Error(`${archetype} hero does not render its declared image`);
+  }
   const manifestPath = join(root, "manifests", `${archetype}.yaml`);
   if (!existsSync(manifestPath)) return;
   const page = parseAllDocuments(readFileSync(manifestPath, "utf8"))
@@ -215,6 +228,37 @@ function assertSectionImageOptOut(root, archetype) {
     && page.spec?.schema?.properties?.sections?.items?.properties?.showImage?.type !== "boolean"
   ) {
     throw new Error(`${archetype} page Schema does not expose showImage`);
+  }
+  const image = page?.spec?.schema?.properties?.sections?.items?.properties?.image;
+  if (
+    page
+    && (
+      image?.type !== "object"
+      || image.properties?.src?.type !== "string"
+      || image.properties?.alt?.type !== "string"
+      || !image.required?.includes("src")
+      || !image.required?.includes("alt")
+    )
+  ) {
+    throw new Error(`${archetype} page Schema does not expose an accessible hero image`);
+  }
+}
+
+function assertOperationalCollection(root, archetype) {
+  const collection = operationalCollections[archetype];
+  if (!collection) return;
+  const manifestPath = join(root, "manifests", `${archetype}.yaml`);
+  const schema = parseAllDocuments(readFileSync(manifestPath, "utf8"))
+    .map((document) => document.toJSON())
+    .find((atom) => atom?.kind === "Schema" && atom?.metadata?.name === collection);
+  if (schema?.spec?.lifecycle !== "none") {
+    throw new Error(`${archetype} operational collection ${collection} must use lifecycle:none`);
+  }
+  const seed = JSON.parse(
+    readFileSync(join(root, ".mantle", "overlays", archetype, "seed.json"), "utf8"),
+  );
+  if ((seed.collections?.[collection] ?? []).some((entry) => entry.status === "draft")) {
+    throw new Error(`${archetype} operational seed ${collection} still declares a draft`);
   }
 }
 
@@ -394,8 +438,39 @@ function assertIntakeForm(root) {
   if (!manifest.includes("required: [name, email, attendance, resultKey, replyLocale]")) {
     throw new Error("intake manifest does not persist reply language");
   }
+  assertIntakeOptionContract(JSON.parse(seed), manifest);
   if (!notify.includes("Reply language:")) {
     throw new Error("intake notification does not expose reply language");
+  }
+}
+
+function assertIntakeOptionContract(seed, manifestText) {
+  const atoms = parseAllDocuments(manifestText).map((document) => document.toJSON());
+  const stored = atoms.find(
+    (atom) => atom?.kind === "Schema" && atom?.metadata?.name === "intake-submissions",
+  )?.spec?.schema?.properties;
+  const input = atoms.find(
+    (atom) => atom?.kind === "Procedure" && atom?.metadata?.name === "submit-intake",
+  )?.spec?.input?.properties;
+  const section = seed.collections?.page?.[0]?.sections?.find(
+    (candidate) => candidate.type === "intake",
+  );
+  for (const field of section?.fields ?? []) {
+    if (!field.options?.length) continue;
+    const values = field.options.map((option) => option.value);
+    if (
+      JSON.stringify(stored?.[field.name]?.enum) !== JSON.stringify(values)
+      || JSON.stringify(input?.[field.name]?.enum) !== JSON.stringify(values)
+    ) {
+      throw new Error(`intake option values for ${field.name} drifted from the manifest`);
+    }
+  }
+  const resultKeys = (section?.results ?? []).map((result) => result.key);
+  if (
+    JSON.stringify(stored?.resultKey?.enum) !== JSON.stringify(resultKeys)
+    || JSON.stringify(input?.resultKey?.enum) !== JSON.stringify(resultKeys)
+  ) {
+    throw new Error("intake result keys drifted from the manifest");
   }
 }
 

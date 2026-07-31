@@ -19,7 +19,7 @@ submits that render context as `replyLocale`. If routing selects a locale at
 request time, pass it to `HomePage`. Do not add `locale` to
 `intake-submissions`: Mantle reserves `data.locale` for localized entries.
 
-Also create one sample `intake-submissions` draft that demonstrates the
+Also create one sample `intake-submissions` record that demonstrates the
 expected response shape. Keep visitor-facing copy separate from
 handoff/setup instructions, and keep all copy easy to replace by the
 site owner.

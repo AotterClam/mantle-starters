@@ -43,6 +43,12 @@ spec:
               x-mcp-hint: markdown
             showImage:
               type: boolean
+            image:
+              type: object
+              required: [src, alt]
+              properties:
+                src: { type: string }
+                alt: { type: string }
             action:
               type: object
               properties:
@@ -174,18 +180,21 @@ spec:
         type: string
       session:
         type: string
+        enum: [morning, afternoon, either]
       updates:
         type: string
+        enum: [future-dates, notes]
       note:
         type: string
       resultKey:
         type: string
+        enum: [reserved, follow-up, updates]
       replyLocale:
         type: string
       createdAt:
         type: number
         x-mantle-bind: now
-  lifecycle: simple
+  lifecycle: none
 ---
 apiVersion: cms.mantle.aotter.net/v1
 kind: Procedure
@@ -201,10 +210,10 @@ spec:
       email: { type: string, format: email }
       attendance: { type: string, enum: [yes, maybe, no] }
       role: { type: string }
-      session: { type: string }
-      updates: { type: string }
+      session: { type: string, enum: [morning, afternoon, either] }
+      updates: { type: string, enum: [future-dates, notes] }
       note: { type: string }
-      resultKey: { type: string }
+      resultKey: { type: string, enum: [reserved, follow-up, updates] }
       replyLocale: { type: string }
       "cf-turnstile-response": { type: string }
       turnstileToken: { type: string }
