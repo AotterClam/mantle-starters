@@ -22,9 +22,6 @@ spec:
         minimum: 1
       note:
         type: string
-      createdAt:
-        type: number
-        x-mantle-bind: now
   lifecycle: none
 ---
 apiVersion: cms.mantle.aotter.net/v1
@@ -32,10 +29,11 @@ kind: View
 metadata:
   name: recent-reservation-requests
 spec:
+  surface: staff
   from: reservation-requests
   fields: [id, name, email, requestedFor, partySize, note, createdAt]
   orderBy:
-    - { field: createdAt, direction: desc }
+    - { field: updatedAt, direction: desc }
   limit: 50
 ---
 apiVersion: cms.mantle.aotter.net/v1
