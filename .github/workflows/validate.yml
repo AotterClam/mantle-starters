@@ -36,6 +36,16 @@ jobs:
         working-directory: blank
         run: pnpm validate
 
+      - name: Check index coverage
+        working-directory: blank
+        run: |
+          SDK_VERSION=$(node -p "require('./package.json').dependencies['@aotter/mantle']")
+          if [ "$SDK_VERSION" = "0.0.11-alpha.62" ]; then
+            echo "mantle-harness ships in alpha.63; alpha.62 transition skips this gate."
+          else
+            pnpm check:indexes
+          fi
+
       - name: Typecheck
         working-directory: blank
         run: pnpm typecheck

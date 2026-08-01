@@ -1,6 +1,6 @@
 {
   "name": "mantle-starter-blank",
-  "version": "0.0.11-alpha.62",
+  "version": "0.0.11-alpha.63",
   "private": true,
   "description": "Mantle launch base with a small Kiwa public homepage plus API and MCP surfaces.",
   "type": "module",
@@ -10,6 +10,7 @@
     "dev": "node scripts/build-styles.mjs && node scripts/wrangler-dev.mjs",
     "validate": "mantle validate",
     "validate:deploy": "mantle validate --phase deploy",
+    "check:indexes": "mantle-harness indexes --manifests manifests --require-public --format text",
     "mantle:update": "node scripts/update.mjs",
     "introspect": "mantle introspect",
     "emit-openapi": "node scripts/mantle.mjs emit-openapi --output openapi.json",
@@ -19,7 +20,7 @@
     "deploy": "pnpm validate:deploy && pnpm check:styles && pnpm typecheck && wrangler deploy"
   },
   "dependencies": {
-    "@aotter/mantle": "0.0.11-alpha.62",
+    "@aotter/mantle": "0.0.11-alpha.63",
     "@cloudflare/workers-oauth-provider": "catalog:",
     "aws4fetch": "catalog:",
     "better-auth": "catalog:",
@@ -30,7 +31,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@aotter/mantle-spec": "0.0.11-alpha.62",
+    "@aotter/mantle-spec": "0.0.11-alpha.63",
     "@cloudflare/workers-types": "catalog:",
     "@types/node": "catalog:",
     "tailwindcss": "catalog:",

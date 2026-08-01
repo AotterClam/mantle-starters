@@ -94,7 +94,7 @@ spec:
   description: Publication posts for the first public content surface.
   schema:
     type: object
-    required: [slug, title]
+    required: [slug, title, publishedAt]
     properties:
       slug:
         type: string
@@ -110,6 +110,8 @@ spec:
         type: number
   uniqueIndexes:
     - [slug]
+  indexes:
+    - [publishedAt, slug]
   localized: false
   lifecycle: simple
 ---
@@ -121,10 +123,12 @@ spec:
   from: posts
   fields: [id, slug, title, excerpt, body, publishedAt, updatedAt]
   filter:
-    eq: { field: status, value: published }
+    and:
+      - eq: { field: status, value: published }
+      - gte: { field: publishedAt, value: 0 }
   orderBy:
     - { field: publishedAt, direction: desc }
-    - { field: updatedAt, direction: desc }
+    - { field: slug, direction: desc }
   limit: 50
 ---
 apiVersion: cms.mantle.aotter.net/v1
