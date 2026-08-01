@@ -2,8 +2,10 @@
 
 This is the starter monorepo, not a generated consumer project.
 
-Use ponytail defaults here: keep launch deterministic, prefer deletion
-over new framework, and do not rebuild the old full-starter/theme path.
+Keep changes minimal and deterministic. Reuse the existing bundle and
+materialization paths instead of introducing parallel abstractions.
+Prefer removing obsolete code when safe. Do not revive the legacy
+full-starter/theme path.
 
 Current contract:
 
