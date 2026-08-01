@@ -35,6 +35,10 @@ const replacements = {
   INSTALL_TIMESTAMP: "2026-01-01T00:00:00.000Z",
 };
 
+if (isWorkersCacheEnabled("[observability]\nenabled = true\n\n[cache]\nenabled = false\n")) {
+  throw new Error("Workers cache check accepted an unrelated enabled flag");
+}
+
 for (const archetype of archetypes) {
   const tempRoot = mkdtempSync(join(tmpdir(), `mantle-bundle-${archetype}-`));
   try {
@@ -234,12 +238,13 @@ function assertEdgeCacheContract(root, archetype) {
   for (const required of [
     'compatibility_date = "2026-07-31"',
     "[observability]",
-    "[cache]",
-    "enabled = true",
   ]) {
     if (!wrangler.includes(required)) {
       throw new Error(`${archetype} wrangler config missing ${required}`);
     }
+  }
+  if (!isWorkersCacheEnabled(wrangler)) {
+    throw new Error(`${archetype} must enable the top-level Workers cache`);
   }
   if (wrangler.includes("cross_version_cache")) {
     throw new Error(`${archetype} must keep the default per-version Workers cache`);
@@ -262,6 +267,10 @@ function assertEdgeCacheContract(root, archetype) {
   if (!source.includes("?v=${assetBuild}")) {
     throw new Error(`${archetype} immutable assets are not content-versioned`);
   }
+}
+
+function isWorkersCacheEnabled(wrangler) {
+  return /^\[cache\]\s*\nenabled\s*=\s*true\s*$/m.test(wrangler);
 }
 
 function assertSectionImageContract(root, archetype) {
