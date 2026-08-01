@@ -10,6 +10,7 @@
     "dev": "node scripts/build-styles.mjs && node scripts/wrangler-dev.mjs",
     "validate": "mantle validate",
     "validate:deploy": "mantle validate --phase deploy",
+    "check:indexes": "mantle-harness indexes --manifests manifests --require-public --format text",
     "mantle:update": "node scripts/update.mjs",
     "introspect": "mantle introspect",
     "emit-openapi": "node scripts/mantle.mjs emit-openapi --output openapi.json",

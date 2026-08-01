@@ -167,6 +167,8 @@ jobs:
           for starter in blank; do
             echo "=== validate $starter ==="
             (cd "$starter" && pnpm validate)
+            echo "=== index coverage $starter ==="
+            (cd "$starter" && pnpm check:indexes)
             echo "=== typecheck $starter ==="
             (cd "$starter" && pnpm typecheck)
           done
