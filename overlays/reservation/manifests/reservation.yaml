@@ -32,6 +32,7 @@ kind: View
 metadata:
   name: recent-reservation-requests
 spec:
+  surface: staff
   from: reservation-requests
   fields: [id, name, email, requestedFor, partySize, note, createdAt]
   orderBy:

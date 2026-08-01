@@ -57,7 +57,6 @@ spec:
   filter:
     eq: { field: status, value: published }
   orderBy:
-    - { field: publishedAt, direction: desc }
     - { field: updatedAt, direction: desc }
   limit: 50
 ---
