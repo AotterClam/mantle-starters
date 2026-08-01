@@ -45,6 +45,7 @@ for (const archetype of archetypes) {
     const bundle = JSON.parse(readFileSync(join(root, "provision-bundles", `${archetype}.json`), "utf8"));
     materializeBundle(tempRoot, bundle, { ...replacements, ARCHETYPE: archetype });
     assertNoLeftovers(tempRoot, bundle.files);
+    assertPerformanceHarnessScript(tempRoot, archetype);
     assertGeneratedStylesCurrent(tempRoot, archetype);
     assertPublicHomeIsNotHandoff(tempRoot);
     assertMantleSiteSignature(tempRoot, archetype);
@@ -97,6 +98,14 @@ for (const archetype of archetypes) {
 }
 smokeLocalMaterializer();
 console.log("provision bundle smoke passed");
+
+function assertPerformanceHarnessScript(root, archetype) {
+  const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+  const expected = "mantle-harness indexes --manifests manifests --require-public --format text";
+  if (manifest.scripts?.["check:indexes"] !== expected) {
+    throw new Error(`${archetype} missing the required index-coverage script`);
+  }
+}
 
 function smokeLocalMaterializer() {
   const tempRoot = mkdtempSync(join(tmpdir(), "mantle-materialize-"));
