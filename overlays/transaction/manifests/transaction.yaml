@@ -11,7 +11,7 @@ spec:
     properties:
       slug:
         type: string
-        pattern: "^[a-z0-9-]+$"
+        pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
       title:
         type: string
       summary:
@@ -43,6 +43,8 @@ spec:
     properties:
       productSlug:
         type: string
+        minLength: 1
+        pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
       email:
         type: string
         format: email
@@ -76,7 +78,7 @@ spec:
     additionalProperties: false
     required: [productSlug, email]
     properties:
-      productSlug: { type: string }
+      productSlug: { type: string, minLength: 1, pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" }
       email: { type: string, format: email }
       note: { type: string }
   output:

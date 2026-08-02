@@ -13,7 +13,7 @@ First useful shape:
 
 The notification stub is intentionally best-effort. Configure Cloudflare
 Email Service and the `EMAIL` send binding only when the site owner wants
-email alerts. Turnstile is also opt-in: add `TURNSTILE_SITE_KEY` as a Worker
-var and `TURNSTILE_SECRET_KEY` as a Cloudflare secret when the contact form
-needs bot protection. Use `mantle:theme` for visual override after the
-content model works.
+email alerts. Landing bakes the public Turnstile site key into the static form
+and stores only `TURNSTILE_SECRET_KEY` as a Cloudflare secret. For a manual
+setup, set the form's `data-sitekey` and that secret together. Use
+`mantle:theme` for visual override after the content model works.

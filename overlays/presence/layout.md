@@ -9,5 +9,5 @@ Start with one homepage:
 - contact: one clear prompt and the contact form path;
 - cta: one final next step.
 
-Use Kiwa primitives already present in the starter. Do not add a custom
-theme layer until the content and route shape are stable.
+Edit the generated `public/index.html` directly. Do not add a component
+framework until the content and route shape require one.

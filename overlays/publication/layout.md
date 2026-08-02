@@ -1,6 +1,6 @@
 # Publication layout hint
 
-Use the shared blank Kiwa homepage renderer. The seeded page should show:
+The generated `public/index.html` should show:
 
 - a hero with the editorial promise;
 - an overview section;

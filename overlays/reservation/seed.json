@@ -1,5 +1,13 @@
 {
   "locale": "{{CANONICAL_LOCALE}}",
+  "site": {
+    "brand": "{{BRAND}}",
+    "description": "{{DESCRIPTION}}",
+    "footer": {
+      "tagline": "{{DESCRIPTION}}",
+      "copyright": "Copyright {{BRAND}}."
+    }
+  },
   "collections": {
     "page": [
       {

@@ -9,7 +9,7 @@
 
 ## Engine / runtime vs. starter?
 
-This repo only holds starter scaffolds, overlays, Kiwa vendored source, and the blank provision bundle. Bugs that live inside `@aotter/mantle-*` packages (runtime, spec, admin UI, Cloudflare adapter) belong on the parent repo:
+This repo only holds the minimal starter base, release-time overlays, and provision bundles. Bugs that live inside `@aotter/mantle-*` packages (runtime, spec, admin UI, Cloudflare adapter) belong on the parent repo:
 [`aotter/mantle` issues](https://github.com/aotter/mantle/issues/new/choose).
 
 Not sure which? File here — a maintainer will redirect.

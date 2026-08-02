@@ -1,35 +1,15 @@
-# CLAUDE.md
+# Claude Code
 
-This is a generated blank Mantle site. Start from:
+Read `AGENTS.md` first. The normal authored surface is the manifest,
+`src/index.ts`, and optional custom handlers/services/routes. Do not edit
+`.mantle/generated/` by hand.
 
-1. [`.mantle/launch-state.json`](.mantle/launch-state.json)
-2. [`.mantle/features.json`](.mantle/features.json)
-3. [`.mantle/handoff.md`](.mantle/handoff.md)
-4. [`AGENTS.md`](AGENTS.md)
-
-Repo-local Core skills govern project workflow and updater recovery; the
-installed package version and embedded docs govern runtime/API behavior:
+Matching Core skills are projected under `.claude/skills/`:
 
 - `.claude/skills/mantle-develop/SKILL.md`
 - `.claude/skills/mantle-plugin/SKILL.md`
 - `.claude/skills/mantle-theme/SKILL.md`
 - `.claude/skills/mantle-update/SKILL.md`
 
-The launch archetype bundle is already applied. Inspect the generated
-manifest, overlay notes, and seed prompt before changing code; do not
-switch to an old full starter or a first-run theme.
-
-Local checks:
-
-```bash
-pnpm install --frozen-lockfile
-pnpm check
-```
-
-Use Claude Code for ongoing site maintenance, especially media uploads.
-R2-backed media is optional post-launch work and may require Cloudflare
-billing or a credit card. If media is needed, read
-`node_modules/@aotter/mantle/docs/media-uploads.md` or
-https://raw.githubusercontent.com/aotter/mantle/develop/docs/media-uploads.md.
-Do not rely on Claude Cowork for R2 uploads; use Claude Code or another
-non-sandboxed agent.
+Run `pnpm check` before shipping. Advanced code may use public low-level
+Mantle/Cloudflare exports; the minimal façade is a default, not a restriction.

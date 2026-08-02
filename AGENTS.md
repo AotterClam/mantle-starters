@@ -14,17 +14,16 @@ Current contract:
 - `blank/` owns the shared generated repo base, including repo-local
   Mantle skills.
 - `overlays/` are source inputs applied while building each type bundle.
-- `kiwa/` is vendored free Kiwa source; generated repos must boot
-  without registry access.
+- Non-headless overlays add only selected UI or business source. Do not put
+  generic Worker assembly back into generated repos.
 
 Useful checks:
 
 ```bash
 pnpm build:provision-bundle
 pnpm check:provision-bundle
-pnpm check:kiwa
 pnpm check:repo-local-skills
+pnpm check:core-skills
 pnpm check:starter-locks
-pnpm typecheck
-pnpm test
+pnpm smoke:provision-bundle
 ```

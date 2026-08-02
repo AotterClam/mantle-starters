@@ -59,13 +59,6 @@ spec:
               properties:
                 label: { type: string }
                 href: { type: string }
-            intakeLabels:
-              type: object
-              properties:
-                back: { type: string }
-                next: { type: string }
-                submit: { type: string }
-                progressTemplate: { type: string }
             items:
               type: array
               items:
@@ -76,17 +69,6 @@ spec:
                     type: string
                     x-mcp-hint: markdown
                   icon: { type: string }
-            steps:
-              type: array
-              items:
-                type: object
-                required: [id, title]
-                properties:
-                  id: { type: string }
-                  title: { type: string }
-                  body:
-                    type: string
-                    x-mcp-hint: markdown
             fields:
               type: array
               items:
@@ -96,7 +78,6 @@ spec:
                   name: { type: string }
                   label: { type: string }
                   type: { type: string }
-                  step: { type: string }
                   placeholder: { type: string }
                   autocomplete: { type: string }
                   required: { type: boolean }
@@ -112,35 +93,6 @@ spec:
                         body:
                           type: string
                           x-mcp-hint: markdown
-                  when:
-                    type: object
-                    required: [field]
-                    properties:
-                      field: { type: string }
-                      equals: { type: string }
-                      oneOf:
-                        type: array
-                        items: { type: string }
-            results:
-              type: array
-              items:
-                type: object
-                required: [key, title]
-                properties:
-                  key: { type: string }
-                  title: { type: string }
-                  body:
-                    type: string
-                    x-mcp-hint: markdown
-                  when:
-                    type: object
-                    required: [field]
-                    properties:
-                      field: { type: string }
-                      equals: { type: string }
-                      oneOf:
-                        type: array
-                        items: { type: string }
   uniqueIndexes:
     - [type]
   localized: false
@@ -166,7 +118,7 @@ spec:
   description: Visitor responses submitted through the public intake flow.
   schema:
     type: object
-    required: [name, email, attendance, resultKey, replyLocale]
+    required: [name, email, attendance]
     properties:
       name:
         type: string
@@ -186,11 +138,6 @@ spec:
         enum: [future-dates, notes]
       note:
         type: string
-      resultKey:
-        type: string
-        enum: [reserved, follow-up, updates]
-      replyLocale:
-        type: string
       createdAt:
         type: number
         x-mantle-bind: now
@@ -204,7 +151,7 @@ spec:
   input:
     type: object
     additionalProperties: false
-    required: [name, email, attendance, resultKey, replyLocale]
+    required: [name, email, attendance]
     properties:
       name: { type: string }
       email: { type: string, format: email }
@@ -213,10 +160,7 @@ spec:
       session: { type: string, enum: [morning, afternoon, either] }
       updates: { type: string, enum: [future-dates, notes] }
       note: { type: string }
-      resultKey: { type: string, enum: [reserved, follow-up, updates] }
-      replyLocale: { type: string }
       "cf-turnstile-response": { type: string }
-      turnstileToken: { type: string }
   output:
     type: object
   handler:
@@ -245,7 +189,6 @@ spec:
     type: object
     properties:
       "cf-turnstile-response": { type: string }
-      turnstileToken: { type: string }
   output:
     type: object
   handler:
@@ -276,8 +219,6 @@ spec:
       name: { type: string }
       email: { type: string }
       attendance: { type: string }
-      resultKey: { type: string }
-      replyLocale: { type: string }
       note: { type: string }
   output:
     type: object

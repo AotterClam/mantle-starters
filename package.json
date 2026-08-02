@@ -2,7 +2,7 @@
   "name": "mantle-starters",
   "private": true,
   "version": "0.0.11-alpha.63",
-  "description": "Workspace root for the @aotter/mantle blank-first starter bundles, type overlays, and vendored Kiwa source.",
+  "description": "Minimal provision bundles for Mantle sites.",
   "license": "MIT",
   "homepage": "https://mantle.tools/",
   "repository": {
@@ -15,23 +15,23 @@
     "pnpm": ">=9"
   },
   "scripts": {
-    "build": "corepack pnpm@9.15.0 -r --filter './packages/**' build",
-    "build:provision-bundle": "node scripts/build-provision-bundle.mjs",
-    "build:styles": "node blank/scripts/build-styles.mjs --root blank",
-    "check:provision-bundle": "node scripts/build-provision-bundle.mjs --check",
-    "check:styles": "node blank/scripts/build-styles.mjs --root blank --check",
+    "generate:overlays": "node scripts/generate-overlay-artifacts.mjs",
+    "check:overlay-generated": "node scripts/generate-overlay-artifacts.mjs --check",
+    "build:provision-bundle": "pnpm --dir blank generate && pnpm generate:overlays && node scripts/build-provision-bundle.mjs",
+    "check:provision-bundle": "pnpm --dir blank check:generated && pnpm check:overlay-generated && node scripts/build-provision-bundle.mjs --check",
     "dev:bundle": "node scripts/dev-provision-bundle.mjs",
     "materialize": "node scripts/dev-provision-bundle.mjs",
     "smoke:provision-bundle": "node scripts/smoke-provision-bundle.mjs",
-    "check:kiwa": "node scripts/sync-kiwa.mjs --check",
+    "smoke:runtime": "node scripts/smoke-runtime.mjs",
+    "check:worker-bundle": "node scripts/check-worker-bundle.mjs",
+    "check:transaction-indexes": "pnpm --dir blank exec mantle-harness indexes --manifests ../overlays/transaction/manifests --require-public --format text",
+    "check:packed": "pnpm --dir blank check && pnpm check:worker-bundle && pnpm check:transaction-indexes && pnpm smoke:runtime",
+    "check:exact": "pnpm check:overlay-generated && pnpm check:repo-local-skills && pnpm check:core-skills && pnpm smoke:provision-bundle && pnpm check:packed",
     "check:starter-locks": "node scripts/refresh-starter-locks.mjs --check",
     "check:repo-local-skills": "node scripts/check-repo-local-skills.mjs",
     "check:core-skills": "node scripts/sync-core-skills.mjs --check",
-    "check:wrangler-dev": "node scripts/check-wrangler-dev-wrapper.mjs",
     "sync:core-skills": "node scripts/sync-core-skills.mjs",
-    "refresh:starter-locks": "node scripts/refresh-starter-locks.mjs",
-    "typecheck": "corepack pnpm@9.15.0 -r typecheck",
-    "test": "corepack pnpm@9.15.0 -r test"
+    "refresh:starter-locks": "node scripts/refresh-starter-locks.mjs"
   },
   "devDependencies": {
     "yaml": "catalog:"

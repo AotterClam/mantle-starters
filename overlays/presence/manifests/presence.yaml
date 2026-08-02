@@ -187,8 +187,6 @@ spec:
         minLength: 1
       "cf-turnstile-response":
         type: string
-      turnstileToken:
-        type: string
   output:
     type: object
   handler:
@@ -217,8 +215,6 @@ spec:
     type: object
     properties:
       "cf-turnstile-response":
-        type: string
-      turnstileToken:
         type: string
   output:
     type: object

@@ -1,59 +1,41 @@
-# This site
+# {{BRAND}}
 
-{{BRAND}} is a Mantle site materialized from a deterministic provision bundle.
-Public site: {{SITE_URL}}
+This is a Mantle site. Start with only these authored surfaces:
 
-## Launch facts
+1. the YAML file under `manifests/` — product, data, and API contract;
+2. `src/index.ts` — Cloudflare Worker entry;
+3. `src/handlers.ts` and nearby service/route files — only when present for
+   custom business behavior.
 
-- Type intent: `{{ARCHETYPE}}`
-- Locale list: `{{LOCALES}}`
-- Purpose: {{DESCRIPTION}}
-- Summary: {{INSTALL_SUMMARY}}
-- Full after-launch skill: {{AFTER_LAUNCH_SKILL_URL}}
+Generated files under `.mantle/generated/` are reproducible; run
+`pnpm generate` instead of editing them. Launch metadata under `.mantle/`
+describes this provisioned instance and is not a second application contract.
 
-Read [`.mantle/launch-state.json`](.mantle/launch-state.json) and
-[`.mantle/features.json`](.mantle/features.json) before editing.
+Core owns the normal D1/KV/Auth/Admin/REST/Trigger/OAuth/MCP assembly. Using
+the public low-level Mantle and Cloudflare exports is allowed when the product
+needs it; reuse Core adapters and safety helpers instead of creating a parallel
+stack.
 
-## Agent handoff
+The small default is not a lock. Former starter customization points map to:
 
-Use these repo-local Mantle skills for project workflow and updater recovery.
-Use the installed package version and `node_modules/@aotter/mantle/docs/` for
-runtime/API behavior. `.mantle/*` files provide context, not a separate
-contract.
+- `src/mantle/config.ts` → façade options/typed `extend`, or the public
+  low-level composition recipe for full control;
+- full Kiwa source → edit `public/index.html`, or copy/eject only the selected
+  version-matched overlay/component into project-owned source;
+- overlay seeds → edit the materialized UI/content contract and use
+  Admin/Staff MCP/Procedures for stored content;
+- repo-local updater → the installed `mantle update` comparator.
 
-- [`.agent/skills/mantle-develop/SKILL.md`](.agent/skills/mantle-develop/SKILL.md)
-- [`.agent/skills/mantle-plugin/SKILL.md`](.agent/skills/mantle-plugin/SKILL.md)
-- [`.agent/skills/mantle-theme/SKILL.md`](.agent/skills/mantle-theme/SKILL.md)
-- [`.agent/skills/mantle-update/SKILL.md`](.agent/skills/mantle-update/SKILL.md)
+Project-owned manifests, handlers, routes, UI, Wrangler config, and ejected
+source are freely editable and must survive updates.
 
-First task after materialization:
+Before changing code, run `pnpm check`. Use the installed Core skills when the
+task matches them:
 
-```text
-Read .mantle/launch-state.json, .mantle/features.json, and .mantle/handoff.md.
-Run the local preview, open {{SITE_URL}}, and confirm the Worker boots. Then
-inspect the already composed type manifest, homepage, and seed files before
-making changes.
-```
+- `.agent/skills/mantle-develop/SKILL.md`
+- `.agent/skills/mantle-plugin/SKILL.md`
+- `.agent/skills/mantle-theme/SKILL.md`
+- `.agent/skills/mantle-update/SKILL.md`
 
-## Commands
-
-- `pnpm dev` local preview on localhost:8787
-- `pnpm validate` manifest validation
-- `pnpm typecheck` TypeScript check
-- `pnpm check` validate + typecheck
-- `pnpm run deploy` deploy Worker after provider setup
-
-Daily content authoring should use the Staff MCP endpoint at
-`<SITE_URL>/mcp/staff`. Do not write directly to D1 or KV.
-
-Media uploads are optional. Configure them only when requested, then read
-`node_modules/@aotter/mantle/docs/media-uploads.md`.
-
-## Notes
-
-- This repo starts from the shared blank base; its selected type is already
-  composed. Do not copy old full starter directories into it.
-- Theme work happens later through `mantle:theme`; there is no launch
-  theme picker.
-- Kiwa source in this repo is copied source material. The repo must keep
-  working without Kiwa registry access.
+Instance facts and the original handoff are in `.mantle/launch-state.json`,
+`.mantle/features.json`, and `.mantle/handoff.md`.

@@ -11,7 +11,7 @@
     ],
     "navAction": { "label": "Start RSVP", "href": "#intake" },
     "footer": {
-      "tagline": "A Mantle intake starter with a seeded branching form.",
+      "tagline": "A Mantle intake starter with one small RSVP form.",
       "copyright": "Copyright {{BRAND}}.",
       "columns": [
         {
@@ -61,7 +61,7 @@
             "body": "Use this starter when the first useful product is a structured response: RSVP, application, onboarding, request, or lead qualification.",
             "items": [
               {
-                "body": "The public page explains why someone should respond, then asks a few branching questions instead of dropping them into a blank form."
+                "body": "The public page explains why someone should respond, then asks only for the details needed to follow up."
               },
               {
                 "body": "The first version stores responses in Mantle. The owner can later add review queues, email routing, scoring, or member login."
@@ -72,23 +72,23 @@
             "type": "features",
             "id": "flow",
             "eyebrow": "Flow",
-            "title": "What this intake starter demonstrates",
-            "body": "The copy is placeholder, but the shape is real enough for a first provision test.",
+            "title": "What this intake starter includes",
+            "body": "The copy is placeholder, but the form and storage path work end to end.",
             "items": [
               {
                 "icon": "layout",
-                "title": "Multi-step form",
-                "body": "Questions are grouped into small steps so the first screen stays focused."
+                "title": "Small form",
+                "body": "The first version asks only for identity, attendance, preferences, and a note."
               },
               {
                 "icon": "chat",
-                "title": "Conditional questions",
-                "body": "Follow-up fields appear only when the previous answer makes them relevant."
+                "title": "Native controls",
+                "body": "Choice fields use browser-native selects and submit the manifest's exact values."
               },
               {
                 "icon": "check",
-                "title": "Result message",
-                "body": "Different answers can show different confirmation copy after submission."
+                "title": "Stored response",
+                "body": "A successful submission is saved for the owner to review in Mantle."
               },
               {
                 "icon": "shield",
@@ -102,31 +102,8 @@
             "id": "intake",
             "eyebrow": "RSVP",
             "title": "Reserve a seat or ask for updates",
-            "body": "This seeded workshop RSVP shows how intake can branch without becoming a full quiz engine.",
+            "body": "This workshop RSVP is deliberately flat, useful, and easy to replace.",
             "action": { "label": "Submit RSVP", "href": "/api/intake" },
-            "intakeLabels": {
-              "back": "Back",
-              "next": "Next",
-              "submit": "Submit RSVP",
-              "progressTemplate": "Step {current} of {total}"
-            },
-            "steps": [
-              {
-                "id": "basics",
-                "title": "Basic details",
-                "body": "Start with the minimum information needed to identify the response."
-              },
-              {
-                "id": "preferences",
-                "title": "Preferences",
-                "body": "Follow-up questions change based on the RSVP answer."
-              },
-              {
-                "id": "confirm",
-                "title": "Send response",
-                "body": "The first version stores the response. Email routing can be connected later."
-              }
-            ],
             "fields": [
               {
                 "name": "name",
@@ -134,7 +111,6 @@
                 "type": "text",
                 "autocomplete": "name",
                 "placeholder": "Your name",
-                "step": "basics",
                 "required": true
               },
               {
@@ -143,13 +119,11 @@
                 "type": "email",
                 "autocomplete": "email",
                 "placeholder": "you@example.com",
-                "step": "basics",
                 "required": true
               },
               {
                 "name": "attendance",
                 "label": "Can you join the workshop?",
-                "step": "basics",
                 "required": true,
                 "options": [
                   { "label": "Yes", "value": "yes", "body": "Reserve a seat and share session preferences." },
@@ -161,15 +135,11 @@
                 "name": "role",
                 "label": "What best describes you?",
                 "type": "text",
-                "placeholder": "Founder, designer, operator...",
-                "step": "preferences",
-                "when": { "field": "attendance", "oneOf": ["yes", "maybe"] }
+                "placeholder": "Founder, designer, operator..."
               },
               {
                 "name": "session",
                 "label": "Preferred session",
-                "step": "preferences",
-                "when": { "field": "attendance", "oneOf": ["yes", "maybe"] },
                 "options": [
                   { "label": "Morning", "value": "morning" },
                   { "label": "Afternoon", "value": "afternoon" },
@@ -178,9 +148,7 @@
               },
               {
                 "name": "updates",
-                "label": "What should we send instead?",
-                "step": "preferences",
-                "when": { "field": "attendance", "equals": "no" },
+                "label": "Optional updates",
                 "options": [
                   { "label": "Future workshop dates", "value": "future-dates" },
                   { "label": "Notes after the event", "value": "notes" }
@@ -190,28 +158,7 @@
                 "name": "note",
                 "label": "Anything else?",
                 "placeholder": "Share access needs, questions, or context.",
-                "step": "confirm",
                 "multiline": true
-              }
-            ],
-            "results": [
-              {
-                "key": "reserved",
-                "title": "You are on the list",
-                "body": "The owner can review the RSVP in Mantle and follow up with final details.",
-                "when": { "field": "attendance", "equals": "yes" }
-              },
-              {
-                "key": "follow-up",
-                "title": "We will follow up",
-                "body": "The response is saved as maybe, so the owner can confirm later.",
-                "when": { "field": "attendance", "equals": "maybe" }
-              },
-              {
-                "key": "updates",
-                "title": "You will receive updates",
-                "body": "The owner can use this response to send future dates or event notes.",
-                "when": { "field": "attendance", "equals": "no" }
               }
             ]
           },
@@ -224,11 +171,11 @@
             "items": [
               {
                 "title": "Can this become an application form?",
-                "body": "Yes. Replace the seed questions with eligibility, availability, or review fields."
+                "body": "Yes. Replace the example questions in public/index.html with eligibility, availability, or review fields."
               },
               {
                 "title": "Can this become a quiz?",
-                "body": "Later. The first slice keeps branching and result copy simple before adding scoring."
+                "body": "Later. Keep this first form flat until scoring is a real requirement."
               },
               {
                 "title": "Where do responses go?",
@@ -240,7 +187,7 @@
             "type": "cta",
             "eyebrow": "Next",
             "title": "Turn this RSVP into {{BRAND}}'s real intake",
-            "body": "Keep the branching form, replace the questions, and add routing only when the owner knows who should receive each response.",
+            "body": "Replace the questions, then add routing only when the owner knows who should receive each response.",
             "action": { "label": "Start RSVP", "href": "#intake" },
             "secondaryAction": { "label": "Review FAQ", "href": "#faq" }
           }
@@ -254,9 +201,7 @@
         "attendance": "maybe",
         "role": "Example operator",
         "session": "either",
-        "note": "I would like details before confirming.",
-        "resultKey": "follow-up",
-        "replyLocale": "{{CANONICAL_LOCALE}}"
+        "note": "I would like details before confirming."
       }
     ]
   }

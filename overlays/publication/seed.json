@@ -97,7 +97,7 @@
             "id": "system",
             "eyebrow": "System",
             "title": "The starter ships an editorial model, not a theme",
-            "body": "Publication keeps the same blank Kiwa runtime as every other type. The type-specific work lives in the manifest and seed.",
+            "body": "Publication keeps the same minimal Worker runtime as every other type. The type-specific work lives in the manifest and public page.",
             "items": [
               {
                 "title": "Posts are the core",
@@ -130,7 +130,7 @@
               },
               {
                 "title": "Where should the agent work next?",
-                "body": "Read `.mantle/launch-state.json`, inspect `manifests/publication.yaml`, then replace this seed with real editorial content."
+                "body": "Read `.mantle/launch-state.json`, inspect `manifests/publication.yaml`, then replace the examples in `public/index.html` with real editorial content."
               }
             ]
           },

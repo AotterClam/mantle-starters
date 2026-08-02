@@ -1,6 +1,0 @@
-:root {
-  --swirl-1: linear-gradient(135deg, var(--muted), var(--card));
-  --swirl-2: linear-gradient(225deg, var(--accent), var(--muted));
-  --swirl-3: linear-gradient(45deg, var(--card), var(--secondary));
-  --swirl-4: linear-gradient(315deg, var(--muted), var(--background));
-}

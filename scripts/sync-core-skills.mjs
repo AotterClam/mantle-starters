@@ -6,9 +6,8 @@ import { fileURLToPath } from "node:url";
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const args = process.argv.slice(2);
 const checkOnly = args.includes("--check");
-const explicitSource = args.includes("--source");
 const sourceArg = args.find((arg, i) => args[i - 1] === "--source");
-const sourceRoot = resolve(root, sourceArg ?? "../mantle");
+const sourceRoot = resolve(root, sourceArg ?? "blank/node_modules/@aotter/mantle");
 const skills = [
   ["develop", "mantle-develop"],
   ["plugin", "mantle-plugin"],
@@ -16,11 +15,6 @@ const skills = [
   ["update", "mantle-update"],
 ];
 const failures = [];
-
-if (checkOnly && !explicitSource && !existsSync(join(sourceRoot, "skills"))) {
-  console.log("core skills: source unavailable; skipped external check");
-  process.exit(0);
-}
 
 for (const [sourceDir, targetDir] of skills) {
   const sourcePath = join(sourceRoot, "skills", sourceDir, "SKILL.md");
@@ -30,7 +24,7 @@ for (const [sourceDir, targetDir] of skills) {
   }
   const text = readFileSync(sourcePath, "utf8");
   for (const base of [".agent", ".claude"]) {
-    const targetPath = join(root, "blank", base, "skills", targetDir, "SKILL.md.template");
+    const targetPath = join(root, "blank", base, "skills", targetDir, "SKILL.md");
     if (checkOnly) {
       const current = existsSync(targetPath) ? readFileSync(targetPath, "utf8") : "";
       if (current !== text) failures.push(`${targetPath} differs from ${sourcePath}`);

@@ -1,5 +1,13 @@
 {
   "locale": "{{CANONICAL_LOCALE}}",
+  "site": {
+    "brand": "{{BRAND}}",
+    "description": "{{DESCRIPTION}}",
+    "footer": {
+      "tagline": "{{DESCRIPTION}}",
+      "copyright": "Copyright {{BRAND}}."
+    }
+  },
   "collections": {
     "page": [
       {
@@ -16,12 +24,12 @@
             "type": "features",
             "id": "updates",
             "title": "A useful first community page",
-            "body": "Replace this seed with the first real updates, events, or ways to participate.",
+            "body": "Replace this page with the first real updates, events, or ways to participate.",
             "items": [
               {
                 "icon": "sparkles",
                 "title": "Publish an update",
-                "body": "Edit the welcome update in this seed before auth is configured."
+                "body": "Edit the welcome update in public/index.html before auth is configured."
               },
               {
                 "icon": "handshake",

@@ -1,616 +1,256 @@
 #!/usr/bin/env node
-import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync } from "node:fs";
+import { mkdtempSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { parseAllDocuments } from "yaml";
-import { materializeBundle } from "../blank/scripts/materialize.mjs";
-import { compare, placeholders } from "../blank/scripts/update.mjs";
+import { join, relative } from "node:path";
+import { materializeBundle } from "./materialize-bundle.mjs";
 
 const root = new URL("..", import.meta.url).pathname;
 const archetypes = ["blank", "presence", "intake", "publication", "transaction", "reservation", "community"];
-const operationalCollections = {
-  presence: "contact",
-  intake: "intake-submissions",
-  publication: "post-suggestions",
-  transaction: "product-inquiries",
-  reservation: "reservation-requests",
-  community: "community-signups",
-};
 const replacements = {
   PROJECT_NAME: "bundle-smoke",
-  ARCHETYPE: "publication",
+  ARCHETYPE: "blank",
   AUTH_MODE: "hosted",
-  BRAND: "grid",
-  DESCRIPTION: "rotate-45",
-  INSTALL_SUMMARY: "Smoke generated from provision bundle.",
-  LOCALES: "[\"en\"]",
+  BRAND: 'North & <Star> "Lab"',
+  DESCRIPTION: 'A "minimal" Mantle \\ site.',
+  INSTALL_SUMMARY: "Generated from the immutable bundle.",
+  LOCALES: '["en","zh-TW"]',
   CANONICAL_LOCALE: "en",
   STARTER_REF: "smoke",
   GITHUB_OWNER: "aotter",
   ADMIN_GITHUB_LOGIN: "aotter",
   SITE_OWNER_EMAIL: "owner@example.com",
   SITE_URL: "https://bundle-smoke.example",
+  TURNSTILE_SITE_KEY: 'test-site-key<&"',
   AFTER_LAUNCH_SKILL_URL: "https://mantle.tools/skill/after-launch?id=smoke",
   INSTALL_TIMESTAMP: "2026-01-01T00:00:00.000Z",
 };
 
-if (isWorkersCacheEnabled("[observability]\nenabled = true\n\n[cache]\nenabled = false\n")) {
-  throw new Error("Workers cache check accepted an unrelated enabled flag");
-}
+assertHostileLocalesFailClosed();
+assertHostilePathFailsClosed();
 
 for (const archetype of archetypes) {
-  const tempRoot = mkdtempSync(join(tmpdir(), `mantle-bundle-${archetype}-`));
+  const bundle = JSON.parse(readFileSync(join(root, "provision-bundles", `${archetype}.json`), "utf8"));
+  const first = mkdtempSync(join(tmpdir(), `mantle-${archetype}-first-`));
+  const second = mkdtempSync(join(tmpdir(), `mantle-${archetype}-second-`));
   try {
-    const bundle = JSON.parse(readFileSync(join(root, "provision-bundles", `${archetype}.json`), "utf8"));
-    materializeBundle(tempRoot, bundle, { ...replacements, ARCHETYPE: archetype });
-    assertNoLeftovers(tempRoot, bundle.files);
-    assertPerformanceHarnessScript(tempRoot, archetype);
-    assertGeneratedStylesCurrent(tempRoot, archetype);
-    assertPublicHomeIsNotHandoff(tempRoot);
-    assertMantleSiteSignature(tempRoot, archetype);
-    assertStylesheetMounted(tempRoot, archetype);
-    assertEdgeCacheContract(tempRoot, archetype);
-    assertSectionImageContract(tempRoot, archetype);
-    assertAuthSwitchUsesSelectedProvider(tempRoot, archetype);
-    assertRuntimeHasNoKiwaDemoCopy(tempRoot, archetype);
-    const launchState = JSON.parse(readFileSync(join(tempRoot, ".mantle", "launch-state.json"), "utf8"));
-    if (launchState.github?.owner !== replacements.GITHUB_OWNER) throw new Error(`${archetype} missing landing GitHub owner`);
-    if (launchState.site_url !== replacements.SITE_URL) throw new Error(`${archetype} missing launch-state site_url`);
-    if (launchState.purpose !== replacements.DESCRIPTION) throw new Error(`${archetype} missing launch-state purpose`);
-    if (launchState.after_launch_skill_url !== replacements.AFTER_LAUNCH_SKILL_URL) throw new Error(`${archetype} missing after-launch skill URL`);
-    const handoff = readFileSync(join(tempRoot, ".mantle", "handoff.md"), "utf8");
-    if (!handoff.includes(`Auth intent: ${replacements.AUTH_MODE}`)) throw new Error(`${archetype} missing auth intent handoff`);
+    const values = { ...replacements, ARCHETYPE: archetype };
+    materializeBundle(first, bundle, values);
+    materializeBundle(second, bundle, values);
+    assertNoPlaceholders(first);
+    assertDeterministic(first, second);
+    assertCommonShape(first, archetype);
+    if (archetype === "blank") assertBlank(first);
+    else assertWebOverlay(first, archetype);
+    if (archetype === "presence" || archetype === "intake") assertTurnstile(first, archetype);
+    if (archetype === "transaction") assertTransaction(first);
+  } finally {
+    rmSync(first, { recursive: true, force: true });
+    rmSync(second, { recursive: true, force: true });
+  }
+}
 
-    const features = JSON.parse(readFileSync(join(tempRoot, ".mantle", "features.json"), "utf8"));
-    if (features?.archetype?.name !== archetype) throw new Error(`${archetype} features archetype mismatch`);
-    if (archetype !== "blank") {
-      if (!features?.archetype?.appliedAt) throw new Error(`${archetype} overlay not marked applied`);
-      assertFourAtoms(tempRoot, archetype);
-      assertPublicMutationInputsStrict(tempRoot, archetype);
-      assertOperationalCollection(tempRoot, archetype);
-      assertOverlayManifestLoaded(tempRoot, archetype);
-      assertNoBlankExampleManifest(tempRoot, archetype);
-      assertSeedDrivenHome(tempRoot, archetype);
-      readFileSync(join(tempRoot, ".mantle", "overlays", archetype, "seed.json"), "utf8");
-      if (archetype === "presence") {
-        assertPresenceHandlerLoaded(tempRoot);
-        assertPresenceContactForm(tempRoot);
-      }
-      if (archetype === "intake") {
-        assertIntakeHandlerLoaded(tempRoot);
-        assertIntakeForm(tempRoot);
-      } else {
-        assertNoIntakeRuntime(tempRoot, archetype);
-      }
-      if (archetype === "publication") {
-        assertPublicationSeed(tempRoot);
-      }
-      if (archetype === "transaction") {
-        assertTransactionSeed(tempRoot);
-      }
-    } else {
-      assertBlankHomeDataIsBlank(tempRoot);
+console.log("minimal provision bundle smoke passed");
+
+function assertCommonShape(target, archetype) {
+  const pkg = JSON.parse(readFileSync(join(target, "package.json"), "utf8"));
+  if (pkg.description !== replacements.DESCRIPTION) fail(archetype, "package description is not valid JSON text");
+  if (Object.keys(pkg.dependencies ?? {}).join(",") !== "@aotter/mantle") {
+    fail(archetype, "production dependencies must contain only @aotter/mantle");
+  }
+  const developmentDependencies = Object.keys(pkg.devDependencies ?? {}).sort();
+  if (developmentDependencies.join(",") !== "@types/node,typescript,wrangler") {
+    fail(archetype, `unexpected development dependencies: ${developmentDependencies.join(",")}`);
+  }
+  const config = JSON.parse(readFileSync(join(target, "wrangler.jsonc"), "utf8"));
+  if (config.name !== replacements.PROJECT_NAME) fail(archetype, "Worker name was not materialized");
+  if (config.cache?.enabled !== true) fail(archetype, "top-level Workers cache is not enabled");
+  if (config.vars?.PUBLIC_ORIGIN !== replacements.SITE_URL) fail(archetype, "site URL var is stale");
+  if (JSON.stringify(config.vars?.MANTLE_SITE_LOCALES) !== replacements.LOCALES) {
+    fail(archetype, "locale vars were not materialized as JSON");
+  }
+  const envTypes = readFileSync(join(target, ".mantle/generated/env.d.ts"), "utf8");
+  for (const binding of ["DB: D1Database", "KV: KVNamespace", "OAUTH_KV: KVNamespace"]) {
+    if (!envTypes.includes(binding)) fail(archetype, `generated Env missing ${binding}`);
+  }
+  const generated = readFileSync(join(target, ".mantle/generated/site.ts"), "utf8");
+  if (generated.includes("parseManifests") || generated.includes(".yaml")) {
+    fail(archetype, "generated Worker module still parses YAML at runtime");
+  }
+}
+
+function assertBlank(target) {
+  const files = listFiles(target);
+  for (const forbidden of ["src/home.ts", "components/", "kiwa/", "styles/", "scripts/"]) {
+    if (files.some((file) => file === forbidden || file.startsWith(forbidden))) {
+      fail("blank", `contains ${forbidden}`);
+    }
+  }
+  const entry = readFileSync(join(target, "src/index.ts"), "utf8");
+  if (!entry.includes("createMantleWorker({ manifest })")) fail("blank", "does not use the default façade");
+  if (entry.split("\n").filter((line) => line.trim() && !line.trim().startsWith("//")).length > 4) {
+    fail("blank", "Worker entry exceeds the attention budget");
+  }
+  const counted = files.filter((file) =>
+    file !== "pnpm-lock.yaml" &&
+    !file.startsWith(".mantle/generated/") &&
+    !/^\.(agent|claude)\/skills\/mantle-[^/]+\/SKILL\.md$/.test(file)
+  );
+  if (counted.length > 20) fail("blank", `has ${counted.length} counted files (max 20)`);
+  const launchMetadata = new Set([
+    ".mantle/features.json",
+    ".mantle/handoff.md",
+    ".mantle/launch-state.json",
+  ]);
+  const authoredSupport = counted.filter((file) => !launchMetadata.has(file));
+  if (authoredSupport.length > 12) {
+    fail("blank", `has ${authoredSupport.length} authored/support files (max 12)`);
+  }
+  const projectedSkills = files.filter((file) =>
+    /^\.(agent|claude)\/skills\/mantle-[^/]+\/SKILL\.md$/.test(file)
+  );
+  console.log(
+    `blank file budget: ${counted.length} counted, ${authoredSupport.length} authored/support, `
+    + `${projectedSkills.length} projected skills, ${files.length} total`,
+  );
+}
+
+function assertWebOverlay(target, archetype) {
+  const home = readFileSync(join(target, "public/index.html"), "utf8");
+  if (!home.includes(`content=\"${archetype}\"`)) fail(archetype, "static homepage has the wrong archetype");
+  if (!home.includes("North &amp; &lt;Star&gt; &quot;Lab&quot;") || home.includes("North & <Star>")) {
+    fail(archetype, "static homepage does not escape provisioned text");
+  }
+  const escapedBrand = "North &amp; &lt;Star&gt; &quot;Lab&quot;";
+  const escapedDescription = "A &quot;minimal&quot; Mantle \\ site.";
+  for (const expected of [
+    `<title>${escapedBrand}</title>`,
+    `<meta name="description" content="${escapedDescription}">`,
+    `<header><a class="brand" href="/">${escapedBrand}</a>`,
+    `<footer><strong>${escapedBrand}</strong><p>`,
+    `<small>Copyright ${escapedBrand}.</small>`,
+  ]) {
+    if (!home.includes(expected)) fail(archetype, `static page chrome is missing ${expected}`);
+  }
+  if (home.includes("<p></p>") || home.includes("<small></small>")) {
+    fail(archetype, "static page contains empty footer chrome");
+  }
+  const launch = JSON.parse(readFileSync(join(target, ".mantle/launch-state.json"), "utf8"));
+  if (launch.brand !== replacements.BRAND || launch.description !== replacements.DESCRIPTION) {
+    fail(archetype, "launch-state JSON did not preserve provisioned text");
+  }
+  const entry = readFileSync(join(target, "src/index.ts"), "utf8");
+  if (!entry.includes("createMantleWorker") || entry.includes("mountHome")) {
+    fail(archetype, "does not use the minimal Mantle Worker entry");
+  }
+  const config = JSON.parse(readFileSync(join(target, "wrangler.jsonc"), "utf8"));
+  if (config.assets?.directory !== "./public") fail(archetype, "does not use Cloudflare static assets");
+  if (!home.includes("<form") && (
+    home.includes("fetch(form.action)")
+    || home.includes("challenges.cloudflare.com/turnstile")
+  )) {
+    fail(archetype, "form-free page ships dead form or Turnstile client code");
+  }
+  if ((home.match(/<h1(?:\s|>)/g) ?? []).length !== 1) {
+    fail(archetype, "page must contain exactly one primary heading");
+  }
+  if (home.includes("<h3></h3>")) fail(archetype, "page contains an empty card heading");
+}
+
+function assertHostileLocalesFailClosed() {
+  const target = mkdtempSync(join(tmpdir(), "mantle-hostile-locales-"));
+  const bundle = JSON.parse(readFileSync(join(root, "provision-bundles", "blank.json"), "utf8"));
+  try {
+    try {
+      materializeBundle(target, bundle, {
+        ...replacements,
+        LOCALES: '[],"INJECTED":true',
+      });
+      throw new Error("hostile LOCALES input was accepted");
+    } catch (error) {
+      if (!String(error).includes("LOCALES must be")) throw error;
     }
   } finally {
-    rmSync(tempRoot, { recursive: true, force: true });
-  }
-}
-smokeLocalMaterializer();
-console.log("provision bundle smoke passed");
-
-function assertPerformanceHarnessScript(root, archetype) {
-  const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
-  const expected = "mantle-harness indexes --manifests manifests --require-public --format text";
-  if (manifest.scripts?.["check:indexes"] !== expected) {
-    throw new Error(`${archetype} missing the required index-coverage script`);
+    rmSync(target, { recursive: true, force: true });
   }
 }
 
-function smokeLocalMaterializer() {
-  const tempRoot = mkdtempSync(join(tmpdir(), "mantle-materialize-"));
-  const output = join(tempRoot, "northstar");
+function assertHostilePathFailsClosed() {
+  const target = mkdtempSync(join(tmpdir(), "mantle-hostile-path-"));
   try {
-    const result = spawnSync(process.execPath, [
-      "scripts/dev-provision-bundle.mjs",
-      "presence",
-      "--out",
-      output,
-      "--brand",
-      "Northstar Studio",
-      "--description",
-      "A local Mantle presence site.",
-      "--locales",
-      "en,zh-TW",
-    ], { cwd: root, encoding: "utf8" });
-    if (result.status !== 0) {
-      throw new Error(`local materializer failed: ${result.stderr || result.stdout}`);
+    try {
+      materializeBundle(target, { files: { "../outside": "bad" } }, replacements);
+      throw new Error("escaping bundle path was accepted");
+    } catch (error) {
+      if (!String(error).includes("bundle path escapes project root")) throw error;
     }
-    const launch = JSON.parse(readFileSync(join(output, ".mantle", "launch-state.json"), "utf8"));
-    const manifest = JSON.parse(readFileSync(join(output, "package.json"), "utf8"));
-    if (launch.authMode !== "self-managed") throw new Error("local auth mode missing");
-    if (launch.brand !== "Northstar Studio") throw new Error("local brand mismatch");
-    if (JSON.stringify(launch.locales) !== '["en","zh-TW"]') throw new Error("local locales mismatch");
-    if (manifest.name !== "northstar") throw new Error("local package name mismatch");
-    if (manifest.description !== "A local Mantle presence site.") throw new Error("local package description mismatch");
-    const updateHelp = spawnSync(
-      "corepack",
-      ["pnpm@9.15.0", "mantle:update", "--", "--help"],
-      { cwd: output, encoding: "utf8" },
-    );
-    if (updateHelp.status !== 0 || !updateHelp.stdout.includes("pnpm mantle:update --ref")) {
-      throw new Error(`pnpm 9 update help failed: ${updateHelp.stderr || updateHelp.stdout}`);
-    }
-    const wrangler = readFileSync(join(output, "wrangler.toml"), "utf8");
-    if (!wrangler.includes('name = "northstar"')) throw new Error("local Worker name mismatch");
-    if (!wrangler.includes('database_name = "northstar-db"')) throw new Error("local D1 name mismatch");
-    if (!wrangler.includes('PUBLIC_ORIGIN = "http://localhost:8787"')) throw new Error("local origin missing");
-    const features = JSON.parse(readFileSync(join(output, ".mantle", "features.json"), "utf8"));
-    const baseline = join(tempRoot, "update-baseline");
-    mkdirSync(baseline);
-    const bundle = JSON.parse(
-      readFileSync(join(root, "provision-bundles", "presence.json"), "utf8"),
-    );
-    materializeBundle(
-      baseline,
-      bundle,
-      placeholders({ launchState: launch, features, targetRef: launch.starter_ref }),
-    );
-    const report = compare(output, baseline);
-    if (report.differing.length || report.missing_current.length) {
-      throw new Error(
-        `unchanged local project reported update drift: ${
-          report.differing.map(({ path }) => path).join(", ")
-        }`,
-      );
-    }
-    assertGeneratedStylesMatchStarterLock(output);
-    const overwrite = spawnSync(process.execPath, [
-      "scripts/dev-provision-bundle.mjs",
-      "blank",
-      "--out",
-      output,
-    ], { cwd: root, encoding: "utf8" });
-    if (overwrite.status === 0) throw new Error("local materializer overwrote a non-empty directory");
   } finally {
-    rmSync(tempRoot, { recursive: true, force: true });
+    rmSync(target, { recursive: true, force: true });
   }
 }
 
-function assertGeneratedStylesMatchStarterLock(root) {
-  const css = readFileSync(join(root, "styles", "generated.css"), "utf8");
-  const lock = readFileSync(join(root, "pnpm-lock.yaml"), "utf8");
-  const cssVersion = css.match(/tailwindcss v([^\s]+)/)?.[1];
-  const lockVersion = lock.match(/^\s+tailwindcss:\n\s+specifier:[^\n]+\n\s+version:\s+([^\s]+)/m)?.[1];
-  if (!cssVersion || !lockVersion || cssVersion !== lockVersion) {
-    throw new Error(`generated styles use Tailwind ${cssVersion ?? "unknown"}, starter lock uses ${lockVersion ?? "unknown"}`);
-  }
-}
-
-function assertGeneratedStylesCurrent(targetRoot, archetype) {
-  symlinkSync(join(root, "blank", "node_modules"), join(targetRoot, "node_modules"), "dir");
-  const result = spawnSync(process.execPath, [
-    join(root, "blank", "scripts", "build-styles.mjs"),
-    "--root",
-    targetRoot,
-    "--check",
-  ], { encoding: "utf8" });
-  if (result.status !== 0) {
-    throw new Error(`${archetype} generated styles are stale: ${result.stderr || result.stdout}`);
-  }
-}
-
-function assertNoLeftovers(root, files) {
-  const leftovers = [];
-  for (const path of Object.keys(files ?? {})) {
-    const target = join(root, path.replace(/\.template$/, ""));
-    const text = readFileSync(target, "utf8");
-    if (/\{\{[A-Z_][A-Z0-9_]*\}\}/.test(text)) leftovers.push(path);
-  }
-  if (leftovers.length) throw new Error(`unfilled placeholders: ${leftovers.join(", ")}`);
-}
-
-function assertPublicHomeIsNotHandoff(root) {
-  const text = readSource(root);
-  for (const forbidden of ["ready for your coding agent", "Copy this prompt", "Open this live site URL", "<textarea"]) {
-    if (text.includes(forbidden)) throw new Error(`public homepage still contains handoff text: ${forbidden}`);
-  }
-}
-
-function assertMantleSiteSignature(root, archetype) {
-  const text = readSource(root);
-  if (!text.includes('<meta name="mantle:site" content="v1" />')) {
-    throw new Error(`${archetype} missing Mantle site signature meta`);
-  }
-}
-
-function assertStylesheetMounted(root, archetype) {
-  const source = readSource(root);
-  const css = readFileSync(join(root, "styles", "generated.css"), "utf8");
-  if (!source.includes("/assets/styles.css")) {
-    throw new Error(`${archetype} homepage does not link generated stylesheet`);
-  }
-  if (!source.includes("stylesCss")) {
-    throw new Error(`${archetype} worker does not mount generated stylesheet`);
-  }
-  if (!css.includes("tailwindcss") || !css.includes(".bg-primary")) {
-    throw new Error(`${archetype} generated stylesheet does not include Kiwa/Tailwind utilities`);
-  }
-  if (css.includes("@import")) {
-    throw new Error(`${archetype} generated stylesheet contains a late CSS import`);
-  }
-}
-
-function assertEdgeCacheContract(root, archetype) {
-  const wrangler = readFileSync(join(root, "wrangler.toml"), "utf8");
-  const source = readSource(root);
-  for (const required of [
-    'compatibility_date = "2026-07-31"',
-    "[observability]",
+function assertTransaction(target) {
+  const manifest = readFileSync(join(target, "manifests/transaction.yaml"), "utf8");
+  for (const expected of [
+    "name: products",
+    "name: product-inquiries",
+    "name: public-products",
+    "name: submit-product-inquiry",
+    "path: /api/product-inquiries",
   ]) {
-    if (!wrangler.includes(required)) {
-      throw new Error(`${archetype} wrangler config missing ${required}`);
-    }
+    if (!manifest.includes(expected)) fail("transaction", `manifest missing ${expected}`);
   }
-  if (!isWorkersCacheEnabled(wrangler)) {
-    throw new Error(`${archetype} must enable the top-level Workers cache`);
+  if (listFiles(target).some((file) => file.includes("handlers"))) {
+    fail("transaction", "builtin-only transaction generated a handler registry");
   }
-  if (wrangler.includes("cross_version_cache")) {
-    throw new Error(`${archetype} must keep the default per-version Workers cache`);
-  }
-  if (source.includes("rsms.me/inter")) {
-    throw new Error(`${archetype} still loads the render-blocking remote Inter font`);
-  }
-  for (const required of [
-    "public, max-age=0, s-maxage=300",
-    "public, max-age=31536000, immutable",
-    "private, no-store",
-    'width="1200"',
-    'height="900"',
-    'fetchpriority="high"',
-  ]) {
-    if (!source.includes(required)) {
-      throw new Error(`${archetype} cache/LCP contract missing ${required}`);
-    }
-  }
-  if (!source.includes("?v=${assetBuild}")) {
-    throw new Error(`${archetype} immutable assets are not content-versioned`);
+  if (!manifest.includes('pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"')) {
+    fail("transaction", "product slugs permit empty or repeated dash segments");
   }
 }
 
-function isWorkersCacheEnabled(wrangler) {
-  return /^\[cache\]\s*\nenabled\s*=\s*true\s*$/m.test(wrangler);
-}
-
-function assertSectionImageContract(root, archetype) {
-  const renderer = readFileSync(join(root, "src", "web", "sections", "renderSection.tsx"), "utf8");
-  if (!renderer.includes("image={section.image}")) {
-    throw new Error(`${archetype} hero does not render its declared image`);
+function assertTurnstile(target, archetype) {
+  const home = readFileSync(join(target, "public/index.html"), "utf8");
+  if (!home.includes('data-sitekey="test-site-key&lt;&amp;&quot;"')) {
+    fail(archetype, "Turnstile public key was not safely materialized into the page");
   }
-  const manifestPath = join(root, "manifests", `${archetype}.yaml`);
-  if (!existsSync(manifestPath)) return;
-  const page = parseAllDocuments(readFileSync(manifestPath, "utf8"))
-    .map((document) => document.toJSON())
-    .find((atom) => atom?.kind === "Schema" && atom?.metadata?.name === "page");
-  if (
-    page
-    && page.spec?.schema?.properties?.sections?.items?.properties?.showImage?.type !== "boolean"
-  ) {
-    throw new Error(`${archetype} page Schema does not expose showImage`);
+  if (!home.includes("challenges.cloudflare.com/turnstile/v0/api.js")) {
+    fail(archetype, "Turnstile client script is missing");
   }
-  const image = page?.spec?.schema?.properties?.sections?.items?.properties?.image;
-  if (
-    page
-    && (
-      image?.type !== "object"
-      || image.properties?.src?.type !== "string"
-      || image.properties?.alt?.type !== "string"
-      || !image.required?.includes("src")
-      || !image.required?.includes("alt")
-    )
-  ) {
-    throw new Error(`${archetype} page Schema does not expose an accessible hero image`);
+  if (!home.includes("turnstile.reset()") || home.includes("turnstile.reset(widget)")) {
+    fail(archetype, "Turnstile retry must reset the implicit widget without an invalid element argument");
   }
 }
 
-function assertOperationalCollection(root, archetype) {
-  const collection = operationalCollections[archetype];
-  if (!collection) return;
-  const manifestPath = join(root, "manifests", `${archetype}.yaml`);
-  const schema = parseAllDocuments(readFileSync(manifestPath, "utf8"))
-    .map((document) => document.toJSON())
-    .find((atom) => atom?.kind === "Schema" && atom?.metadata?.name === collection);
-  if (schema?.spec?.lifecycle !== "none") {
-    throw new Error(`${archetype} operational collection ${collection} must use lifecycle:none`);
-  }
-  const seed = JSON.parse(
-    readFileSync(join(root, ".mantle", "overlays", archetype, "seed.json"), "utf8"),
-  );
-  if ((seed.collections?.[collection] ?? []).some((entry) => entry.status === "draft")) {
-    throw new Error(`${archetype} operational seed ${collection} still declares a draft`);
+function assertNoPlaceholders(target) {
+  for (const file of listFiles(target)) {
+    const text = readFileSync(join(target, file), "utf8");
+    if (/\{\{[A-Z_][A-Z0-9_]*\}\}/.test(text)) throw new Error(`unfilled placeholder in ${file}`);
   }
 }
 
-function assertNoIntakeRuntime(root, archetype) {
-  const section = readFileSync(join(root, "src", "web", "sections", "intakeSection.tsx"), "utf8");
-  const client = readFileSync(join(root, "src", "web", "client", "intakeClient.ts"), "utf8");
-  if (section.includes("data-intake-root") || client.includes("data-intake-root")) {
-    throw new Error(`${archetype} bundle includes intake-only runtime`);
-  }
-}
-
-function assertAuthSwitchUsesSelectedProvider(root, archetype) {
-  const source = readFileSync(join(root, "src", "worker", "auth.ts"), "utf8");
-  if (!/const hostedAuth = platformIssuer && env\.MANTLE_PLATFORM_AUTH_CLIENT_ID\s*\?/.test(source)) {
-    throw new Error(`${archetype} auth switch does not name the selected hosted provider mode`);
-  }
-  if (!source.includes("bootstrapOwner: hostedAuth")) {
-    throw new Error(`${archetype} auth bootstrap owner is not tied to the selected auth provider`);
-  }
-}
-
-function assertRuntimeHasNoKiwaDemoCopy(root, archetype) {
-  const files = [
-    "src/web/pages/HomePage.tsx",
-    "src/web/sections/renderSection.tsx",
-    "src/web/content/homeContent.ts",
-    "src/web/content/siteContent.ts",
-    "components/blocks/marketing/bento-02.tsx",
-    "components/blocks/marketing/contact-02.tsx",
-    "components/blocks/marketing/content-01.tsx",
-    "components/blocks/marketing/cta-02.tsx",
-    "components/blocks/marketing/faq-02.tsx",
-    "components/blocks/marketing/features-02.tsx",
-    "components/blocks/marketing/footer-02.tsx",
-    "components/blocks/marketing/hero-02.tsx",
-    "components/blocks/marketing/metrics-02.tsx",
-    "components/blocks/marketing/nav-02.tsx",
-    "components/blocks/marketing/social-proof-02.tsx",
-    "components/blocks/marketing/testimonials-02.tsx",
-  ];
-  const forbidden = [
-    "Kiwa UI",
-    "Your workflow, supercharged with AI",
-    "Start free trial",
-    "Book a demo",
-    "Trusted by product-led teams everywhere",
-    "We started Kiwa UI",
-    "hello@kiwaui.com",
-    "Frequently asked questions",
-    "Get in touch",
-    "Your Company",
-  ];
-  for (const file of files) {
-    const text = readFileSync(join(root, file), "utf8");
-    for (const needle of forbidden) {
-      if (text.includes(needle)) {
-        throw new Error(`${archetype} runtime still contains Kiwa demo copy: ${file}: ${needle}`);
-      }
+function assertDeterministic(first, second) {
+  const firstFiles = listFiles(first);
+  const secondFiles = listFiles(second);
+  if (JSON.stringify(firstFiles) !== JSON.stringify(secondFiles)) throw new Error("materialized file trees differ");
+  for (const file of firstFiles) {
+    if (readFileSync(join(first, file), "utf8") !== readFileSync(join(second, file), "utf8")) {
+      throw new Error(`materialization is not deterministic: ${file}`);
     }
   }
 }
 
-function assertOverlayManifestLoaded(root, archetype) {
-  const text = readFileSync(join(root, "src", "mantle", "manifests.ts"), "utf8");
-  if (!text.includes(`../../manifests/${archetype}.yaml`)) {
-    throw new Error(`${archetype} manifest is present but not loaded`);
-  }
-}
-
-function assertFourAtoms(root, archetype) {
-  const text = readFileSync(join(root, "manifests", `${archetype}.yaml`), "utf8");
-  for (const atom of ["Schema", "View", "Procedure", "Trigger"]) {
-    if (!new RegExp(`kind:\\s*${atom}\\b`).test(text)) {
-      throw new Error(`${archetype} manifest missing ${atom}`);
+function listFiles(target) {
+  const files = [];
+  const walk = (directory) => {
+    for (const name of readdirSync(directory)) {
+      const path = join(directory, name);
+      if (statSync(path).isDirectory()) walk(path);
+      else files.push(relative(target, path));
     }
-  }
+  };
+  walk(target);
+  return files.sort();
 }
 
-function assertPublicMutationInputsStrict(root, archetype) {
-  const text = readFileSync(join(root, "manifests", `${archetype}.yaml`), "utf8");
-  const publicMutations = parseAllDocuments(text)
-    .map((document) => document.toJSON())
-    .filter((atom) =>
-      atom?.kind === "Procedure"
-      && atom?.spec?.handler?.kind === "builtin"
-      && atom?.spec?.handler?.op === "create"
-    );
-  if (!publicMutations.length) throw new Error(`${archetype} missing public mutation`);
-  for (const procedure of publicMutations) {
-    if (procedure.spec.input?.additionalProperties !== false) {
-      throw new Error(`${procedure.metadata?.name} silently accepts undeclared fields`);
-    }
-  }
-}
-
-function assertPresenceHandlerLoaded(root) {
-  const text = readFileSync(join(root, "src", "mantle", "handlers", "index.ts"), "utf8");
-  if (!text.includes('"notify-contact": notifyContact')) {
-    throw new Error("presence overlay did not install notify-contact handler");
-  }
-  if (!text.includes('"verify-contact-turnstile": verifyContactTurnstile')) {
-    throw new Error("presence overlay did not install verify-contact-turnstile handler");
-  }
-}
-
-function assertPresenceContactForm(root) {
-  const text = readSource(root);
-  const seed = readFileSync(join(root, ".mantle", "overlays", "presence", "seed.json"), "utf8");
-  if (!text.includes("data-mantle-form")) {
-    throw new Error("presence homepage does not mark forms for JSON submit");
-  }
-  if (!text.includes("content-type': 'application/json'")) {
-    throw new Error("presence contact form submit does not send JSON");
-  }
-  if (!text.includes("cf-turnstile")) {
-    throw new Error("presence contact form is missing Turnstile support");
-  }
-  if (!seed.includes('"type": "form"') || !seed.includes('"/api/contact"')) {
-    throw new Error("presence seed does not define the contact form section");
-  }
-}
-
-function assertIntakeHandlerLoaded(root) {
-  const text = readFileSync(join(root, "src", "mantle", "handlers", "index.ts"), "utf8");
-  if (!text.includes('"notify-intake": notifyIntake')) {
-    throw new Error("intake overlay did not install notify-intake handler");
-  }
-  if (!text.includes('"verify-intake-turnstile": verifyIntakeTurnstile')) {
-    throw new Error("intake overlay did not install verify-intake-turnstile handler");
-  }
-}
-
-function assertIntakeForm(root) {
-  const text = [
-    readSource(root),
-    readFileSync(join(root, "src", "web", "sections", "intakeSection.tsx"), "utf8"),
-    readFileSync(join(root, "src", "web", "client", "intakeClient.ts"), "utf8"),
-  ].join("\n");
-  const fieldControl = readFileSync(
-    join(root, "src", "web", "sections", "fieldControl.tsx"),
-    "utf8",
-  );
-  const seed = readFileSync(join(root, ".mantle", "overlays", "intake", "seed.json"), "utf8");
-  const manifest = readFileSync(join(root, "manifests", "intake.yaml"), "utf8");
-  const notify = readFileSync(
-    join(root, "src", "worker", "features", "intake", "notifyIntake.ts"),
-    "utf8",
-  );
-  if (!text.includes("data-intake-form")) {
-    throw new Error("intake homepage does not render the intake form surface");
-  }
-  if (!text.includes("mantle:form-success")) {
-    throw new Error("intake homepage does not render a saved-response result state");
-  }
-  if (
-    !text.includes("data-intake-progress-template")
-    || !text.includes("dataset.intakeProgressTemplate")
-  ) {
-    throw new Error("intake progress copy is not seed-driven");
-  }
-  if (!text.includes('name="replyLocale"') || !text.includes("value={locale}")) {
-    throw new Error("intake form does not submit its rendered locale");
-  }
-  if (!fieldControl.includes("<fieldset") || !fieldControl.includes("<legend")) {
-    throw new Error("intake option groups do not use fieldset and legend semantics");
-  }
-  if (!seed.includes('"type": "intake"') || !seed.includes('"/api/intake"')) {
-    throw new Error("intake seed does not define the intake section");
-  }
-  if (
-    !seed.includes('"locale": "en"')
-    || !seed.includes('"intakeLabels"')
-    || !seed.includes('"replyLocale"')
-  ) {
-    throw new Error("intake seed does not define localized chrome and reply language");
-  }
-  if (!manifest.includes("required: [name, email, attendance, resultKey, replyLocale]")) {
-    throw new Error("intake manifest does not persist reply language");
-  }
-  assertIntakeOptionContract(JSON.parse(seed), manifest);
-  if (!notify.includes("Reply language:")) {
-    throw new Error("intake notification does not expose reply language");
-  }
-}
-
-function assertIntakeOptionContract(seed, manifestText) {
-  const atoms = parseAllDocuments(manifestText).map((document) => document.toJSON());
-  const stored = atoms.find(
-    (atom) => atom?.kind === "Schema" && atom?.metadata?.name === "intake-submissions",
-  )?.spec?.schema?.properties;
-  const input = atoms.find(
-    (atom) => atom?.kind === "Procedure" && atom?.metadata?.name === "submit-intake",
-  )?.spec?.input?.properties;
-  const section = seed.collections?.page?.[0]?.sections?.find(
-    (candidate) => candidate.type === "intake",
-  );
-  for (const field of section?.fields ?? []) {
-    if (!field.options?.length) continue;
-    const values = field.options.map((option) => option.value);
-    if (
-      JSON.stringify(stored?.[field.name]?.enum) !== JSON.stringify(values)
-      || JSON.stringify(input?.[field.name]?.enum) !== JSON.stringify(values)
-    ) {
-      throw new Error(`intake option values for ${field.name} drifted from the manifest`);
-    }
-  }
-  const resultKeys = (section?.results ?? []).map((result) => result.key);
-  if (
-    JSON.stringify(stored?.resultKey?.enum) !== JSON.stringify(resultKeys)
-    || JSON.stringify(input?.resultKey?.enum) !== JSON.stringify(resultKeys)
-  ) {
-    throw new Error("intake result keys drifted from the manifest");
-  }
-}
-
-function assertPublicationSeed(root) {
-  const seed = readFileSync(join(root, ".mantle", "overlays", "publication", "seed.json"), "utf8");
-  if (!seed.includes('"site"') || !seed.includes('"type": "home"')) {
-    throw new Error("publication seed does not drive site/page content");
-  }
-  if (!seed.includes('"posts"') || !seed.includes('"slug": "welcome"')) {
-    throw new Error("publication seed does not include starter posts");
-  }
-}
-
-function assertSeedDrivenHome(root, archetype) {
-  const homeContent = readFileSync(join(root, "src", "web", "content", "homeContent.ts"), "utf8");
-  const seedImport = `../../../.mantle/overlays/${archetype}/seed.json`;
-  if (!homeContent.includes(seedImport)) {
-    throw new Error(`${archetype} homepage content is not driven by the overlay seed`);
-  }
-}
-
-function assertTransactionSeed(root) {
-  const seed = readFileSync(join(root, ".mantle", "overlays", "transaction", "seed.json"), "utf8");
-  const parsed = JSON.parse(seed);
-  if (!seed.includes('"type": "home"') || parsed.collections?.products?.length !== 3) {
-    throw new Error("transaction seed does not include a visible home and three products");
-  }
-}
-
-function assertBlankHomeDataIsBlank(root) {
-  const homeContent = readFileSync(join(root, "src", "web", "content", "homeContent.ts"), "utf8");
-  const siteContent = readFileSync(join(root, "src", "web", "content", "siteContent.ts"), "utf8");
-  if (!homeContent.includes("sections: []")) {
-    throw new Error("blank homepage should not seed visible sections");
-  }
-  for (const forbidden of ["contactForm", "Placeholder proof", "Start a conversation", "navAction"]) {
-    if (homeContent.includes(forbidden) || siteContent.includes(forbidden)) {
-      throw new Error(`blank homepage still seeds visible copy: ${forbidden}`);
-    }
-  }
-}
-
-function assertNoBlankExampleManifest(root, archetype) {
-  try {
-    readFileSync(join(root, "manifests", "example.yaml"), "utf8");
-  } catch {
-    return;
-  }
-  throw new Error(`${archetype} bundle still includes blank example manifest`);
-}
-
-function readSource(root) {
-  return [
-    "src/index.ts",
-    "src/renderer.tsx",
-    "src/worker/auth.ts",
-    "src/worker/app.ts",
-    "src/worker/routes/assets.ts",
-    "src/worker/routes/home.tsx",
-    "src/web/assets.ts",
-    "src/web/client/homeClient.ts",
-    "src/web/pages/HomePage.tsx",
-    "src/web/sections/renderSection.tsx",
-    "components/blocks/marketing/hero-02.tsx",
-  ]
-    .map((path) => {
-      try {
-        return readFileSync(join(root, path), "utf8");
-      } catch {
-        return "";
-      }
-    })
-    .join("\n");
+function fail(archetype, message) {
+  throw new Error(`${archetype}: ${message}`);
 }

@@ -1,6 +1,6 @@
 # Contributing to mantle-starters
 
-This repo holds the blank starter source, type bundle overlays, vendored Kiwa source, and the provision bundles consumed by Mantle landing.
+This repo holds the blank starter source, small type-overlay build inputs, and the provision bundles consumed by Mantle Landing.
 
 Start here before changing code or docs. For project-wide doctrine, read the parent repo's [`CLAUDE.md`](https://github.com/aotter/mantle/blob/main/CLAUDE.md).
 
@@ -32,7 +32,7 @@ git checkout -b feat/issue-NN-topic origin/develop
 
 Use these prefixes:
 
-- `feat/issue-NN-topic` — user-visible features (new overlay, Kiwa source, bundle capability).
+- `feat/issue-NN-topic` — user-visible features (new overlay or bundle capability).
 - `fix/issue-NN-topic` — bug fixes (broken validate, broken provision bundle).
 - `docs/issue-NN-topic` — documentation-only changes.
 - `chore/issue-NN-topic` — tooling, metadata, dependency, maintenance.
@@ -60,12 +60,12 @@ First launch uses a generated `provision-bundles/<type>.json`. New
 type-specific work belongs in a small overlay source, not a full starter
 directory.
 
-An overlay should contain only what the user's coding agent needs next:
+An overlay is a release-time input and should contain only what is needed to
+produce the user's small project:
 
 - `manifests/*.yaml` with the smallest useful 4-atoms model.
-- `handoff.md` for the agent.
-- `seed-prompt.md` when example data helps.
-- `layout.md` when route/layout guidance helps.
+- `handoff.md` and `layout.md` folded into the generated README.
+- `seed.json` used to produce the editable `public/index.html`.
 
 Then:
 
@@ -79,16 +79,17 @@ Then:
 
 ## Adding visual source
 
-Theme work is post-launch source editing, not a first-run picker. Put
-shared Kiwa source under `kiwa/` through `scripts/sync-kiwa.mjs`, and
-put generated-repo guidance in `mantle:theme`.
+Theme work is post-launch source editing, not a first-run picker. Keep only
+the UI source used by the selected overlay; do not restore a vendored registry
+or unrelated component catalog. Put generated-repo guidance in
+`mantle:theme`.
 
 ## Issues
 
 Use the GitHub issue templates:
 
-- **Bug report** — broken, surprising, or unsafe behavior in the blank starter, overlays, Kiwa source, or provision bundle. (Engine / runtime bugs go on the parent repo.)
-- **Feature request** — a concrete capability for the blank starter, overlays, Kiwa source, or provision bundle.
+- **Bug report** — broken, surprising, or unsafe behavior in the blank starter, overlays, or provision bundle. (Engine / runtime bugs go on the parent repo.)
+- **Feature request** — a concrete capability for the blank starter, overlays, or provision bundle.
 - **New overlay** — propose a new type bundle overlay.
 
 Apply at least one `starter:*` or `area:*` label.

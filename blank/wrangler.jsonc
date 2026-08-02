@@ -1,0 +1,22 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "mantle-blank",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-30",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "observability": { "enabled": true, "head_sampling_rate": 1 },
+  "cache": { "enabled": true },
+  "vars": {
+    "PUBLIC_ORIGIN": "http://localhost:8787",
+    "MANTLE_SITE_BRAND": "Mantle",
+    "MANTLE_SITE_DESCRIPTION": "A Mantle site.",
+    "MANTLE_SITE_LOCALES": ["en"]
+  },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "mantle-blank-local" }
+  ],
+  "kv_namespaces": [
+    { "binding": "KV" },
+    { "binding": "OAUTH_KV" }
+  ]
+}

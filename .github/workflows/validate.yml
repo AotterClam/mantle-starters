@@ -14,80 +14,60 @@ permissions:
   contents: read
 
 jobs:
-  starters:
-    name: starter blank
+  exact-packed:
+    name: Exact packed Core + starters
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7.0.0
-
-      - uses: pnpm/action-setup@v6.0.9
-
-      - uses: actions/setup-node@v7.0.0
         with:
-          node-version: 22
-          cache: pnpm
-          cache-dependency-path: blank/pnpm-lock.yaml
+          path: downstream
 
-      - name: Install
-        working-directory: blank
-        run: pnpm install --frozen-lockfile
+      - uses: actions/checkout@v7.0.0
+        with:
+          repository: aotter/mantle
+          ref: develop
+          path: core
+          fetch-depth: 0
 
-      - name: Validate manifests
-        working-directory: blank
-        run: pnpm validate
-
-      - name: Check index coverage
-        working-directory: blank
+      - name: Use a paired Core branch when one exists
+        working-directory: core
+        env:
+          PAIRED_REF: ${{ github.head_ref }}
         run: |
-          SDK_VERSION=$(node -p "require('./package.json').dependencies['@aotter/mantle']")
-          if [ "$SDK_VERSION" = "0.0.11-alpha.62" ]; then
-            echo "mantle-harness ships in alpha.63; alpha.62 transition skips this gate."
-          else
-            pnpm check:indexes
+          if [ -n "$PAIRED_REF" ] && git ls-remote --exit-code origin "refs/heads/$PAIRED_REF" >/dev/null 2>&1; then
+            git fetch --depth=1 origin "refs/heads/$PAIRED_REF"
+            git checkout --detach FETCH_HEAD
           fi
 
-      - name: Typecheck
-        working-directory: blank
-        run: pnpm typecheck
-
-  starter-locks:
-    name: starter lockfiles
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7.0.0
-
       - uses: pnpm/action-setup@v6.0.9
 
       - uses: actions/setup-node@v7.0.0
         with:
           node-version: 22
           cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
+          cache-dependency-path: core/pnpm-lock.yaml
 
-      - name: Install
+      - name: Install starter build dependencies
+        working-directory: downstream
         run: pnpm install --frozen-lockfile
 
       - name: Check standalone starter lockfiles
+        working-directory: downstream
         run: pnpm check:starter-locks
 
-      - name: Check provision bundle is current
-        run: pnpm check:provision-bundle
+      - name: Check provision bundles are current
+        working-directory: downstream
+        run: node scripts/build-provision-bundle.mjs --check
 
-      - name: Smoke provision bundle
-        run: pnpm smoke:provision-bundle
+      - name: Install Core
+        working-directory: core
+        run: pnpm install --frozen-lockfile
 
-      - name: Check Kiwa vendor source is current
-        run: pnpm check:kiwa
+      - name: Build Core
+        working-directory: core
+        run: pnpm build
 
-  starter-safety:
-    name: starter safety
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7.0.0
-      - uses: actions/setup-node@v7.0.0
-        with:
-          node-version: 22
-      - name: Assert starter safety checks
-        run: |
-          node scripts/check-wrangler-dev-wrapper.mjs
-          node scripts/check-repo-local-skills.mjs
+      - name: Validate the complete starter surface against those artifacts
+        working-directory: core
+        run: node scripts/run-packed-downstream.mjs --project ../downstream -- pnpm check:exact

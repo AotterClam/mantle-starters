@@ -1,46 +1,14 @@
 packages:
-  - "packages/*"
   - "blank"
 
 allowBuilds:
   esbuild: true
-  sharp: true
   workerd: true
 
-# Catalog centralizes shared third-party version specifiers so
-# dependabot edits one place per dependency and starter package.jsons
-# stop drifting. pnpm 9.5+ ships catalogs; dependabot supports the
-# protocol as of Feb 2025 GA. See https://pnpm.io/catalogs.
-#
-# Starters are *application* packages (they ship as runnable Worker
-# projects), not libraries — so unlike the mantle SDK we don't need
-# the `peer` / default catalog split. A single catalog suffices.
-#
-# `@aotter/mantle*` is intentionally excluded — those bumps land via
-# `.github/workflows/bump-from-sdk.yml` (which rewrites every
-# package.json + lockfile in lockstep when the SDK publishes a new
-# version), not via routine dependabot churn. See the workflow file
-# for the bump list.
-#
+# Keep the generated application's two tools and this repo's YAML parser in
+# one catalog. The SDK version is bumped by release fanout, not Dependabot.
 catalog:
-  # Runtime — every starter ships these.
-  '@cloudflare/workers-oauth-provider': ^0.8.0
-  aws4fetch: ^1.0.20
-  better-auth: ^1.6.23
-  clsx: ^2.1.1
-  hono: ^4.12.30
-  lucide: ^1.23.0
-  marked: ^18.0.4
-  tailwind-merge: ^3.4.0
-  # generated.css must stay byte-for-byte reproducible from a fresh starter install.
-  tailwindcss: 4.3.3
-  worker-mailer: ^1.2.1
+  '@types/node': ^26.1.2
   yaml: ^2.9.0
-  zod: ^4.4.2
-  # Toolchain — every starter and (most) packages/.
-  '@cloudflare/workers-types': ^5.20260708.1
-  '@types/node': ^26
-  tsx: ^4.22.3
   typescript: ^6.0.3
-  vitest: ^2.1.4
-  wrangler: ^4.107.1
+  wrangler: ^4.118.0

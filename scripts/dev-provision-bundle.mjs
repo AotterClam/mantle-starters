@@ -3,7 +3,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, delimiter, join, resolve } from "node:path";
-import { materializeBundle } from "../blank/scripts/materialize.mjs";
+import { materializeBundle } from "./materialize-bundle.mjs";
 
 const root = new URL("..", import.meta.url).pathname;
 const archetype = process.argv[2];
@@ -50,16 +50,19 @@ if (existsSync(nodeModules) && !existsSync(join(targetRoot, "node_modules"))) {
 console.log(`generated ${archetype} bundle at ${targetRoot}`);
 console.log(`local URL: http://localhost:${port}`);
 
-run(process.execPath, ["scripts/build-styles.mjs"], targetRoot);
 if (!prepareOnly) {
-  run(process.execPath, ["scripts/wrangler-dev.mjs"], targetRoot, {
+  run("wrangler", [
+    "dev",
+    "--port",
+    port,
+    "--inspector-port",
+    process.env.WRANGLER_INSPECTOR_PORT ?? "0",
+  ], targetRoot, {
     PATH: [
       join(root, "blank", "node_modules", ".bin"),
       join(targetRoot, "node_modules", ".bin"),
       process.env.PATH ?? "",
     ].join(delimiter),
-    WRANGLER_DEV_PORT: port,
-    WRANGLER_INSPECTOR_PORT: process.env.WRANGLER_INSPECTOR_PORT ?? "0",
   });
 }
 
@@ -120,6 +123,7 @@ function localLaunch(type, targetRoot, version) {
     ADMIN_GITHUB_LOGIN: "",
     SITE_OWNER_EMAIL: "",
     SITE_URL: `http://localhost:${port}`,
+    TURNSTILE_SITE_KEY: "",
     AFTER_LAUNCH_SKILL_URL: `https://raw.githubusercontent.com/aotter/mantle/${starterRef}/skills/develop/SKILL.md`,
     INSTALL_TIMESTAMP: new Date().toISOString(),
   };
@@ -145,6 +149,7 @@ function sampleLaunch(type) {
     ADMIN_GITHUB_LOGIN: "aotter",
     SITE_OWNER_EMAIL: "owner@example.com",
     SITE_URL: `http://localhost:${port}`,
+    TURNSTILE_SITE_KEY: "",
     AFTER_LAUNCH_SKILL_URL: "https://mantle.tools/skill/after-launch?id=local",
     INSTALL_TIMESTAMP: new Date(0).toISOString(),
   };
@@ -168,8 +173,8 @@ function title(value) {
 }
 
 function safeText(value, label) {
-  if (/["\\\r\n{}]/.test(value)) {
-    fail(`${label} cannot contain quotes, backslashes, braces, or newlines`);
+  if (/[\0\r\n]/.test(value)) {
+    fail(`${label} cannot contain control characters or newlines`);
   }
   const trimmed = value.trim();
   if (!trimmed) fail(`${label} cannot be empty`);
