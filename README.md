@@ -6,16 +6,23 @@ Current launch contract:
 
 - `blank/` is the headless first-launch base and uses Core's conventional
   Worker facade.
-- `recipes/typed-web/` preserves established typed-site behavior while each
-  archetype is recut around that facade.
+- `recipes/typed-web/` is the shared source for typed sites; each bundle keeps
+  only the runtime surface selected by its archetype.
 - `provision-bundles/<type>.json` are generated artifacts used by landing and
   local cold starts.
 - `overlays/<type>/` contains small type intent overlays applied while
   building each matching bundle.
-- `kiwa/` vendors selected free Kiwa source for deterministic generated
-  repos.
-- No first-run theme picker, full archetype starter fork, or Kiwa
-  registry access is required to boot.
+- No first-run theme picker or full archetype starter fork is required to
+  boot.
+
+## Current UI implementation (replaceable)
+
+This revision uses free [Kiwa UI](https://kiwaui.com/) source. Typed bundles
+keep selected runtime components plus the complete pinned `kiwa/` snapshot as
+an offline coding-agent palette; no registry access is required. This is an
+implementation and credit boundary, not the Starter layering contract. A
+future UI-library swap should replace the recipe and its Kiwa-specific bundle
+guards together.
 
 Generated `blank` repos expose only the authored model and Worker entry:
 
@@ -33,9 +40,10 @@ src/index.ts          Worker fetch entrypoint
 src/renderer.tsx      Hono JSX document renderer
 src/worker/           typed UI routes and selected feature code
 src/web/              public JSX page, seed-driven content, browser client JS
-src/mantle/           typed manifest loader and handler registry
+src/mantle/           site defaults and selected handler registry
 manifests/            4 atoms: Schema, View, Procedure, Trigger
-components/ lib/      Kiwa root-level convention from kiwa-ui.json
+components/ lib/      selected runtime-facing Kiwa surface
+kiwa/                  complete offline reference palette; not runtime source
 styles/               Kiwa/Tailwind source and generated CSS
 ```
 
@@ -44,12 +52,9 @@ not Worker route code. Type overlays may add server behavior under
 `src/worker/features/<feature>` and register Mantle Procedure handlers
 from `src/mantle/handlers/index.ts`.
 
-## Kiwa Credit
-
-Selected UI primitives are copied from the free
-[Kiwa UI](https://kiwaui.com/) registry and vendored here so generated
-repos boot without registry access. Kiwa source is MIT licensed; keep
-`kiwa/LICENSE` and `kiwa/manifest.json` with any copied Kiwa files.
+Kiwa source is MIT licensed; keep `kiwa/LICENSE` and `kiwa/manifest.json`
+while this implementation is present. Runtime code must not import from the
+reference palette.
 
 ## Commands
 
@@ -65,7 +70,7 @@ pnpm typecheck
 pnpm test
 ```
 
-Refresh selected Kiwa source:
+Refresh the current Kiwa snapshot:
 
 ```bash
 node scripts/sync-kiwa.mjs

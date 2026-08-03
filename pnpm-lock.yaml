@@ -106,9 +106,6 @@ importers:
         specifier: 'catalog:'
         version: 4.4.3
     devDependencies:
-      '@aotter/mantle-spec':
-        specifier: 0.0.11-alpha.63
-        version: 0.0.11-alpha.63(zod@4.4.3)
       '@cloudflare/workers-types':
         specifier: 'catalog:'
         version: 5.20260801.1

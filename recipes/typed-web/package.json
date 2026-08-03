@@ -2,22 +2,25 @@
   "name": "mantle-recipe-typed-web",
   "version": "0.0.11-alpha.63",
   "private": true,
-  "description": "Temporary typed-archetype behavior baseline while each bundle moves to the Core facade.",
+  "description": "Mantle typed-site source recipe for Cloudflare Workers.",
   "type": "module",
   "scripts": {
     "build:styles": "node scripts/build-styles.mjs",
     "check:styles": "node scripts/build-styles.mjs --check",
-    "dev": "node scripts/build-styles.mjs && node scripts/wrangler-dev.mjs",
+    "generate": "mantle generate",
+    "check:generated": "mantle generate --check",
+    "dev": "pnpm generate && node scripts/build-styles.mjs && wrangler dev --ip localhost --port 8787 --inspector-port 0 --persist-to .wrangler",
     "validate": "mantle validate",
     "validate:deploy": "mantle validate --phase deploy",
     "check:indexes": "mantle-harness indexes --manifests manifests --require-public --format text",
-    "mantle:update": "node scripts/update.mjs",
+    "mantle:update": "mantle update",
+    "skills": "mantle skills",
     "introspect": "mantle introspect",
-    "emit-openapi": "node scripts/mantle.mjs emit-openapi --output openapi.json",
-    "emit-types": "node scripts/mantle.mjs emit-types --namespace BlankCms --output mantle-types.d.ts",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
-    "check": "pnpm validate && pnpm check:styles && pnpm typecheck",
-    "deploy": "pnpm validate:deploy && pnpm check:styles && pnpm typecheck && wrangler deploy"
+    "emit-openapi": "mantle emit-openapi",
+    "typecheck": "pnpm generate && tsc --noEmit -p tsconfig.json",
+    "check:worker": "wrangler deploy --dry-run --outdir .wrangler/dry-run",
+    "check": "pnpm validate && pnpm validate:deploy && pnpm check:generated && pnpm typecheck && pnpm check:styles && pnpm check:indexes && pnpm check:worker",
+    "deploy": "pnpm check && wrangler deploy"
   },
   "dependencies": {
     "@aotter/mantle": "0.0.11-alpha.63",
@@ -31,7 +34,6 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@aotter/mantle-spec": "0.0.11-alpha.63",
     "@cloudflare/workers-types": "catalog:",
     "@types/node": "catalog:",
     "tailwindcss": "catalog:",

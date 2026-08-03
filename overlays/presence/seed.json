@@ -3,6 +3,14 @@
   "site": {
     "brand": "{{BRAND}}",
     "description": "{{DESCRIPTION}}",
+    "chromeLabels": {
+      "openNavigation": "Open navigation",
+      "closeNavigation": "Close navigation",
+      "navigation": "Navigation",
+      "toggleTheme": "Toggle color theme",
+      "lightMode": "Light mode",
+      "darkMode": "Dark mode"
+    },
     "navLinks": [
       { "label": "About", "href": "#about" },
       { "label": "Services", "href": "#services" },
@@ -241,6 +249,11 @@
             "body": "Use these fields as a placeholder intake shape before adding validation, routing, or richer workflows.",
             "footerBody": "The first version stores the message. Connect email delivery when the owner is ready.",
             "action": { "label": "Send message", "href": "/api/contact" },
+            "formMessages": {
+              "pending": "Sending message…",
+              "success": "Message received.",
+              "error": "Could not send the message. Please try again."
+            },
             "items": [
               { "icon": "mail", "body": "Only ask for the essentials" },
               { "icon": "clock", "body": "Set a simple response promise" },

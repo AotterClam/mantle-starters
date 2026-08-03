@@ -8,6 +8,14 @@ export type SiteContent = {
   readonly description: string;
   readonly navLinks: readonly SiteAction[];
   readonly navAction?: SiteAction;
+  readonly chromeLabels: {
+    readonly openNavigation: string;
+    readonly closeNavigation: string;
+    readonly navigation: string;
+    readonly toggleTheme: string;
+    readonly lightMode: string;
+    readonly darkMode: string;
+  };
   readonly footer: {
     readonly tagline?: string;
     readonly copyright?: string;
@@ -77,16 +85,16 @@ export type HomeResult = {
 };
 
 export type HomeFormMessages = {
-  readonly pending?: string;
-  readonly success?: string;
-  readonly error?: string;
+  readonly pending: string;
+  readonly success: string;
+  readonly error: string;
 };
 
 export type HomeIntakeLabels = {
-  readonly back?: string;
-  readonly next?: string;
-  readonly submit?: string;
-  readonly progressTemplate?: string;
+  readonly back: string;
+  readonly next: string;
+  readonly submit: string;
+  readonly progressTemplate: string;
 };
 
 export type HomeSection = {

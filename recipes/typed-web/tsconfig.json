@@ -20,9 +20,6 @@
     "skipLibCheck": true,
     "verbatimModuleSyntax": false,
     "isolatedModules": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
     "noEmit": true,
     "types": ["@cloudflare/workers-types", "node"]
   },

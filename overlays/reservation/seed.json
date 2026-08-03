@@ -1,5 +1,29 @@
 {
   "locale": "{{CANONICAL_LOCALE}}",
+  "site": {
+    "brand": "{{BRAND}}",
+    "description": "{{DESCRIPTION}}",
+    "chromeLabels": {
+      "openNavigation": "Open navigation",
+      "closeNavigation": "Close navigation",
+      "navigation": "Navigation",
+      "toggleTheme": "Toggle color theme",
+      "lightMode": "Light mode",
+      "darkMode": "Dark mode"
+    },
+    "navLinks": [
+      { "label": "Availability", "href": "#availability" },
+      { "label": "Request", "href": "#request" }
+    ],
+    "navAction": { "label": "Request a reservation", "href": "#request" },
+    "footer": {
+      "tagline": "Clear reservation requests without pretending availability is automatic.",
+      "copyright": "Copyright {{BRAND}}.",
+      "columns": [],
+      "socialLinks": [],
+      "bottomLinks": []
+    }
+  },
   "collections": {
     "page": [
       {
@@ -39,6 +63,11 @@
             "action": {
               "label": "Send request",
               "href": "/api/reservation-requests"
+            },
+            "formMessages": {
+              "pending": "Sending request…",
+              "success": "Reservation request received.",
+              "error": "Could not send the request. Please try again."
             },
             "fields": [
               {

@@ -1,7 +1,7 @@
-# `mantle-starters/blank`
+# `mantle-starters/recipes/typed-web`
 
 > **This README ships with your materialized project.** If you're reading
-> it on GitHub at `aotter/mantle-starters/blank`, the
+> it on GitHub at `aotter/mantle-starters/recipes/typed-web`, the
 > Getting-started block below **does not work on a raw clone** —
 > `src/mantle/config.ts` contains literal `{{BRAND}}` / `{{LOCALES}}` /
 > `{{DESCRIPTION}}` placeholders that the provision flow substitutes.
@@ -10,11 +10,9 @@
 > --out <dir>` from the repository root, or use Mantle landing for the
 > hosted GitHub and Cloudflare flow.
 
-**Blank-first Mantle starter.** Ships a Hono/Cloudflare Worker runtime,
-Mantle API/MCP surfaces, and a seed-driven Hono JSX public page. `blank`
-has the full project skeleton but no visible homepage sections; typed
-launches such as `presence`, `publication`, and `intake` fill
-`src/web/content/*` and selected `manifests/*.yaml`.
+**Shared typed-site recipe.** The bundle builder selects the sections,
+browser behavior, handlers, and manifest required by one archetype, then
+wires them through Core's conventional Worker facade.
 
 Type-specific bundles include the selected manifest, overlay notes, and
 seed prompt up front. Continue from `.mantle/handoff.md` in the generated
@@ -22,11 +20,11 @@ project.
 
 ## Kiwa UI Credit
 
-This starter includes selected free [Kiwa UI](https://kiwaui.com/)
-primitives copied into `components/ui/`, plus `lib/utils.ts`,
-`styles/globals.css`, and `kiwa-ui.json`. Kiwa source is MIT licensed;
-see `kiwa/LICENSE` and `kiwa/manifest.json` for the copied files and
-upstream commit.
+`components/` and `lib/` contain this revision's selected runtime-facing
+[Kiwa UI](https://kiwaui.com/) surface. If `kiwa/` exists, it is this Starter
+revision's offline reference palette and provenance record, not a permanent
+typed-project contract or runtime source. Follow `mantle:theme` when adopting
+a palette item or replacing the UI implementation.
 
 ## Project shape
 
@@ -35,30 +33,30 @@ src/
   index.ts                    # Worker fetch entrypoint
   renderer.tsx                # Hono JSX document renderer
   worker/
-    app.ts                    # Hono app composition + OAuth/MCP wrapper
-    auth.ts                   # Better Auth setup boundary
     routes/
-      home.tsx                # c.render(<HomePage />)
-      assets.ts               # generated CSS, SVGs, Kiwa enhance JS
+      home.tsx                # public homepage extension route
+      assets.ts               # selected CSS and browser assets
     features/                 # type overlays add server behavior here
   web/
     pages/HomePage.tsx        # public page body
     content/                  # seed-driven site/home content modules
     client/                   # browser behavior served as /assets/kiwa-home.js
   mantle/
-    config.ts                 # CmsConfig/env/bindings
-    manifests.ts              # loads root manifests/*.yaml
+    config.ts                 # environment and site defaults
     handlers/index.ts         # Procedure handler registry
 
 manifests/                    # 4 atoms: Schema, View, Procedure, Trigger
-components/, lib/, styles/     # Kiwa-managed convention; keep root-level
+components/, lib/, styles/     # selected runtime-facing UI surface
+kiwa/                         # current revision's optional offline UI palette
+.mantle/generated/            # generated manifest/types consumed by Worker
 .mantle/                      # launch state, overlay notes, handoff
 ```
 
-`manifests/` is the authoritative Mantle model. `src/mantle/*` only
-wires those atoms to the Cloudflare adapter. Kiwa components stay at
-root because `kiwa-ui.json` follows Kiwa's `@/components` and
-`@/lib/utils` convention.
+`manifests/` is the authoritative Mantle model. `mantle generate` compiles it
+to `.mantle/generated/`; `src/index.ts` passes that output to
+`createMantleWorker`. In this revision, runtime components stay at root
+because `kiwa-ui.json` uses Kiwa's `@/components` and `@/lib/utils`
+convention.
 
 ## URL surface
 
@@ -95,8 +93,9 @@ cp .dev.vars.example .dev.vars
 > published since the lockfile was committed; the drift only surfaces
 > when CI rejects it.
 
-The headless `/` preview works without auth. Mantle Platform hosted auth
-uses `MANTLE_PLATFORM_AUTH_ISSUER`, `MANTLE_PLATFORM_AUTH_CLIENT_ID`,
+The seeded `/` preview and public HTTP Procedures work without auth. Mantle
+Platform hosted auth uses `MANTLE_PLATFORM_AUTH_ISSUER`,
+`MANTLE_PLATFORM_AUTH_CLIENT_ID`,
 and `MANTLE_SITE_OWNER_EMAIL`. Hosted clients use public PKCE by default;
 `MANTLE_PLATFORM_AUTH_CLIENT_SECRET` is only needed if you later register a
 confidential hosted client.
@@ -108,25 +107,24 @@ when you want to exercise `/api/auth/*` or Staff MCP locally. Then:
 pnpm dev      # safe wrangler dev — http://localhost:8787
 ```
 
-Hit `GET http://localhost:8787/api/views/published-notes` to see the
-example View executing against an empty `notes` collection. Type-specific
-bundles replace that loader with their selected manifest.
+Open `http://localhost:8787/`, then inspect
+`manifests/{{ARCHETYPE}}.yaml` for the selected View and Procedure names.
+The homepage starts from `.mantle/overlays/{{ARCHETYPE}}/seed.json`; content
+created later through Staff MCP lives in D1.
 
 For production, push the generated repo and configure Cloudflare, or use
 Mantle landing to automate the GitHub and Cloudflare steps.
 
-> **Note:** `blank` has no visitor homepage sections, but it does mount
-> `/admin`, `/api/auth/*`, and Staff MCP. Those surfaces need either
-> Mantle Platform hosted auth or self-hosted GitHub OAuth. Plain
-> `/api/views/*` works without auth.
+`/admin`, `/api/auth/*`, and Staff MCP need either Mantle Platform hosted
+auth or self-hosted GitHub OAuth. The public homepage does not.
 
-## Replacing the example
+## Editing the launch
 
-1. Open `manifests/example.yaml`.
-2. Edit or replace the `Schema` and `View` to match your content.
-3. If you need server-side Procedures (form handlers, webhooks, etc.),
-   add a `Procedure` atom, bind it with a `Trigger.source.kind: http`,
-   and register the handler in `src/mantle/handlers/index.ts`.
+1. Edit `.mantle/overlays/{{ARCHETYPE}}/seed.json` for auth-free local copy.
+2. Edit `manifests/{{ARCHETYPE}}.yaml` when the Schema, View, Procedure, or
+   Trigger contract changes, then run `pnpm generate`.
+3. Register only ref Procedure handlers in `src/mantle/handlers/index.ts`;
+   builtin handlers come from Core.
 4. Validate with `pnpm validate` (runs the spec CLI in preview phase — grammar + cross-Schema only). Before deploying, run `pnpm validate:deploy` (= `mantle validate --phase deploy`) for production-only checks. `pnpm run deploy` chains it in front of `wrangler deploy` automatically.
 
 ## What you get from the npm packages

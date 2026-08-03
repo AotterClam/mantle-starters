@@ -17,6 +17,14 @@ type Nav02Props = {
   loginHref?: string
   ctaText?: string
   ctaHref?: string
+  labels: {
+    openNavigation: string
+    closeNavigation: string
+    navigation: string
+    toggleTheme: string
+    lightMode: string
+    darkMode: string
+  }
   class?: string
 }
 
@@ -28,6 +36,7 @@ export const Nav02: FC<Nav02Props> = ({
   loginHref = '#',
   ctaText,
   ctaHref = '#',
+  labels,
   class: className,
 }) => (
   <nav data-site-nav class={cn('border-b border-b-border-subtle bg-background', className)}>
@@ -60,7 +69,7 @@ export const Nav02: FC<Nav02Props> = ({
               {ctaText}
             </a>
           )}
-          <ThemeToggle />
+          <ThemeToggle labels={labels} />
         </div>
 
         <button
@@ -68,7 +77,7 @@ export const Nav02: FC<Nav02Props> = ({
           class={cn(getButtonClasses('ghost', 'iconSm'), 'group lg:hidden')}
           aria-controls="mobile-navigation"
           aria-expanded="false"
-          aria-label="Open navigation"
+          aria-label={labels.openNavigation}
         >
           <MenuIcon class="size-4 group-aria-expanded:hidden" />
           <XIcon class="hidden size-4 group-aria-expanded:block" />
@@ -85,13 +94,13 @@ export const Nav02: FC<Nav02Props> = ({
       class="fixed inset-0 z-50 lg:hidden"
       role="dialog"
       aria-modal="true"
-      aria-label="Navigation"
+      aria-label={labels.navigation}
     >
       <button
         data-sheet-overlay
         data-mobile-nav-close="true"
         class="fixed inset-0 bg-background/80 backdrop-blur-sm"
-        aria-label="Close navigation"
+        aria-label={labels.closeNavigation}
       />
       <div
         data-sheet-content
@@ -104,7 +113,7 @@ export const Nav02: FC<Nav02Props> = ({
           <button
             data-mobile-nav-close="true"
             class={getButtonClasses('ghost', 'iconSm')}
-            aria-label="Close navigation"
+            aria-label={labels.closeNavigation}
           >
             <XIcon class="size-4" />
           </button>
@@ -124,7 +133,7 @@ export const Nav02: FC<Nav02Props> = ({
         </div>
 
         <div class="mt-auto flex flex-col gap-2 pt-8">
-          <ThemeToggle showLabel class="w-full" />
+          <ThemeToggle labels={labels} showLabel class="w-full" />
           {loginText && (
             <a href={loginHref} data-mobile-nav-close="true" class={cn(getButtonClasses('ghost', 'sm'), 'w-full')}>
               {loginText}

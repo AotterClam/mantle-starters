@@ -1,9 +1,4 @@
-import {
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  writeFileSync,
-} from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
 export function materializeBundle(root, bundle, values) {
@@ -15,7 +10,7 @@ export function materializeBundle(root, bundle, values) {
   applyProjectIdentity(root, values.PROJECT_NAME, values.SITE_URL);
 }
 
-export function substitute(text, values) {
+function substitute(text, values) {
   return text.replace(/\{\{([A-Z_][A-Z0-9_]*)\}\}/g, (match, key) => {
     if (key in values) return values[key];
     throw new Error(`Unknown placeholder ${match}`);

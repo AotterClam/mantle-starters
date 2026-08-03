@@ -61,11 +61,19 @@ spec:
                 href: { type: string }
             intakeLabels:
               type: object
+              required: [back, next, submit, progressTemplate]
               properties:
                 back: { type: string }
                 next: { type: string }
                 submit: { type: string }
                 progressTemplate: { type: string }
+            formMessages:
+              type: object
+              required: [pending, success, error]
+              properties:
+                pending: { type: string }
+                success: { type: string }
+                error: { type: string }
             items:
               type: array
               items:

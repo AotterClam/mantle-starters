@@ -52,9 +52,10 @@ function generatedAssetVersion(css) {
   const hash = createHash("sha256");
   for (const content of [
     css,
-    readFileSync(join(root, "src", "web", "client", "homeClient.ts"), "utf8"),
-    readFileSync(join(root, "src", "web", "client", "intakeClient.ts"), "utf8"),
-    readFileSync(join(root, "src", "web", "client", "kiwaEnhanceAssets.ts"), "utf8"),
+    ...readdirSync(join(root, "src", "web", "client"))
+      .filter((name) => name.endsWith(".ts"))
+      .sort()
+      .map((name) => readFileSync(join(root, "src", "web", "client", name), "utf8")),
   ]) {
     hash.update(content);
     hash.update("\0");
