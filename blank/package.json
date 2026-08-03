@@ -1,6 +1,6 @@
 {
   "name": "mantle-starter-blank",
-  "version": "0.0.11-alpha.67",
+  "version": "0.0.11-alpha.68",
   "private": true,
   "description": "Minimal Mantle site for Cloudflare Workers.",
   "type": "module",
@@ -22,7 +22,7 @@
     "deploy": "pnpm check && wrangler deploy"
   },
   "dependencies": {
-    "@aotter/mantle": "0.0.11-alpha.67"
+    "@aotter/mantle": "0.0.11-alpha.68"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "catalog:",
