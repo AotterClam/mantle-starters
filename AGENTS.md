@@ -7,6 +7,10 @@ materialization paths instead of introducing parallel abstractions.
 Prefer removing obsolete code when safe. Do not revive the legacy
 full-starter/theme path.
 
+Before changing versions, tags, release workflows, or release tarball URLs,
+read the repo-local
+[`mantle-starters-release` skill](.claude/skills/mantle-starters-release/SKILL.md).
+
 Current layering contract:
 
 - Landing and local cold starts materialize the same

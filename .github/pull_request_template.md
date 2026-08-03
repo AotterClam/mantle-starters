@@ -14,6 +14,13 @@
 
 -
 
+## Release workflow evidence (only when release automation changes)
+
+- State table:
+- Invariants / non-goals:
+- Mutation boundary and recovery path:
+- Reviewed commit SHA:
+
 ## Test plan
 
 - [ ] Blank starter: `cd blank && pnpm install --frozen-lockfile && pnpm validate && pnpm typecheck`

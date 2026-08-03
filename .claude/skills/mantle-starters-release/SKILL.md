@@ -25,6 +25,15 @@ existing public version, or repair a published tarball in place.
 If a public tarball is incomplete, fix forward with the next aligned
 Mantle alpha.
 
+## Changing Release Automation
+
+Before code, open a Draft PR with a finite state table, its invariants and
+non-goals, and the single mutation boundary and recovery path for each external
+resource. Freeze one commit SHA for review. Every finding must name the state
+row, concrete event interleaving, and wrong mutation; a clean verdict expires
+when the SHA changes. After two patch rounds, return a new foundational blocker
+to the state table and user instead of continuing a local redesign loop.
+
 ## Normal Release Path
 
 1. Merge required starter content into `develop`.
