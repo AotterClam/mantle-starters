@@ -9,5 +9,5 @@ Start with one homepage:
 - contact: one clear prompt and the contact form path;
 - cta: one final next step.
 
-Use Kiwa primitives already present in the starter. Do not add a custom
+Use runtime primitives already present in the starter. Do not add a custom
 theme layer until the content and route shape are stable.

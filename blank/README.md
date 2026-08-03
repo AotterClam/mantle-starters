@@ -4,7 +4,7 @@
 
 This is the headless Mantle base: one authored manifest, one generated manifest
 module, and one Worker entry using Core's conventional Cloudflare facade. It
-contains no visitor UI or Kiwa component tree.
+contains no visitor UI or component tree.
 
 Launch facts live in `.mantle/launch-state.json`; the coding-agent handoff is
 `.mantle/handoff.md`.

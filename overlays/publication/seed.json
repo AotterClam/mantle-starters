@@ -105,7 +105,7 @@
             "id": "system",
             "eyebrow": "System",
             "title": "The starter ships an editorial model, not a theme",
-            "body": "Publication keeps the same blank Kiwa runtime as every other type. The type-specific work lives in the manifest and seed.",
+            "body": "Publication keeps the same typed-web runtime as every other site type. The type-specific work lives in the manifest and seed.",
             "items": [
               {
                 "title": "Posts are the core",

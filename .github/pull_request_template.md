@@ -31,7 +31,7 @@ Refs #
 
 ## Contributor checklist
 
-- [ ] Base branch is `develop` for normal work, or `main` for release fanout/promote PRs.
+- [ ] Base branch is `develop`; pre-v0.1 release work does not target `main`.
 - [ ] If adding/changing an overlay: `overlays/<name>/` updated and bundle smoke covered.
 - [ ] If changing Kiwa source: `node scripts/sync-kiwa.mjs` run and `pnpm check:kiwa` passes.
 - [ ] Labels applied: `starter:*` and/or `area:*`.

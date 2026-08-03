@@ -285,7 +285,7 @@ function applyProvisionedReadme(files, archetype) {
   if (archetype === "blank") return;
   const reusableStart = base.indexOf("## Kiwa UI Credit");
   const reusableBody = reusableStart === -1 ? base : base.slice(reusableStart);
-  const manifestPath = archetype === "blank" ? "manifests/site.yaml" : `manifests/${archetype}.yaml`;
+  const manifestPath = `manifests/${archetype}.yaml`;
   const overview = [
     "# {{BRAND}}",
     "",
@@ -300,28 +300,18 @@ function applyProvisionedReadme(files, archetype) {
     `- Manifest: \`${manifestPath}\``,
     "- Launch facts: `.mantle/launch-state.json`",
     "- Agent handoff: `.mantle/handoff.md`",
-    ...(archetype === "blank"
-      ? ["- Type notes: this is the blank base with no seeded visible homepage sections"]
-      : [
-          `- Type notes: \`.mantle/overlays/${archetype}/handoff.md\``,
-          `- Layout notes: \`.mantle/overlays/${archetype}/layout.md\``,
-          `- Seed data: \`.mantle/overlays/${archetype}/seed.json\``,
-        ]),
+    `- Type notes: \`.mantle/overlays/${archetype}/handoff.md\``,
+    `- Layout notes: \`.mantle/overlays/${archetype}/layout.md\``,
+    `- Seed data: \`.mantle/overlays/${archetype}/seed.json\``,
     "",
     "## Type notes",
     "",
-    archetype === "blank"
-      ? "`blank` is the base Mantle site: Cloudflare Worker runtime, Mantle API/MCP surfaces, Kiwa components, and an example manifest. It intentionally ships no visible homepage sections until a launch type or coding agent adds them."
-      : stripMarkdownTitle(files[`.mantle/overlays/${archetype}/handoff.md`] ?? ""),
+    stripMarkdownTitle(files[`.mantle/overlays/${archetype}/handoff.md`] ?? ""),
     "",
-    ...(archetype === "blank"
-      ? []
-      : [
-          "## Layout notes",
-          "",
-          stripMarkdownTitle(files[`.mantle/overlays/${archetype}/layout.md`] ?? ""),
-          "",
-        ]),
+    "## Layout notes",
+    "",
+    stripMarkdownTitle(files[`.mantle/overlays/${archetype}/layout.md`] ?? ""),
+    "",
   ].join("\n");
   files["README.md"] = `${overview}\n${reusableBody}`;
 }
