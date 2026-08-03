@@ -17,13 +17,12 @@ BETTER_AUTH_SECRET=
 # Better Auth's baseURL. Production: the deployed Worker origin.
 PUBLIC_ORIGIN=http://localhost:8787
 
-# ── Hosted Mantle Platform auth ──────────────────────────────────────
-# Preferred for sites provisioned by Mantle landing. The platform registers
-# this site as an OAuth/OIDC client, then writes these values to Cloudflare.
+# ── Mantle Hosted Auth ───────────────────────────────────────────────
+# Landing writes these public values to the deployed Worker. Hosted Auth uses
+# Authorization Code + PKCE and never gives the site a client secret.
 #
-# MANTLE_PLATFORM_AUTH_ISSUER=https://platform.mantle.tools/api/auth
-# MANTLE_PLATFORM_AUTH_CLIENT_ID=<site_client_id>
-MANTLE_SITE_OWNER_EMAIL={{SITE_OWNER_EMAIL}}
+# MANTLE_HOSTED_AUTH_ISSUER=https://auth.mantle.tools
+# MANTLE_HOSTED_AUTH_CLIENT_ID=https://auth.mantle.tools/clients/<site-id>
 
 # ── Self-hosted GitHub OAuth fallback ────────────────────────────────
 # Use this only when you are not using Mantle Platform hosted auth.
@@ -37,4 +36,6 @@ MANTLE_SITE_OWNER_EMAIL={{SITE_OWNER_EMAIL}}
 #   3. Set ADMIN_GITHUB_LOGIN to YOUR GitHub login.
 GITHUB_CLIENT_ID=<your_github_oauth_app_client_id>
 GITHUB_CLIENT_SECRET=<your_github_oauth_app_client_secret>
+# Both auth modes bootstrap the first local owner from GitHub's authenticated
+# login. Email is profile data, not owner authority.
 ADMIN_GITHUB_LOGIN={{ADMIN_GITHUB_LOGIN}}

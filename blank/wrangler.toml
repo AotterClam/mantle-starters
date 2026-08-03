@@ -12,10 +12,9 @@ enabled = true
 
 [vars]
 PUBLIC_ORIGIN = "http://localhost:8787"
-# Hosted auth:
-# MANTLE_PLATFORM_AUTH_ISSUER = "https://platform.mantle.tools/api/auth"
-# MANTLE_PLATFORM_AUTH_CLIENT_ID = "..."
-# MANTLE_SITE_OWNER_EMAIL = "owner@example.com"
+# Mantle Hosted Auth (public PKCE client; no client secret):
+# MANTLE_HOSTED_AUTH_ISSUER = "https://auth.mantle.tools"
+# MANTLE_HOSTED_AUTH_CLIENT_ID = "https://auth.mantle.tools/clients/<site-id>"
 # Self-managed GitHub auth:
 # GITHUB_CLIENT_ID = "..."
 # ADMIN_GITHUB_LOGIN = "..."

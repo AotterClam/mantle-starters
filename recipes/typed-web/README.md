@@ -94,11 +94,9 @@ cp .dev.vars.example .dev.vars
 > when CI rejects it.
 
 The seeded `/` preview and public HTTP Procedures work without auth. Mantle
-Platform hosted auth uses `MANTLE_PLATFORM_AUTH_ISSUER`,
-`MANTLE_PLATFORM_AUTH_CLIENT_ID`,
-and `MANTLE_SITE_OWNER_EMAIL`. Hosted clients use public PKCE by default;
-`MANTLE_PLATFORM_AUTH_CLIENT_SECRET` is only needed if you later register a
-confidential hosted client.
+Hosted Auth uses `MANTLE_HOSTED_AUTH_ISSUER`,
+`MANTLE_HOSTED_AUTH_CLIENT_ID`, and `ADMIN_GITHUB_LOGIN`. Hosted clients are
+public PKCE clients and have no client secret.
 Standalone/self-hosted auth can still use `GITHUB_CLIENT_ID`,
 `GITHUB_CLIENT_SECRET`, and `ADMIN_GITHUB_LOGIN`. Fill one auth path only
 when you want to exercise `/api/auth/*` or Staff MCP locally. Then:
