@@ -89,10 +89,6 @@ function buildBundleFiles(archetype) {
     '    "owner": "{{GITHUB_OWNER}}",',
     '    "admin_login": "{{ADMIN_GITHUB_LOGIN}}"',
     "  },",
-    '  "site_owner": {',
-    '    "email": "{{SITE_OWNER_EMAIL}}",',
-    '    "github_login": "{{ADMIN_GITHUB_LOGIN}}"',
-    "  },",
     '  "repo": {',
     '    "owner": "{{GITHUB_OWNER}}",',
     '    "name": "{{PROJECT_NAME}}",',
@@ -192,8 +188,11 @@ function assertBundle(bundle, archetype) {
   if (!bundle.files["pnpm-workspace.yaml"]?.includes('  - "."')) {
     throw new Error(`${archetype} bundle missing root package workspace entry`);
   }
-  if (!bundle.files["wrangler.toml"]?.includes("https://platform.mantle.tools/api/auth")) {
-    throw new Error(`${archetype} bundle must use the canonical Platform auth issuer`);
+  if (!bundle.files["wrangler.toml"]?.includes("https://auth.mantle.tools")) {
+    throw new Error(`${archetype} bundle must use the canonical Hosted Auth issuer`);
+  }
+  if (bundle.files["wrangler.toml"]?.includes("MANTLE_PLATFORM_AUTH")) {
+    throw new Error(`${archetype} bundle still contains preview Hosted Auth variables`);
   }
   if (archetype !== "blank" && !bundle.files[`manifests/${archetype}.yaml`]) {
     throw new Error(`${archetype} bundle missing applied manifest`);
