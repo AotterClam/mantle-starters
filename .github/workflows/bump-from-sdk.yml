@@ -185,7 +185,7 @@ jobs:
           set -euo pipefail
           BRANCH="release/v$VERSION"
           git checkout -B "$BRANCH" origin/develop
-          echo "branch=$BRANCH" >> "$GITHUB_ENV"
+          echo "BRANCH=$BRANCH" >> "$GITHUB_ENV"
           node --input-type=module -e "
             import { readFileSync, writeFileSync } from 'node:fs';
             const version = process.env.VERSION;
