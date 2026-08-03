@@ -9,5 +9,5 @@ First useful shape:
 - do not build cart, payment, inventory, accounts, or admin flows until
   the user asks for them.
 
-Move to real checkout only after the blank site deploy and first product
+Move to real checkout only after the site deploy and first product
 surface are working.

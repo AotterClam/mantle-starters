@@ -89,5 +89,4 @@ jobs:
           node-version: 22
       - name: Assert starter safety checks
         run: |
-          node scripts/check-wrangler-dev-wrapper.mjs
           node scripts/check-repo-local-skills.mjs

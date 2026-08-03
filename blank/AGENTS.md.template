@@ -44,7 +44,8 @@ and seed files before making changes.
 - `pnpm check` validate + typecheck
 - `pnpm run deploy` deploy Worker after provider setup
 
-Daily content authoring should use the Staff MCP endpoint at
+For a typed launch before auth, edit its `.mantle/overlays/<type>/seed.json`.
+After auth, daily content authoring should use the Staff MCP endpoint at
 `<SITE_URL>/mcp/staff`. Do not write directly to D1 or KV.
 
 Media uploads are optional. Configure them only when requested, then read
@@ -56,5 +57,6 @@ Media uploads are optional. Configure them only when requested, then read
   composed. Do not copy old full starter directories into it.
 - Theme work happens later through `mantle:theme`; there is no launch
   theme picker.
-- Typed launches may include copied Kiwa source; blank does not. A typed repo
-  must keep working without Kiwa registry access.
+- If `kiwa/manifest.json` exists, treat `kiwa/` as this Starter revision's
+  offline UI reference palette, not runtime source or a permanent Mantle
+  contract. Follow `mantle:theme` when adopting or replacing it.

@@ -21,7 +21,7 @@ export function IntakeSection({
   }];
   const fields = section.fields ?? [];
   const intakeLabels = section.intakeLabels;
-  const progressTemplate = intakeLabels?.progressTemplate ?? "Step {current} of {total}";
+  const progressTemplate = intakeLabels?.progressTemplate ?? "";
   return (
     <section id={section.id} class="py-16 md:py-24">
       <div class="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 lg:grid-cols-[0.82fr_1.18fr] lg:px-8">
@@ -95,13 +95,13 @@ export function IntakeSection({
             )}
             <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <Button type="button" variant="outline" class="w-full sm:w-auto" data-intake-prev>
-                {intakeLabels?.back ?? "Back"}
+                {intakeLabels?.back}
               </Button>
               <Button type="button" class="w-full sm:w-auto" data-intake-next>
-                {intakeLabels?.next ?? "Next"}
+                {intakeLabels?.next}
               </Button>
               <Button type="submit" class="w-full sm:w-auto" data-intake-submit hidden>
-                {intakeLabels?.submit ?? section.action?.label ?? "Submit"}
+                {intakeLabels?.submit ?? section.action?.label}
               </Button>
             </div>
             <p

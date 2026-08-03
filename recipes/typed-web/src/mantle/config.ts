@@ -1,60 +1,18 @@
-import {
-  AssetsAssetServer,
-  D1DatabaseDriver,
-  KvCacheBinding,
-  type Auth,
-  type CmsConfig,
-} from "@aotter/mantle/cloudflare";
-import { buildHandlers } from "./handlers/index.js";
-import { loadManifests } from "./manifests.js";
+import type { MantleCloudflareEnv } from "@aotter/mantle/cloudflare";
+import type { SiteDefaults } from "@aotter/mantle/spec";
 
-export interface Env {
-  readonly DB: D1Database;
-  readonly KV: KVNamespace;
-  /** OAuth grant store for `@cloudflare/workers-oauth-provider` —
-   *  client registrations + grants + tokens. Required by the
-   *  top-level OAuthProvider that wraps the Worker; both /mcp/staff
-   *  and /mcp use this namespace for OAuth state. The top-level
-   *  wrangler.toml binding intentionally omits an id so Cloudflare can
-   *  auto-provision it during the first deploy. */
-  readonly OAUTH_KV: KVNamespace;
-  readonly ASSETS?: Fetcher;
-  readonly GITHUB_CLIENT_ID?: string;
-  readonly GITHUB_CLIENT_SECRET?: string;
-  readonly ADMIN_GITHUB_LOGIN?: string;
-  readonly MANTLE_PLATFORM_AUTH_ISSUER?: string;
-  readonly MANTLE_PLATFORM_AUTH_CLIENT_ID?: string;
-  readonly MANTLE_PLATFORM_AUTH_CLIENT_SECRET?: string;
-  readonly MANTLE_SITE_OWNER_EMAIL?: string;
-  readonly BETTER_AUTH_SECRET: string;
-  readonly PUBLIC_ORIGIN?: string;
+export interface Env extends MantleCloudflareEnv {
   readonly TURNSTILE_SITE_KEY?: string;
   readonly TURNSTILE_SECRET_KEY?: string;
 }
 
-export function buildCmsConfig(env: Env, auth: Auth): CmsConfig {
+export function buildSiteDefaults(env: Env): SiteDefaults {
   return {
-    manifests: loadManifests(),
-    handlers: buildHandlers(),
-    siteDefaults: {
-      brand: "{{BRAND}}",
-      title: "{{BRAND}}",
-      description: "{{DESCRIPTION}}",
-      origin: env.PUBLIC_ORIGIN ?? "http://localhost:8787",
-      // `{{LOCALES}}` is substituted while materializing the provision bundle.
-      // JSON.parse keeps this file TS-valid pre-substitution
-      // so contributors can `pnpm typecheck` the starter directly; the runtime
-      // cost is one tiny parse at worker cold-start.
-      locales: parseLocales(),
-    },
-    bindings: {
-      db: new D1DatabaseDriver(env.DB),
-      kv: new KvCacheBinding(env.KV),
-      assets: env.ASSETS
-        ? new AssetsAssetServer(env.ASSETS)
-        : { fetch: async () => null },
-    },
-    auth,
+    brand: "{{BRAND}}",
+    title: "{{BRAND}}",
+    description: "{{DESCRIPTION}}",
+    origin: env.PUBLIC_ORIGIN ?? "http://localhost:8787",
+    locales: parseLocales(),
   };
 }
 

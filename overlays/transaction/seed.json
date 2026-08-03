@@ -3,6 +3,14 @@
   "site": {
     "brand": "{{BRAND}}",
     "description": "{{DESCRIPTION}}",
+    "chromeLabels": {
+      "openNavigation": "Open navigation",
+      "closeNavigation": "Close navigation",
+      "navigation": "Navigation",
+      "toggleTheme": "Toggle color theme",
+      "lightMode": "Light mode",
+      "darkMode": "Dark mode"
+    },
     "navLinks": [
       { "label": "Products", "href": "#products" },
       { "label": "How it works", "href": "#how-it-works" },

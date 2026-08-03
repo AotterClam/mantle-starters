@@ -1,14 +1,25 @@
-import { Hono } from "hono";
-import { renderer } from "../../renderer.js";
+import type { MantleExtensionApp } from "@aotter/mantle/cloudflare";
+import type { CmsRuntime } from "@aotter/mantle/runtime";
 import { HomePage } from "../../web/pages/HomePage.js";
+import { homeLocale, resolveHomeContent } from "../../web/content/homeContent.js";
+import { PageDocument } from "../../renderer.js";
 import type { Env } from "../../mantle/config.js";
 
-export function createHomeRoutes(env: Env): Hono {
-  const app = new Hono();
-  app.use("*", renderer);
-  app.get("/", (c) => {
+export function mountHomeRoute(
+  app: MantleExtensionApp<Env>,
+  getRuntime: () => Promise<CmsRuntime>,
+): void {
+  app.get("/", async (c) => {
     c.header("cache-control", "public, max-age=0, s-maxage=300");
-    return c.render(<HomePage turnstileSiteKey={env.TURNSTILE_SITE_KEY} />);
+    const content = await resolveHomeContent(getRuntime);
+    return c.html(
+      <PageDocument locale={homeLocale}>
+        <HomePage
+          content={content}
+          locale={homeLocale}
+          turnstileSiteKey={c.env.TURNSTILE_SITE_KEY}
+        />
+      </PageDocument>,
+    );
   });
-  return app;
 }

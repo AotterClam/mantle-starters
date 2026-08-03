@@ -2,8 +2,8 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { basename, delimiter, join, resolve } from "node:path";
-import { materializeBundle } from "../recipes/typed-web/scripts/materialize.mjs";
+import { basename, join, resolve } from "node:path";
+import { materializeBundle } from "./materialize-bundle.mjs";
 
 const root = new URL("..", import.meta.url).pathname;
 const archetype = process.argv[2];
@@ -42,7 +42,9 @@ if (output) {
   process.exit(0);
 }
 
-const nodeModules = join(root, "node_modules");
+const nodeModules = archetype === "blank"
+  ? join(root, "blank", "node_modules")
+  : join(root, "recipes", "typed-web", "node_modules");
 if (existsSync(nodeModules) && !existsSync(join(targetRoot, "node_modules"))) {
   symlinkSync(nodeModules, join(targetRoot, "node_modules"), "dir");
 }
@@ -50,17 +52,21 @@ if (existsSync(nodeModules) && !existsSync(join(targetRoot, "node_modules"))) {
 console.log(`generated ${archetype} bundle at ${targetRoot}`);
 console.log(`local URL: http://localhost:${port}`);
 
-run(process.execPath, ["scripts/build-styles.mjs"], targetRoot);
+if (archetype !== "blank") run(process.execPath, ["scripts/build-styles.mjs"], targetRoot);
 if (!prepareOnly) {
-  run(process.execPath, ["scripts/wrangler-dev.mjs"], targetRoot, {
-    PATH: [
-      join(root, "node_modules", ".bin"),
-      join(targetRoot, "node_modules", ".bin"),
-      process.env.PATH ?? "",
-    ].join(delimiter),
-    WRANGLER_DEV_PORT: port,
-    WRANGLER_INSPECTOR_PORT: process.env.WRANGLER_INSPECTOR_PORT ?? "0",
-  });
+  run("pnpm", [
+    "exec",
+    "wrangler",
+    "dev",
+    "--ip",
+    "localhost",
+    "--port",
+    port,
+    "--inspector-port",
+    process.env.WRANGLER_INSPECTOR_PORT ?? "0",
+    "--persist-to",
+    ".wrangler",
+  ], targetRoot);
 }
 
 function run(command, args, cwd, env = {}) {

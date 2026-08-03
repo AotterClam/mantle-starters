@@ -80,6 +80,13 @@ spec:
                   type: string
                 href:
                   type: string
+            formMessages:
+              type: object
+              required: [pending, success, error]
+              properties:
+                pending: { type: string }
+                success: { type: string }
+                error: { type: string }
             items:
               type: array
               items:

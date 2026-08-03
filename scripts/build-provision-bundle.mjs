@@ -12,7 +12,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, posix } from "node:path";
-import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
+import { parse as parseYaml, parseAllDocuments, stringify as stringifyYaml } from "yaml";
 
 const root = new URL("..", import.meta.url).pathname;
 const version = JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version;
@@ -60,10 +60,10 @@ function buildBundleFiles(archetype) {
   resolveCatalogLockfile(files);
   if (archetype !== "blank") {
     applyOverlay(files, archetype);
-    applyOverlayManifestLoader(files, archetype);
+    selectTypedSurface(files, archetype);
+    pruneRuntimeSource(files);
     delete files["manifests/example.yaml"];
-  }
-  if (archetype !== "blank") {
+    // This UI revision keeps its licensed snapshot as an offline agent palette.
     walk(files, "kiwa", "kiwa");
     compileBundleStyles(files, archetype);
   }
@@ -206,8 +206,11 @@ function assertBundle(bundle, archetype) {
   }
   if (archetype !== "blank") {
     for (const required of [
+      ".mantle/generated/site.ts",
+      ".mantle/generated/types.d.ts",
       "src/web/content/types.ts",
       "kiwa/manifest.json",
+      "kiwa/LICENSE",
       "styles/generated.css",
     ]) {
       if (!bundle.files[required]) throw new Error(`${archetype} bundle missing ${required}`);
@@ -224,6 +227,24 @@ function assertBundle(bundle, archetype) {
     const seedImport = `../../../.mantle/overlays/${archetype}/seed.json`;
     if (!bundle.files["src/web/content/homeContent.ts"]?.includes(seedImport)) {
       throw new Error(`${archetype} homeContent must read the overlay seed`);
+    }
+    if (!bundle.files["src/index.ts"]?.includes("createMantleWorker") ||
+        !bundle.files["src/index.ts"]?.includes(".mantle/generated/site.js")) {
+      throw new Error(`${archetype} Worker must use Core's facade and generated manifest`);
+    }
+    for (const path of Object.keys(bundle.files)) {
+      if (!["src/", "components/", "lib/", "styles/"].some((prefix) => path.startsWith(prefix))) continue;
+      for (const specifier of imports(bundle.files[path])) {
+        const target = resolveLocalImport(bundle.files, path, specifier);
+        if (target?.startsWith("kiwa/") || specifier === "kiwa" || specifier.startsWith("kiwa/")) {
+          throw new Error(`${archetype} runtime source imports the offline Kiwa palette: ${path}`);
+        }
+      }
+    }
+    const paletteFiles = Object.keys(bundle.files).filter((path) => path.startsWith("kiwa/"));
+    const sourcePaletteFiles = listFiles("kiwa").map((path) => `kiwa/${path}`);
+    if (JSON.stringify(paletteFiles.sort()) !== JSON.stringify(sourcePaletteFiles.sort())) {
+      throw new Error(`${archetype} bundle must retain this revision's complete offline Kiwa palette`);
     }
   }
   assertLockfileMatchesPackageJson(bundle, archetype);
@@ -373,7 +394,6 @@ function walk(files, from, to) {
 
 function applyOverlay(files, archetype) {
   walk(files, `overlays/${archetype}/manifests`, "manifests");
-  walkIfExists(files, `overlays/${archetype}/src`, "src");
   let seedText = null;
   for (const name of ["handoff.md", "layout.md", "seed-prompt.md", "seed.json"]) {
     const path = join(root, "overlays", archetype, name);
@@ -388,32 +408,30 @@ function applyOverlay(files, archetype) {
     }
   }
   if (seedText) applyOverlaySeedContent(files, archetype, seedText);
+  walkIfExists(files, `overlays/${archetype}/src`, "src");
+  walk(files, `overlays/${archetype}/generated`, ".mantle/generated");
 }
 
 function applyOverlaySeedContent(files, archetype, seedText) {
   const seed = JSON.parse(seedText);
   const seedImport = `../../../.mantle/overlays/${archetype}/seed.json`;
-  if (seed?.site) {
-    files["src/web/content/siteContent.ts"] = [
-      `import seed from "${seedImport}";`,
-      'import type { SiteContent } from "./types.js";',
-      "",
-      "type Seed = { readonly site?: SiteContent };",
-      "const seedData = seed as Seed;",
-      "export const siteContent: SiteContent = seedData.site ?? {",
-      '  brand: "{{BRAND}}",',
-      '  description: "{{DESCRIPTION}}".trim(),',
-      "  navLinks: [],",
-      "  footer: { columns: [], socialLinks: [], bottomLinks: [] },",
-      "};",
-      "",
-    ].join("\n");
-  }
+  if (!seed?.site) throw new Error(`${archetype} seed must define site chrome`);
+  assertLocalizedChrome(seed, archetype);
+  files["src/web/content/siteContent.ts"] = [
+    `import seed from "${seedImport}";`,
+    'import type { SiteContent } from "./types.js";',
+    "",
+    "type Seed = { readonly site: SiteContent };",
+    "const seedData = seed as Seed;",
+    "export const siteContent: SiteContent = seedData.site;",
+    "",
+  ].join("\n");
   if (!Array.isArray(seed?.collections?.page)) {
     throw new Error(`${archetype} seed must define collections.page`);
   }
   files["src/web/content/homeContent.ts"] = [
     `import seed from "${seedImport}";`,
+    'import type { CmsRuntime } from "@aotter/mantle/runtime";',
     'import type { HomeContent, HomeSection } from "./types.js";',
     "",
     "type SeedPage = { readonly type?: string; readonly sections?: readonly HomeSection[] };",
@@ -425,8 +443,29 @@ function applyOverlaySeedContent(files, archetype, seedText) {
     'const homePage = (seedData.collections?.page ?? []).find((page) => page.type === "home");',
     "export const homeContent: HomeContent = { sections: homePage?.sections ?? [] };",
     "export const homeLocale = seedData.locale;",
+    "export async function resolveHomeContent(_getRuntime: () => Promise<CmsRuntime>): Promise<HomeContent> {",
+    "  return homeContent;",
+    "}",
     "",
   ].join("\n");
+}
+
+function assertLocalizedChrome(seed, archetype) {
+  for (const key of ["openNavigation", "closeNavigation", "navigation", "toggleTheme", "lightMode", "darkMode"]) {
+    if (!seed.site.chromeLabels?.[key]) throw new Error(`${archetype} seed site.chromeLabels.${key} is required`);
+  }
+  for (const section of (seed.collections?.page ?? []).flatMap((page) => page.sections ?? [])) {
+    if (["form", "intake"].includes(section.type)) {
+      for (const key of ["pending", "success", "error"]) {
+        if (!section.formMessages?.[key]) throw new Error(`${archetype} ${section.type}.formMessages.${key} is required`);
+      }
+    }
+    if (section.type === "intake") {
+      for (const key of ["back", "next", "submit", "progressTemplate"]) {
+        if (!section.intakeLabels?.[key]) throw new Error(`${archetype} intake.intakeLabels.${key} is required`);
+      }
+    }
+  }
 }
 
 function walkIfExists(files, from, to) {
@@ -438,17 +477,141 @@ function walkIfExists(files, from, to) {
   walk(files, from, to);
 }
 
-function applyOverlayManifestLoader(files, archetype) {
-  const bindingName = `${archetype.replace(/[^a-zA-Z0-9]/g, "_")}Yaml`;
-  files["src/mantle/manifests.ts"] = [
-    'import { parseManifestsOrThrow, type Manifest } from "@aotter/mantle/spec";',
-    `import ${bindingName} from "../../manifests/${archetype}.yaml";`,
+function selectTypedSurface(files, archetype) {
+  const selected = selectedSectionNames(files, archetype);
+  files["src/web/sections/sectionRegistry.ts"] = [
+    ...selected.map((name) => `import { render${upperFirst(name)} } from "./renderers/${name}.js";`),
+    'import type { HomeSection } from "../content/types.js";',
+    'import type { SectionRenderer } from "./renderSection.js";',
     "",
-    "export function loadManifests(): readonly Manifest[] {",
-    `  return parseManifestsOrThrow([${bindingName}], { context: "starters/${archetype}" });`,
+    "export const sectionRenderers: Partial<Record<HomeSection[\"type\"], SectionRenderer>> = {",
+    ...selected.map((name) => `  ${name}: render${upperFirst(name)},`),
+    "};",
+    "",
+  ].join("\n");
+
+  const clients = [
+    ...(selected.includes("faq") ? ["enhance"] : []),
+    "theme",
+    "nav",
+    ...(selected.includes("intake") ? ["intake"] : []),
+    ...(selected.includes("form") || selected.includes("intake") ? ["form"] : []),
+  ];
+  files["src/web/client/homeClient.ts"] = [
+    ...clients.map((name) => `import { ${name}ClientJs } from "./${name}Client.js";`),
+    "",
+    "export const homeClientJs = [",
+    ...clients.map((name) => `  ...${name}ClientJs,`),
+    '  "",',
+    '].join("\\n");',
+    "",
+  ].join("\n");
+
+  const enhance = selected.includes("faq");
+  files["src/worker/routes/assets.ts"] = [
+    'import type { MantleExtensionApp } from "@aotter/mantle/cloudflare";',
+    'import stylesCss from "../../../styles/generated.css";',
+    'import { homeClientJs } from "../../web/client/homeClient.js";',
+    ...(enhance ? ['import { kiwaEnhanceAssets } from "../../web/client/kiwaEnhanceAssets.js";'] : []),
+    'import type { Env } from "../../mantle/config.js";',
+    "",
+    'const ASSET_CACHE_CONTROL = "public, max-age=31536000, immutable";',
+    "",
+    "export function mountAssetRoutes(app: MantleExtensionApp<Env>): void {",
+    '  app.get("/assets/styles.css", () => new Response(stylesCss, {',
+    '    headers: { "cache-control": ASSET_CACHE_CONTROL, "content-type": "text/css; charset=utf-8" },',
+    "  }));",
+    '  app.get("/assets/kiwa-home.js", () => new Response(homeClientJs, {',
+    '    headers: { "cache-control": ASSET_CACHE_CONTROL, "content-type": "text/javascript; charset=utf-8" },',
+    "  }));",
+    ...(enhance ? [
+      '  app.get("/enhance/:file", (c) => {',
+      '    const file = c.req.param("file");',
+      '    if (!/^[A-Za-z0-9._-]+\\.js$/.test(file)) return c.notFound();',
+      '    const assetText = kiwaEnhanceAssets[file];',
+      '    if (!assetText) return c.notFound();',
+      '    return new Response(assetText, {',
+      '      headers: { "cache-control": ASSET_CACHE_CONTROL, "content-type": "text/javascript; charset=utf-8" },',
+      "    });",
+      "  });",
+    ] : []),
     "}",
     "",
   ].join("\n");
+}
+
+function selectedSectionNames(files, archetype) {
+  const seed = JSON.parse(files[`.mantle/overlays/${archetype}/seed.json`] ?? "{}");
+  const seeded = [...new Set((seed.collections?.page ?? [])
+    .flatMap((page) => page.sections ?? [])
+    .map((section) => section.type)
+    .filter(Boolean))];
+  const pageSchema = parseAllDocuments(files[`manifests/${archetype}.yaml`] ?? "")
+    .map((document) => document.toJSON())
+    .find((atom) => atom?.kind === "Schema" && atom?.metadata?.name === "page");
+  const declared = pageSchema?.spec?.schema?.properties?.sections?.items?.properties?.type?.enum;
+  if (!Array.isArray(declared)) return seeded;
+  for (const type of seeded) {
+    if (!declared.includes(type)) throw new Error(`${archetype} seed section ${type} is absent from the page Schema grammar`);
+  }
+  return declared;
+}
+
+function upperFirst(value) {
+  return value[0].toUpperCase() + value.slice(1);
+}
+
+function pruneRuntimeSource(files) {
+  const reachable = new Set();
+  const pending = ["src/index.ts"];
+  while (pending.length > 0) {
+    const path = pending.pop();
+    if (!path || reachable.has(path) || !files[path]) continue;
+    reachable.add(path);
+    for (const specifier of imports(files[path])) {
+      const resolved = resolveLocalImport(files, path, specifier);
+      if (resolved && !reachable.has(resolved)) pending.push(resolved);
+    }
+  }
+  for (const path of Object.keys(files)) {
+    if (["src/", "components/", "lib/"].some((prefix) => path.startsWith(prefix)) &&
+        !path.endsWith(".d.ts") && !reachable.has(path)) {
+      delete files[path];
+    }
+  }
+}
+
+function imports(source) {
+  return [
+    ...source.matchAll(/(?:from\s+|import\s*)["']([^"']+)["']/g),
+    ...source.matchAll(/import\s*\(\s*["']([^"']+)["']/g),
+    ...source.matchAll(/@import\s+(?:url\()?\s*["']([^"']+)["']/g),
+  ].map((match) => match[1]);
+}
+
+function resolveLocalImport(files, importer, specifier) {
+  let base;
+  if (specifier.startsWith("@/")) base = specifier.slice(2);
+  else if (specifier.startsWith(".")) base = posix.normalize(posix.join(posix.dirname(importer), specifier));
+  else return null;
+  const withoutJs = base.replace(/\.js$/, "");
+  for (const candidate of [base, withoutJs, `${withoutJs}.ts`, `${withoutJs}.tsx`, `${withoutJs}.json`, `${withoutJs}.css`, `${withoutJs}/index.ts`, `${withoutJs}/index.tsx`]) {
+    if (files[candidate]) return candidate;
+  }
+  return null;
+}
+
+function listFiles(from, prefix = "") {
+  const found = [];
+  for (const name of readdirSync(join(root, from))) {
+    if (skip(name)) continue;
+    const source = join(root, from, name);
+    const relative = posix.join(prefix, name);
+    const stat = statSync(source);
+    if (stat.isDirectory()) found.push(...listFiles(posix.join(from, name), relative));
+    else if (stat.isFile()) found.push(relative);
+  }
+  return found;
 }
 
 function skip(name) {
@@ -497,6 +660,7 @@ function resolveCatalogLockfile(files) {
   for (const key of dependencySectionKeys) {
     for (const [name, entry] of Object.entries(importer[key] ?? {})) {
       if (expected.has(name)) entry.specifier = expected.get(name);
+      else delete importer[key][name];
     }
   }
   files["pnpm-lock.yaml"] = stringifyYaml(lockfile, { lineWidth: 0, singleQuote: true });
@@ -517,6 +681,9 @@ function assertLockfileMatchesPackageJson(bundle, archetype) {
         `${archetype} bundle lockfile mismatch for ${name}: package.json=${specifier}, pnpm-lock.yaml=${lockfileSpecifier ?? "(missing)"}`,
       );
     }
+  }
+  for (const name of actual.keys()) {
+    if (!expected.has(name)) throw new Error(`${archetype} bundle lockfile has unexpected root dependency ${name}`);
   }
 }
 
