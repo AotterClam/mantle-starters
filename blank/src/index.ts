@@ -1,17 +1,23 @@
-import { createWorkerFetch } from "./worker/app.js";
 import {
-  authSetupComplete,
-  setupIncompleteResponse,
-  shouldBlockWhenAuthIncomplete,
-} from "./worker/auth.js";
-import type { Env } from "./mantle/config.js";
+  createMantleWorker,
+  type MantleCloudflareEnv,
+} from "@aotter/mantle/cloudflare";
+import { manifest } from "../.mantle/generated/site.js";
 
-export default {
-  async fetch(req: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    const url = new URL(req.url);
-    if (!authSetupComplete(env) && shouldBlockWhenAuthIncomplete(url.pathname)) {
-      return setupIncompleteResponse();
-    }
-    return createWorkerFetch(env)(req, env, ctx);
-  },
-};
+interface Env extends MantleCloudflareEnv {
+  readonly PUBLIC_ORIGIN?: string;
+}
+
+const rawLocales = '{{LOCALES}}';
+const locales = rawLocales.startsWith("{{") ? ["en"] : JSON.parse(rawLocales);
+
+export default createMantleWorker<Env>({
+  manifest,
+  siteDefaults: (env) => ({
+    brand: "{{BRAND}}",
+    title: "{{BRAND}}",
+    description: "{{DESCRIPTION}}",
+    origin: env.PUBLIC_ORIGIN ?? "http://localhost:8787",
+    locales,
+  }),
+});

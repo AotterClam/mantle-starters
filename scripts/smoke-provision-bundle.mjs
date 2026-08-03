@@ -4,8 +4,8 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync }
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parseAllDocuments } from "yaml";
-import { materializeBundle } from "../blank/scripts/materialize.mjs";
-import { compare, placeholders } from "../blank/scripts/update.mjs";
+import { materializeBundle } from "../recipes/typed-web/scripts/materialize.mjs";
+import { compare, placeholders } from "../recipes/typed-web/scripts/update.mjs";
 
 const root = new URL("..", import.meta.url).pathname;
 const archetypes = ["blank", "presence", "intake", "publication", "transaction", "reservation", "community"];
@@ -46,14 +46,18 @@ for (const archetype of archetypes) {
     materializeBundle(tempRoot, bundle, { ...replacements, ARCHETYPE: archetype });
     assertNoLeftovers(tempRoot, bundle.files);
     assertPerformanceHarnessScript(tempRoot, archetype);
-    assertGeneratedStylesCurrent(tempRoot, archetype);
-    assertPublicHomeIsNotHandoff(tempRoot);
-    assertMantleSiteSignature(tempRoot, archetype);
-    assertStylesheetMounted(tempRoot, archetype);
-    assertEdgeCacheContract(tempRoot, archetype);
-    assertSectionImageContract(tempRoot, archetype);
-    assertAuthSwitchUsesSelectedProvider(tempRoot, archetype);
-    assertRuntimeHasNoKiwaDemoCopy(tempRoot, archetype);
+    if (archetype === "blank") {
+      assertHeadlessBlank(tempRoot);
+    } else {
+      assertGeneratedStylesCurrent(tempRoot, archetype);
+      assertPublicHomeIsNotHandoff(tempRoot);
+      assertMantleSiteSignature(tempRoot, archetype);
+      assertStylesheetMounted(tempRoot, archetype);
+      assertEdgeCacheContract(tempRoot, archetype);
+      assertSectionImageContract(tempRoot, archetype);
+      assertAuthSwitchUsesSelectedProvider(tempRoot, archetype);
+      assertRuntimeHasNoKiwaDemoCopy(tempRoot, archetype);
+    }
     const launchState = JSON.parse(readFileSync(join(tempRoot, ".mantle", "launch-state.json"), "utf8"));
     if (launchState.github?.owner !== replacements.GITHUB_OWNER) throw new Error(`${archetype} missing landing GitHub owner`);
     if (launchState.site_url !== replacements.SITE_URL) throw new Error(`${archetype} missing launch-state site_url`);
@@ -89,8 +93,6 @@ for (const archetype of archetypes) {
       if (archetype === "transaction") {
         assertTransactionSeed(tempRoot);
       }
-    } else {
-      assertBlankHomeDataIsBlank(tempRoot);
     }
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
@@ -188,15 +190,36 @@ function assertGeneratedStylesMatchStarterLock(root) {
 }
 
 function assertGeneratedStylesCurrent(targetRoot, archetype) {
-  symlinkSync(join(root, "blank", "node_modules"), join(targetRoot, "node_modules"), "dir");
+  symlinkSync(join(root, "node_modules"), join(targetRoot, "node_modules"), "dir");
   const result = spawnSync(process.execPath, [
-    join(root, "blank", "scripts", "build-styles.mjs"),
+    join(root, "recipes", "typed-web", "scripts", "build-styles.mjs"),
     "--root",
     targetRoot,
     "--check",
   ], { encoding: "utf8" });
   if (result.status !== 0) {
     throw new Error(`${archetype} generated styles are stale: ${result.stderr || result.stdout}`);
+  }
+}
+
+function assertHeadlessBlank(root) {
+  const files = [
+    "manifests/site.yaml",
+    "src/index.ts",
+    ".mantle/generated/site.ts",
+    ".mantle/generated/types.d.ts",
+  ];
+  for (const path of files) readFileSync(join(root, path), "utf8");
+  const worker = readFileSync(join(root, "src", "index.ts"), "utf8");
+  if (!worker.includes("createMantleWorker") || !worker.includes(".mantle/generated/site.js")) {
+    throw new Error("blank Worker does not use the generated manifest and Core facade");
+  }
+  const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+  if (JSON.stringify(Object.keys(manifest.dependencies ?? {})) !== '["@aotter/mantle"]') {
+    throw new Error("blank production dependency must be @aotter/mantle only");
+  }
+  for (const path of ["components", "kiwa", "lib", "scripts", "styles", "src/web", "src/worker", "src/mantle"]) {
+    if (existsSync(join(root, path))) throw new Error(`blank includes typed/UI source: ${path}`);
   }
 }
 
@@ -566,19 +589,6 @@ function assertTransactionSeed(root) {
   const parsed = JSON.parse(seed);
   if (!seed.includes('"type": "home"') || parsed.collections?.products?.length !== 3) {
     throw new Error("transaction seed does not include a visible home and three products");
-  }
-}
-
-function assertBlankHomeDataIsBlank(root) {
-  const homeContent = readFileSync(join(root, "src", "web", "content", "homeContent.ts"), "utf8");
-  const siteContent = readFileSync(join(root, "src", "web", "content", "siteContent.ts"), "utf8");
-  if (!homeContent.includes("sections: []")) {
-    throw new Error("blank homepage should not seed visible sections");
-  }
-  for (const forbidden of ["contactForm", "Placeholder proof", "Start a conversation", "navAction"]) {
-    if (homeContent.includes(forbidden) || siteContent.includes(forbidden)) {
-      throw new Error(`blank homepage still seeds visible copy: ${forbidden}`);
-    }
   }
 }
 

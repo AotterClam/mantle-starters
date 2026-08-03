@@ -11,48 +11,22 @@ head_sampling_rate = 1
 enabled = true
 
 [vars]
-# Post-deploy provisioning writes PUBLIC_ORIGIN and the chosen auth
-# client metadata here. Secrets stay in Cloudflare via `wrangler secret put`.
-#
-# Mantle Platform hosted auth:
+PUBLIC_ORIGIN = "http://localhost:8787"
+# Hosted auth:
 # MANTLE_PLATFORM_AUTH_ISSUER = "https://platform.mantle.tools/api/auth"
 # MANTLE_PLATFORM_AUTH_CLIENT_ID = "..."
 # MANTLE_SITE_OWNER_EMAIL = "owner@example.com"
-#
-# Self-hosted GitHub OAuth fallback:
+# Self-managed GitHub auth:
 # GITHUB_CLIENT_ID = "..."
 # ADMIN_GITHUB_LOGIN = "..."
-#
-# Optional contact protection:
-# TURNSTILE_SITE_KEY = "0x..."
-# Set BETTER_AUTH_SECRET and optional TURNSTILE_SECRET_KEY with
-# `wrangler secret put`.
+# Secrets stay in Cloudflare via `wrangler secret put`.
 
 [[d1_databases]]
 binding = "DB"
 database_name = "mantle-blank-local"
-# Omit database_id in generated projects so Cloudflare's first Git
-# deploy can auto-provision the D1 database.
 
 [[kv_namespaces]]
 binding = "KV"
-# Omit id in generated projects so Cloudflare can auto-provision the
-# render KV namespace during the first Git deploy.
 
-# OAuth grant store for @cloudflare/workers-oauth-provider — client
-# registrations + grants + tokens for the MCP surfaces (/mcp + /mcp/staff).
-# Omit id in generated projects for the same first-deploy
-# auto-provisioning path.
 [[kv_namespaces]]
 binding = "OAUTH_KV"
-
-# Bundle YAML manifests as inline text strings.
-[[rules]]
-type = "Text"
-globs = ["**/*.yaml"]
-fallthrough = true
-
-[[rules]]
-type = "Text"
-globs = ["**/*.css"]
-fallthrough = true

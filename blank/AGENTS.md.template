@@ -31,14 +31,15 @@ First task after materialization:
 ```text
 Read .mantle/launch-state.json, .mantle/features.json, and .mantle/handoff.md.
 Run the local preview, open {{SITE_URL}}, and confirm the Worker boots. Then
-inspect the already composed type manifest, homepage, and seed files before
-making changes.
+inspect the manifest. For a typed launch, also inspect its composed homepage
+and seed files before making changes.
 ```
 
 ## Commands
 
 - `pnpm dev` local preview on localhost:8787
 - `pnpm validate` manifest validation
+- `pnpm generate` regenerate machine-owned manifest/types
 - `pnpm typecheck` TypeScript check
 - `pnpm check` validate + typecheck
 - `pnpm run deploy` deploy Worker after provider setup
@@ -55,5 +56,5 @@ Media uploads are optional. Configure them only when requested, then read
   composed. Do not copy old full starter directories into it.
 - Theme work happens later through `mantle:theme`; there is no launch
   theme picker.
-- Kiwa source in this repo is copied source material. The repo must keep
-  working without Kiwa registry access.
+- Typed launches may include copied Kiwa source; blank does not. A typed repo
+  must keep working without Kiwa registry access.

@@ -125,6 +125,7 @@ jobs:
             const paths = [
               'package.json',
               'blank/package.json',
+              'recipes/typed-web/package.json',
             ];
             const version = process.env.VERSION;
             for (const p of paths) {
@@ -154,7 +155,7 @@ jobs:
 
       - name: Sync repo-local Core skills
         if: steps.released.outputs.done != 'true'
-        run: pnpm sync:core-skills --source blank/node_modules/@aotter/mantle
+        run: pnpm --dir blank exec mantle skills
 
       - name: Regenerate provision bundles
         if: steps.released.outputs.done != 'true'

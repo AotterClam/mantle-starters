@@ -20,7 +20,7 @@ const checkOnly = process.argv.includes("--check");
 const archetypes = ["blank", "presence", "intake", "publication", "transaction", "reservation", "community"];
 const dependencySectionKeys = ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"];
 
-ensureStarterStyles();
+ensureTypedStyles();
 
 for (const archetype of archetypes) {
   const files = buildBundleFiles(archetype);
@@ -49,6 +49,12 @@ for (const archetype of archetypes) {
 function buildBundleFiles(archetype) {
   const files = {};
   walk(files, "blank", "");
+  if (archetype !== "blank") {
+    walk(files, "recipes/typed-web", "");
+    delete files[".mantle/generated/site.ts"];
+    delete files[".mantle/generated/types.d.ts"];
+    delete files["manifests/site.yaml"];
+  }
   resolveCatalogPackageJson(files);
   applyProvisionedPackageMetadata(files);
   resolveCatalogLockfile(files);
@@ -57,8 +63,10 @@ function buildBundleFiles(archetype) {
     applyOverlayManifestLoader(files, archetype);
     delete files["manifests/example.yaml"];
   }
-  walk(files, "kiwa", "kiwa");
-  compileBundleStyles(files, archetype);
+  if (archetype !== "blank") {
+    walk(files, "kiwa", "kiwa");
+    compileBundleStyles(files, archetype);
+  }
 
   files[".mantle/launch-state.json.template"] = [
     "{",
@@ -149,9 +157,9 @@ function compileBundleStyles(files, archetype) {
       mkdirSync(dirname(target), { recursive: true });
       writeFileSync(target, content);
     }
-    symlinkSync(join(root, "blank", "node_modules"), join(tempRoot, "node_modules"), "dir");
+    symlinkSync(join(root, "node_modules"), join(tempRoot, "node_modules"), "dir");
     const result = spawnSync(process.execPath, [
-      join(root, "blank", "scripts", "build-styles.mjs"),
+      join(root, "recipes", "typed-web", "scripts", "build-styles.mjs"),
       "--root",
       tempRoot,
     ], { stdio: "inherit" });
@@ -178,20 +186,8 @@ function assertBundle(bundle, archetype) {
     ".claude/skills/mantle-plugin/SKILL.md",
     ".claude/skills/mantle-theme/SKILL.md",
     ".claude/skills/mantle-update/SKILL.md",
-    "src/web/content/types.ts",
-    "kiwa/manifest.json",
-    "styles/generated.css",
   ]) {
     if (!bundle.files[required]) throw new Error(`${archetype} bundle missing ${required}`);
-  }
-  if (!bundle.files["src/worker/routes/assets.ts"]?.includes("/styles.css")) {
-    throw new Error(`${archetype} bundle missing generated stylesheet route`);
-  }
-  if (!bundle.files["src/web/assets.ts"]?.includes("assetBuild")) {
-    throw new Error(`${archetype} homepage assets must be cache-busted`);
-  }
-  if (!bundle.files["src/worker/routes/assets.ts"]?.includes("max-age=31536000, immutable")) {
-    throw new Error(`${archetype} versioned homepage assets must be immutable`);
   }
   if (!bundle.files["pnpm-workspace.yaml"]?.includes('  - "."')) {
     throw new Error(`${archetype} bundle missing root package workspace entry`);
@@ -206,15 +202,25 @@ function assertBundle(bundle, archetype) {
     throw new Error(`${archetype} bundle should not include blank example manifest`);
   }
   if (archetype === "blank") {
-    const homeContent = bundle.files["src/web/content/homeContent.ts"] ?? "";
-    const siteContent = bundle.files["src/web/content/siteContent.ts"] ?? "";
-    for (const forbidden of ["starts here", "contactForm", "Placeholder proof", "Start a conversation"]) {
-      if (homeContent.includes(forbidden) || siteContent.includes(forbidden)) {
-        throw new Error(`blank bundle contains seeded homepage copy: ${forbidden}`);
-      }
-    }
+    assertHeadlessBlank(bundle);
   }
   if (archetype !== "blank") {
+    for (const required of [
+      "src/web/content/types.ts",
+      "kiwa/manifest.json",
+      "styles/generated.css",
+    ]) {
+      if (!bundle.files[required]) throw new Error(`${archetype} bundle missing ${required}`);
+    }
+    if (!bundle.files["src/worker/routes/assets.ts"]?.includes("/styles.css")) {
+      throw new Error(`${archetype} bundle missing generated stylesheet route`);
+    }
+    if (!bundle.files["src/web/assets.ts"]?.includes("assetBuild")) {
+      throw new Error(`${archetype} homepage assets must be cache-busted`);
+    }
+    if (!bundle.files["src/worker/routes/assets.ts"]?.includes("max-age=31536000, immutable")) {
+      throw new Error(`${archetype} versioned homepage assets must be immutable`);
+    }
     const seedImport = `../../../.mantle/overlays/${archetype}/seed.json`;
     if (!bundle.files["src/web/content/homeContent.ts"]?.includes(seedImport)) {
       throw new Error(`${archetype} homeContent must read the overlay seed`);
@@ -224,12 +230,41 @@ function assertBundle(bundle, archetype) {
   assertProvisionedReadme(bundle, archetype);
 }
 
+function assertHeadlessBlank(bundle) {
+  for (const required of [
+    "manifests/site.yaml",
+    "src/index.ts",
+    ".mantle/generated/site.ts",
+    ".mantle/generated/types.d.ts",
+  ]) {
+    if (!bundle.files[required]) throw new Error(`blank bundle missing ${required}`);
+  }
+  for (const path of Object.keys(bundle.files)) {
+    if (["components/", "kiwa/", "lib/", "scripts/", "src/mantle/", "src/web/", "src/worker/", "styles/"]
+      .some((prefix) => path.startsWith(prefix))) {
+      throw new Error(`blank bundle includes typed/UI source: ${path}`);
+    }
+  }
+  const manifest = JSON.parse(bundle.files["package.json"]);
+  if (JSON.stringify(Object.keys(manifest.dependencies ?? {})) !== '["@aotter/mantle"]') {
+    throw new Error("blank production dependency must be @aotter/mantle only");
+  }
+  const worker = bundle.files["src/index.ts"];
+  if (!worker.includes("createMantleWorker") || !worker.includes(".mantle/generated/site.js")) {
+    throw new Error("blank Worker must use the generated manifest and Core facade");
+  }
+  if (bundle.files["wrangler.toml"].includes("[[rules]]")) {
+    throw new Error("blank must not ship runtime YAML/CSS loader rules");
+  }
+}
+
 function applyProvisionedReadme(files, archetype) {
   const base = files["README.md"];
   if (!base) return;
+  if (archetype === "blank") return;
   const reusableStart = base.indexOf("## Kiwa UI Credit");
   const reusableBody = reusableStart === -1 ? base : base.slice(reusableStart);
-  const manifestPath = archetype === "blank" ? "manifests/example.yaml" : `manifests/${archetype}.yaml`;
+  const manifestPath = archetype === "blank" ? "manifests/site.yaml" : `manifests/${archetype}.yaml`;
   const overview = [
     "# {{BRAND}}",
     "",
@@ -279,13 +314,25 @@ function assertProvisionedReadme(bundle, archetype) {
   if (!readme.startsWith("# {{BRAND}}\n")) {
     throw new Error(`${archetype} README must start with the provisioned brand placeholder`);
   }
+  if (archetype === "blank") {
+    for (const required of [
+      "manifests/site.yaml",
+      ".mantle/handoff.md",
+      ".mantle/launch-state.json",
+      "createMantleWorker",
+    ]) {
+      if (!readme.includes(required)) throw new Error(`blank README missing ${required}`);
+    }
+    if (readme.includes("## Kiwa UI Credit")) throw new Error("blank README claims a Kiwa UI surface");
+    return;
+  }
   for (const required of ["## Launch overview", "## Type notes", ".mantle/handoff.md", ".mantle/launch-state.json"]) {
     if (!readme.includes(required)) throw new Error(`${archetype} README missing ${required}`);
   }
   if (readme.includes("aotter/mantle-starters/blank")) {
     throw new Error(`${archetype} README still reads like the source starter README`);
   }
-  const manifestPath = archetype === "blank" ? "manifests/example.yaml" : `manifests/${archetype}.yaml`;
+  const manifestPath = `manifests/${archetype}.yaml`;
   if (!readme.includes(manifestPath)) throw new Error(`${archetype} README missing manifest path`);
   if (archetype !== "blank") {
     for (const required of [
@@ -299,11 +346,11 @@ function assertProvisionedReadme(bundle, archetype) {
   }
 }
 
-function ensureStarterStyles() {
+function ensureTypedStyles() {
   const args = [
-    join(root, "blank", "scripts", "build-styles.mjs"),
+    join(root, "recipes", "typed-web", "scripts", "build-styles.mjs"),
     "--root",
-    join(root, "blank"),
+    join(root, "recipes", "typed-web"),
   ];
   if (checkOnly) args.push("--check");
   const result = spawnSync(process.execPath, args, { stdio: "inherit" });
