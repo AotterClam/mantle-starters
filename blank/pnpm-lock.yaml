@@ -21,8 +21,8 @@ importers:
   .:
     dependencies:
       '@aotter/mantle':
-        specifier: 0.0.11-alpha.63
-        version: 0.0.11-alpha.63(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260801.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.7)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-oauth-provider@0.8.3)(aws4fetch@1.0.20)(better-auth@1.6.25(@cloudflare/workers-types@5.20260801.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(better-call@1.3.7(zod@4.4.3))(hono@4.12.34)(zod@4.4.3)
+        specifier: 0.0.11-alpha.67
+        version: 0.0.11-alpha.67(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260801.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.7)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-oauth-provider@0.8.3)(aws4fetch@1.0.20)(better-auth@1.6.25(@cloudflare/workers-types@5.20260801.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(better-call@1.3.7(zod@4.4.3))(hono@4.12.34)(zod@4.4.3)
     devDependencies:
       '@cloudflare/workers-types':
         specifier: 'catalog:'
@@ -36,11 +36,11 @@ importers:
 
 packages:
 
-  '@aotter/mantle-admin-ui@0.0.11-alpha.63':
-    resolution: {integrity: sha512-TpsktRoVBDJJJ6ldKdzLosuFOElY+jmyTUQUrO4dkLKeeU8pDWKFvAYqfsjK5MicjbfmX1Ae8MtM+ynjcAz+fg==}
+  '@aotter/mantle-admin-ui@0.0.11-alpha.67':
+    resolution: {integrity: sha512-c1dMgBLhdK8LuSsmshwNsm7zUFF+y7j+2XYpyXPJR8kzdRZ93z/a7SRHVszj2gk4LabcJvE2gjratsFwJhZrAA==}
 
-  '@aotter/mantle-cloudflare@0.0.11-alpha.63':
-    resolution: {integrity: sha512-TX3N9Ilr7or9mFY9+eBJnEEsV6hLtM9QFe3I8An1HXNu0xr03BuMJY0r/IaeKmzK96w+eyk3aNbTHvQzP+4hOQ==}
+  '@aotter/mantle-cloudflare@0.0.11-alpha.67':
+    resolution: {integrity: sha512-iEYjPuEYciIIr0pq3VF+1SuZorCtk1avVjZ3u+fN+qN9JOdoL5aiq81n/Do7Y2PqWPXThnfZ9EzLzrKRKaApmQ==}
     peerDependencies:
       '@cloudflare/workers-oauth-provider': ^0.8.0
       aws4fetch: ^1.0.20
@@ -48,19 +48,19 @@ packages:
       hono: ^4.12.0
       zod: ^4.0.0
 
-  '@aotter/mantle-runtime@0.0.11-alpha.63':
-    resolution: {integrity: sha512-bOp/cP2xP5U2/lo6/18FwCzoeekcryhejvu/5R+I/WQW7MAvS8SYaRxQFETgPGTmQYJV2pXXv0iyQw8/zl42aA==}
+  '@aotter/mantle-runtime@0.0.11-alpha.67':
+    resolution: {integrity: sha512-mIUqjZ2365GAcweL2uXO8CrNfw00eZ52lvyU0eFXIqrOKPdvbtZXMMVl96eMuT9KgoFOSDsTLArwmGNgljKFpA==}
     peerDependencies:
       zod: ^4.0.0
 
-  '@aotter/mantle-spec@0.0.11-alpha.63':
-    resolution: {integrity: sha512-fvcPlET2+23zrIilRuu718Yc5u0rWCBpShPVa2J+EsxohB1w2ZOMM89niA99qAyGjMlZ22DHPDjsW1HRvQUuMg==}
+  '@aotter/mantle-spec@0.0.11-alpha.67':
+    resolution: {integrity: sha512-wjIrM2rl+vOY1sLmu+g6oy9vwhc74zBIdEeh6h/nNdg4zaFlVKc3AjffBN1hp3uj9ASrZkqpViOxMQYaOYtMFg==}
     hasBin: true
     peerDependencies:
       zod: ^4.0.0
 
-  '@aotter/mantle@0.0.11-alpha.63':
-    resolution: {integrity: sha512-gcR9+b6MWsu1J4HweEIG0A4j7/dzw0tP43EF6KWaSDneqfpIR/A6sCjUnI7K1IYv6ST/BYmy7K30loh+glk+Bw==}
+  '@aotter/mantle@0.0.11-alpha.67':
+    resolution: {integrity: sha512-qPGynrwm4x9M2cTJJhmRqHlm9M48QWg6A5pBXvzQoWO8ElzfE1n4VXBmMXvB+fQULy+/50F3/oJnUt+72R3JEA==}
     engines: {node: '>=22'}
     hasBin: true
     peerDependencies:
@@ -1166,7 +1166,7 @@ packages:
 
 snapshots:
 
-  '@aotter/mantle-admin-ui@0.0.11-alpha.63':
+  '@aotter/mantle-admin-ui@0.0.11-alpha.67':
     dependencies:
       '@radix-ui/react-collapsible': 1.1.20(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@radix-ui/react-dialog': 1.1.23(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -1183,11 +1183,11 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  '@aotter/mantle-cloudflare@0.0.11-alpha.63(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260801.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.7)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-oauth-provider@0.8.3)(aws4fetch@1.0.20)(better-auth@1.6.25(@cloudflare/workers-types@5.20260801.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(better-call@1.3.7(zod@4.4.3))(hono@4.12.34)(zod@4.4.3)':
+  '@aotter/mantle-cloudflare@0.0.11-alpha.67(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260801.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.7)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-oauth-provider@0.8.3)(aws4fetch@1.0.20)(better-auth@1.6.25(@cloudflare/workers-types@5.20260801.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(better-call@1.3.7(zod@4.4.3))(hono@4.12.34)(zod@4.4.3)':
     dependencies:
-      '@aotter/mantle-admin-ui': 0.0.11-alpha.63
-      '@aotter/mantle-runtime': 0.0.11-alpha.63(zod@4.4.3)
-      '@aotter/mantle-spec': 0.0.11-alpha.63(zod@4.4.3)
+      '@aotter/mantle-admin-ui': 0.0.11-alpha.67
+      '@aotter/mantle-runtime': 0.0.11-alpha.67(zod@4.4.3)
+      '@aotter/mantle-spec': 0.0.11-alpha.67(zod@4.4.3)
       '@better-auth/oauth-provider': 1.6.25(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260801.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.7)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-auth@1.6.25(@cloudflare/workers-types@5.20260801.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(better-call@1.3.7(zod@4.4.3))
       '@cloudflare/workers-oauth-provider': 0.8.3
       aws4fetch: 1.0.20
@@ -1202,22 +1202,22 @@ snapshots:
       - '@types/react-dom'
       - better-call
 
-  '@aotter/mantle-runtime@0.0.11-alpha.63(zod@4.4.3)':
+  '@aotter/mantle-runtime@0.0.11-alpha.67(zod@4.4.3)':
     dependencies:
-      '@aotter/mantle-spec': 0.0.11-alpha.63(zod@4.4.3)
+      '@aotter/mantle-spec': 0.0.11-alpha.67(zod@4.4.3)
       zod: 4.4.3
 
-  '@aotter/mantle-spec@0.0.11-alpha.63(zod@4.4.3)':
+  '@aotter/mantle-spec@0.0.11-alpha.67(zod@4.4.3)':
     dependencies:
       yaml: 2.9.0
       zod: 4.4.3
 
-  '@aotter/mantle@0.0.11-alpha.63(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260801.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.7)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-oauth-provider@0.8.3)(aws4fetch@1.0.20)(better-auth@1.6.25(@cloudflare/workers-types@5.20260801.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(better-call@1.3.7(zod@4.4.3))(hono@4.12.34)(zod@4.4.3)':
+  '@aotter/mantle@0.0.11-alpha.67(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260801.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.7)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-oauth-provider@0.8.3)(aws4fetch@1.0.20)(better-auth@1.6.25(@cloudflare/workers-types@5.20260801.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(better-call@1.3.7(zod@4.4.3))(hono@4.12.34)(zod@4.4.3)':
     dependencies:
-      '@aotter/mantle-admin-ui': 0.0.11-alpha.63
-      '@aotter/mantle-cloudflare': 0.0.11-alpha.63(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260801.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.7)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-oauth-provider@0.8.3)(aws4fetch@1.0.20)(better-auth@1.6.25(@cloudflare/workers-types@5.20260801.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(better-call@1.3.7(zod@4.4.3))(hono@4.12.34)(zod@4.4.3)
-      '@aotter/mantle-runtime': 0.0.11-alpha.63(zod@4.4.3)
-      '@aotter/mantle-spec': 0.0.11-alpha.63(zod@4.4.3)
+      '@aotter/mantle-admin-ui': 0.0.11-alpha.67
+      '@aotter/mantle-cloudflare': 0.0.11-alpha.67(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-types@5.20260801.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.7)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@cloudflare/workers-oauth-provider@0.8.3)(aws4fetch@1.0.20)(better-auth@1.6.25(@cloudflare/workers-types@5.20260801.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(better-call@1.3.7(zod@4.4.3))(hono@4.12.34)(zod@4.4.3)
+      '@aotter/mantle-runtime': 0.0.11-alpha.67(zod@4.4.3)
+      '@aotter/mantle-spec': 0.0.11-alpha.67(zod@4.4.3)
       '@cloudflare/workers-oauth-provider': 0.8.3
       aws4fetch: 1.0.20
       better-auth: 1.6.25(@cloudflare/workers-types@5.20260801.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
