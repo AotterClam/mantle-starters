@@ -134,7 +134,7 @@
       "path": "components/ui/accordion.tsx",
       "mirrors": [
         "kiwa",
-        "blank"
+        "typed-web"
       ],
       "source": "https://registry.kiwaui.com/r/accordion.json",
       "sha256": "156b4a47a9437ae3627ca3c433b118691e8b6101aeac7f9913a9596ec619ce98"
@@ -143,7 +143,7 @@
       "path": "components/ui/avatar.tsx",
       "mirrors": [
         "kiwa",
-        "blank"
+        "typed-web"
       ],
       "source": "https://registry.kiwaui.com/r/avatar.json",
       "sha256": "d6eec88c6cdff9565b37ae6276c8419fb2629ab31de90d1893f0b5bd7d93eeae"
@@ -160,7 +160,7 @@
       "path": "components/ui/button.tsx",
       "mirrors": [
         "kiwa",
-        "blank"
+        "typed-web"
       ],
       "source": "https://registry.kiwaui.com/r/button.json",
       "sha256": "d8f2aa24eae2c8701c8ec56b7297bd73adf1437278bf53b78088b1a15293da5d"
@@ -169,7 +169,7 @@
       "path": "components/ui/display-card.tsx",
       "mirrors": [
         "kiwa",
-        "blank"
+        "typed-web"
       ],
       "source": "https://registry.kiwaui.com/r/display-card.json",
       "sha256": "74f5862afecfaec110fa46c06a07682360e4f66e51606f7e1d96b1cf9851adf2"
@@ -178,7 +178,7 @@
       "path": "components/ui/icon.tsx",
       "mirrors": [
         "kiwa",
-        "blank"
+        "typed-web"
       ],
       "source": "https://registry.kiwaui.com/r/icon.json",
       "sha256": "3b0d28152083c27c3b41f08e12d4dc1229f224bf47355d882edf4438a16ee5a7"
@@ -187,7 +187,7 @@
       "path": "components/ui/input.tsx",
       "mirrors": [
         "kiwa",
-        "blank"
+        "typed-web"
       ],
       "source": "https://registry.kiwaui.com/r/input.json",
       "sha256": "39325528e9f30603463d45e3782f880578eb70b1e8d21e99d4eacb68d7bb0a8a"
@@ -196,7 +196,7 @@
       "path": "components/ui/label.tsx",
       "mirrors": [
         "kiwa",
-        "blank"
+        "typed-web"
       ],
       "source": "https://registry.kiwaui.com/r/label.json",
       "sha256": "bb840e780b5270af18cf5abf2bde5906296c5ded29e1ed74a1083a8cfaabfd07"
@@ -205,7 +205,7 @@
       "path": "components/ui/placeholder-gradient.tsx",
       "mirrors": [
         "kiwa",
-        "blank"
+        "typed-web"
       ],
       "source": "https://registry.kiwaui.com/r/placeholder-gradient.json",
       "sha256": "48df1987672596e1c5d1592b8dc2090ecc6ee76702ea20a136e79883210a103d"
@@ -214,7 +214,7 @@
       "path": "components/ui/placeholder-logo.tsx",
       "mirrors": [
         "kiwa",
-        "blank"
+        "typed-web"
       ],
       "source": "https://registry.kiwaui.com/r/placeholder-logo.json",
       "sha256": "96a306a3fd3cf048fbbd367ce6cc1e8710ad5e7dd5b7e472b08743de6b8a6baf"
@@ -223,7 +223,7 @@
       "path": "components/ui/social-icon.tsx",
       "mirrors": [
         "kiwa",
-        "blank"
+        "typed-web"
       ],
       "source": "https://registry.kiwaui.com/r/social-icon.json",
       "sha256": "16121f1d35a5453316e3e63fca3fe3b9ca4b3087c3bde004e34017f084e37a02"
@@ -232,7 +232,7 @@
       "path": "components/ui/textarea.tsx",
       "mirrors": [
         "kiwa",
-        "blank"
+        "typed-web"
       ],
       "source": "https://registry.kiwaui.com/r/textarea.json",
       "sha256": "20b67feaef227403fe54607631c2bfcfbce2c1cff0de30c8fc037edcabbef71f"
@@ -297,7 +297,7 @@
       "path": "lib/utils.ts",
       "mirrors": [
         "kiwa",
-        "blank"
+        "typed-web"
       ],
       "source": "https://raw.githubusercontent.com/kiwa-ui/kiwa-ui/d00aba1ce6fc0f0c48c0102d803dc15e5f1ce3d5/registry/lib/utils.ts",
       "sha256": "cc415674b12bea27cf6e2255b94453c772ae1c9f26513ad6c51910e0d6049ed5"
@@ -305,7 +305,7 @@
     {
       "path": "src/web/client/kiwaEnhanceAssets.ts",
       "mirrors": [
-        "blank"
+        "typed-web"
       ],
       "source": "https://unpkg.com/@kiwa-ui/enhance@2.1.0/dist/",
       "sha256": "a92eddfb1db98c952b84551c73ff9ff9c3d21b9467193fe0ac34d6c3e607452f"

@@ -1,26 +1,13 @@
-# Release fanout — Step 2 of aotter/mantle#191.
+# Release worker for aotter/mantle#559.
 #
-# Triggered by mantle SDK's `release.yml` after a successful publish.
-# Bumps blank starter `@aotter/mantle*` deps + own version to the
-# just-published SDK version, gates on validate + typecheck for blank,
-# opens a PR against main, waits for PR checks, then admin-merges it.
-# repository_dispatch runs on the default branch (`develop`), so this
-# PR also promotes the current develop starter content into the release.
-# After the PR merges, this workflow
-# waits for `tag-and-dispatch-landing.yml` to create the tag from the
-# main push; if GitHub suppresses that follow-on workflow for an
-# Actions-originated merge, this workflow creates the tag and dispatches
-# `mantle-landing` directly as a fallback. Finally, it syncs the release
-# bump commit from `main` back to `develop` so the next SDK fanout does
-# not start from stale starter package / lock metadata.
+# Core's release controller dispatches this workflow only after npm publish.
+# This worker owns one deterministic Starter transition:
 #
-# Operator setup (one-time):
+#   develop source -> version/locks/skills/bundles -> validated PR -> develop tag
 #
-#   RELEASE_FANOUT_TOKEN — fine-grained PAT (or GitHub App token)
-#                          with `contents: write` + `pull-requests:
-#                          write` on this repo (for opening + merging
-#                          the PR) and on `mantle-landing`
-#                          (for the dispatch after merge). Required.
+# It does not promote main, backport main, or dispatch Landing. Core waits for
+# the immutable Starter tag, verifies the published-registry consumer, and
+# decides explicitly whether Landing should move.
 
 name: bump-from-sdk
 
@@ -28,49 +15,46 @@ on:
   repository_dispatch:
     types: [sdk-published]
 
-  # Manual override — useful if RELEASE_FANOUT_TOKEN was missing during
-  # the SDK publish or if a previous bump PR was closed without merge.
-  workflow_dispatch:
-    inputs:
-      sdk_version:
-        description: 'SDK version to bump to (without leading v)'
-        required: true
-        type: string
-      npm_tag:
-        description: 'npm dist-tag (alpha / beta / rc / latest)'
-        required: true
-        type: string
-        default: alpha
-
 permissions:
   contents: write
-  pull-requests: write
+  pull-requests: read
+  checks: read
 
 concurrency:
-  group: bump-from-sdk-${{ github.event.client_payload.sdk_version || inputs.sdk_version || github.run_id }}
+  group: bump-from-sdk
   cancel-in-progress: false
 
 jobs:
-  bump:
+  release:
     runs-on: ubuntu-latest
     steps:
       - id: input
+        env:
+          VERSION: ${{ github.event.client_payload.sdk_version }}
+          CORE_SHA: ${{ github.event.client_payload.core_sha }}
+          STARTER_SHA: ${{ github.event.client_payload.starter_sha }}
         run: |
           set -euo pipefail
-          VERSION="${{ github.event.client_payload.sdk_version || inputs.sdk_version }}"
-          NPM_TAG="${{ github.event.client_payload.npm_tag || inputs.npm_tag }}"
-          if [ -z "$VERSION" ]; then
-            echo "::error::sdk_version not supplied"
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || {
+            echo "::error::Invalid sdk_version: $VERSION"
             exit 1
-          fi
+          }
+          [[ "$CORE_SHA" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "::error::Invalid core_sha: $CORE_SHA"
+            exit 1
+          }
+          [[ "$STARTER_SHA" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "::error::Invalid starter_sha: $STARTER_SHA"
+            exit 1
+          }
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "npm_tag=$NPM_TAG" >> "$GITHUB_OUTPUT"
-          echo "Bumping starters to SDK version $VERSION (npm dist-tag $NPM_TAG)"
+          echo "core_sha=$CORE_SHA" >> "$GITHUB_OUTPUT"
+          echo "starter_sha=$STARTER_SHA" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v7.0.0
         with:
-          token: ${{ secrets.RELEASE_FANOUT_TOKEN }}
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: pnpm/action-setup@v6.0.9
 
@@ -79,255 +63,317 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      - name: Fetch release refs
-        run: |
-          set -euo pipefail
-          git fetch origin \
-            '+refs/heads/main:refs/remotes/origin/main' \
-            '+refs/heads/develop:refs/remotes/origin/develop' \
-            --tags
-
-      - name: Skip if main is already released
-        id: released
+      - name: Inspect release state
+        id: state
         env:
+          GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.input.outputs.version }}
+          CORE_SHA: ${{ steps.input.outputs.core_sha }}
+          STARTER_SHA: ${{ steps.input.outputs.starter_sha }}
         run: |
           set -euo pipefail
-          MAIN_VERSION=$(git show origin/main:package.json | node --input-type=module -e "let s=''; for await (const c of process.stdin) s += c; console.log(JSON.parse(s).version)")
-          if [ "$MAIN_VERSION" = "$VERSION" ]; then
-            echo "origin/main already has version $VERSION; duplicate dispatch is a no-op."
-            echo "done=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "origin/main is $MAIN_VERSION; release needed for $VERSION."
-            echo "done=false" >> "$GITHUB_OUTPUT"
+          git fetch origin --prune --tags
+
+          CORE_TAG_SHA=$(git ls-remote https://github.com/aotter/mantle.git "refs/tags/v$VERSION^{}" | awk '{print $1}')
+          if [ -z "$CORE_TAG_SHA" ]; then
+            CORE_TAG_SHA=$(git ls-remote https://github.com/aotter/mantle.git "refs/tags/v$VERSION" | awk '{print $1}')
+          fi
+          [ "$CORE_TAG_SHA" = "$CORE_SHA" ] || {
+            echo "::error::Core v$VERSION resolves to ${CORE_TAG_SHA:-nothing}, not $CORE_SHA"
+            exit 1
+          }
+
+          MERGED=$(gh pr list --base develop --head "release/v$VERSION" --state merged --limit 10 \
+            --json url,mergeCommit,headRepository,headRepositoryOwner,isCrossRepository \
+            --jq '[.[] | select(.isCrossRepository == false and .headRepository.name == "mantle-starters" and .headRepositoryOwner.login == "aotter")]')
+          MERGED_COUNT=$(jq 'length' <<< "$MERGED")
+          [ "$MERGED_COUNT" -le 1 ] || {
+            echo "::error::Multiple canonical release/v$VERSION PRs are merged"
+            exit 1
+          }
+          MERGE_SHA=$(jq -r '.[0].mergeCommit.oid // ""' <<< "$MERGED")
+
+          TAG_SHA=$(git rev-parse -q --verify "refs/tags/v$VERSION^{commit}" || true)
+          if [ -n "$TAG_SHA" ]; then
+            [ -n "$MERGE_SHA" ] && [ "$TAG_SHA" = "$MERGE_SHA" ] || {
+              echo "::error::v$VERSION is not the canonical merged release PR commit"
+              exit 1
+            }
+            echo "mode=tagged" >> "$GITHUB_OUTPUT"
+            echo "release_sha=$TAG_SHA" >> "$GITHUB_OUTPUT"
+            echo "v$VERSION already exists at $TAG_SHA; duplicate dispatch is a no-op."
+            exit 0
           fi
 
-      - name: Create release branch
-        if: steps.released.outputs.done != 'true'
-        run: |
-          set -euo pipefail
-          BRANCH="release/v${{ steps.input.outputs.version }}"
-          git checkout -B "$BRANCH" origin/develop
-          git merge --no-ff origin/main -m "chore: include released main before v${{ steps.input.outputs.version }}"
-          echo "branch=$BRANCH" >> "$GITHUB_ENV"
+          OPEN=$(gh pr list --base develop --head "release/v$VERSION" --state open --limit 10 \
+            --json url,baseRefOid,headRepository,headRepositoryOwner,isCrossRepository \
+            --jq '[.[] | select(.isCrossRepository == false and .headRepository.name == "mantle-starters" and .headRepositoryOwner.login == "aotter")]')
+          OPEN_COUNT=$(jq 'length' <<< "$OPEN")
+          [ "$OPEN_COUNT" -le 1 ] || {
+            echo "::error::Multiple canonical release/v$VERSION PRs are open"
+            exit 1
+          }
+          PR_URL=$(jq -r '.[0].url // ""' <<< "$OPEN")
+          if [ -n "$PR_URL" ]; then
+            BASE_SHA=$(jq -r '.[0].baseRefOid' <<< "$OPEN")
+            [ "$BASE_SHA" = "$STARTER_SHA" ] || {
+              echo "::error::Release PR base is $BASE_SHA, not gated Starter $STARTER_SHA; rerun the Core controller"
+              exit 1
+            }
+            echo "mode=open" >> "$GITHUB_OUTPUT"
+            echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+            echo "Resuming open release PR: $PR_URL"
+            exit 0
+          fi
 
-      - name: Bump @aotter/mantle* deps + own version
-        if: steps.released.outputs.done != 'true'
+          if [ -n "$MERGE_SHA" ]; then
+            git fetch origin "$MERGE_SHA"
+            git merge-base --is-ancestor "$MERGE_SHA" origin/develop || {
+              echo "::error::Recovered release commit $MERGE_SHA is not on develop"
+              exit 1
+            }
+            MERGE_BASE=$(git rev-parse "$MERGE_SHA^1")
+            [ "$MERGE_BASE" = "$STARTER_SHA" ] || {
+              echo "::error::Release PR merged from $MERGE_BASE, not gated Starter $STARTER_SHA"
+              exit 1
+            }
+            echo "mode=resume" >> "$GITHUB_OUTPUT"
+            echo "release_sha=$MERGE_SHA" >> "$GITHUB_OUTPUT"
+            echo "Resuming after merged release PR at $MERGE_SHA."
+            exit 0
+          fi
+
+          ORPHAN_SHA=$(git ls-remote origin "refs/heads/release/v$VERSION" | awk '{print $1}')
+          if [ -n "$ORPHAN_SHA" ]; then
+            CLOSED=$(gh pr list --base develop --head "release/v$VERSION" --state closed --limit 10 \
+              --json url,headRepository,headRepositoryOwner,isCrossRepository \
+              --jq '[.[] | select(.isCrossRepository == false and .headRepository.name == "mantle-starters" and .headRepositoryOwner.login == "aotter")] | .[0].url // ""')
+            [ -z "$CLOSED" ] || {
+              echo "::error::Release branch belongs to closed PR $CLOSED; reopen it or remove the branch explicitly"
+              exit 1
+            }
+            git fetch origin "$ORPHAN_SHA"
+            node scripts/check-release-candidate.mjs "$ORPHAN_SHA" "$VERSION" "$CORE_SHA" "$STARTER_SHA"
+            echo "mode=orphan" >> "$GITHUB_OUTPUT"
+            echo "Resuming release branch $ORPHAN_SHA before PR creation."
+            exit 0
+          fi
+
+          DEVELOP_SHA=$(git rev-parse origin/develop)
+          [ "$DEVELOP_SHA" = "$STARTER_SHA" ] || {
+            echo "::error::develop advanced from gated Starter $STARTER_SHA to $DEVELOP_SHA; rerun the Core controller"
+            exit 1
+          }
+          echo "mode=bump" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare release branch
+        if: steps.state.outputs.mode == 'bump'
         env:
           VERSION: ${{ steps.input.outputs.version }}
+          CORE_SHA: ${{ steps.input.outputs.core_sha }}
         run: |
           set -euo pipefail
-          # Per generated base (and root): rewrite every "@aotter/mantle*" dep
-          # to the new version, and bump the package's own `version`.
-          # Touches both `dependencies` and `devDependencies`.
+          BRANCH="release/v$VERSION"
+          git checkout -B "$BRANCH" origin/develop
+          echo "branch=$BRANCH" >> "$GITHUB_ENV"
           node --input-type=module -e "
             import { readFileSync, writeFileSync } from 'node:fs';
-            const paths = [
-              'package.json',
-              'blank/package.json',
-              'recipes/typed-web/package.json',
-            ];
             const version = process.env.VERSION;
-            for (const p of paths) {
-              const j = JSON.parse(readFileSync(p, 'utf8'));
-              for (const k of ['dependencies', 'devDependencies']) {
-                if (!j[k]) continue;
-                for (const dep of Object.keys(j[k])) {
-                  if (dep === '@aotter/mantle' || dep.startsWith('@aotter/mantle-')) {
-                    j[k][dep] = version;
-                  }
+            for (const path of ['package.json', 'blank/package.json', 'recipes/typed-web/package.json']) {
+              const pkg = JSON.parse(readFileSync(path, 'utf8'));
+              for (const section of ['dependencies', 'devDependencies']) {
+                for (const name of Object.keys(pkg[section] ?? {})) {
+                  if (name === '@aotter/mantle' || name.startsWith('@aotter/mantle-')) pkg[section][name] = version;
                 }
               }
-              // Own version mirrors SDK version per #191.
-              j.version = version;
-              writeFileSync(p, JSON.stringify(j, null, 2) + '\n');
-              console.log('bumped', p);
+              pkg.version = version;
+              if (path === 'package.json') pkg.mantleCoreSha = process.env.CORE_SHA;
+              writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n');
             }
           "
 
-      - name: Regenerate workspace lockfile
-        if: steps.released.outputs.done != 'true'
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Regenerate standalone starter lockfiles
-        if: steps.released.outputs.done != 'true'
-        run: pnpm refresh:starter-locks
-
-      - name: Sync repo-local Core skills
-        if: steps.released.outputs.done != 'true'
-        run: pnpm --dir blank exec mantle skills
-
-      - name: Regenerate provision bundles
-        if: steps.released.outputs.done != 'true'
-        run: pnpm build:provision-bundle
-
-      - name: Validate (gate)
-        if: steps.released.outputs.done != 'true'
+      - name: Regenerate release artifacts
+        if: steps.state.outputs.mode == 'bump'
         run: |
           set -euo pipefail
-          for starter in blank; do
-            echo "=== validate $starter ==="
-            (cd "$starter" && pnpm validate)
-            echo "=== index coverage $starter ==="
-            (cd "$starter" && pnpm check:indexes)
-            echo "=== typecheck $starter ==="
-            (cd "$starter" && pnpm typecheck)
-          done
+          pnpm install --no-frozen-lockfile
+          pnpm refresh:starter-locks
+          pnpm --dir blank exec mantle skills
+          pnpm build:provision-bundle
 
-      - name: Commit + push
-        if: steps.released.outputs.done != 'true'
+      - name: Validate release artifacts
+        if: steps.state.outputs.mode == 'bump'
+        run: |
+          set -euo pipefail
+          pnpm check:starter-locks
+          pnpm check:provision-bundle
+          pnpm check:packed
+
+      - name: Commit and push release branch
+        if: steps.state.outputs.mode == 'bump'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.input.outputs.version }}
         run: |
           set -euo pipefail
           git config user.name 'mantle-release-bot'
           git config user.email '49699333+dependabot[bot]@users.noreply.github.com'
           git add -A
-          if git diff --cached --quiet; then
-            echo "::error::No changes after bump — was the SDK version the same as current?"
+          git diff --cached --quiet && {
+            echo "::error::Release bump produced no changes"
             exit 1
-          fi
-          git commit -m "release: bump @aotter/mantle* to v${{ steps.input.outputs.version }}"
-          git push origin "${{ env.branch }}" --force-with-lease
+          }
+          git commit -m "release: bump @aotter/mantle* to v$VERSION"
+          gh auth setup-git
+          git push origin "$BRANCH"
 
       - name: Open release PR
-        if: steps.released.outputs.done != 'true'
+        if: steps.state.outputs.mode == 'bump' || steps.state.outputs.mode == 'orphan'
         id: openpr
         env:
-          # PR creation uses RELEASE_FANOUT_TOKEN because it's a PAT
-          # with cross-repo `pull-requests: write` — needed for the
-          # commit + push and the cross-repo dispatch later.
           GH_TOKEN: ${{ secrets.RELEASE_FANOUT_TOKEN }}
+          VERSION: ${{ steps.input.outputs.version }}
         run: |
           set -euo pipefail
-          PR_URL=$(gh pr list \
-            --base main \
-            --head "${{ env.branch }}" \
-            --state open \
-            --json url \
-            --jq '.[0].url // ""')
-          if [ -z "$PR_URL" ]; then
-            PR_URL=$(gh pr create \
-              --base main \
-              --head "${{ env.branch }}" \
-              --title "release: bump @aotter/mantle* to v${{ steps.input.outputs.version }}" \
-              --body "Auto-generated by \`bump-from-sdk.yml\` after SDK release \`v${{ steps.input.outputs.version }}\` (dist-tag \`${{ steps.input.outputs.npm_tag }}\`). Workspace + standalone blank lockfiles and provision bundles were regenerated, and validate + typecheck passed for blank before this PR opened. This workflow waits for PR checks, admin-merges, tags starters, dispatches landing, then backports \`main\` to \`develop\`.")
-          fi
+          [ -n "$GH_TOKEN" ] || {
+            echo "::error::RELEASE_FANOUT_TOKEN is required to create the release PR"
+            exit 1
+          }
+          BRANCH="release/v$VERSION"
+          PR_URL=$(gh pr create \
+            --base develop \
+            --head "$BRANCH" \
+            --title "release: bump @aotter/mantle* to v$VERSION" \
+            --body "Generated by the Core release controller after published SDK v$VERSION. Locks, Core skills, provision bundles, exact packed Core, and runtime smoke are gated before merge. The merged develop commit becomes the immutable Starter tag; main and Landing are not mutated by this worker.")
           echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
-          echo "Release PR: $PR_URL"
 
-      - name: Wait for PR checks
-        if: steps.released.outputs.done != 'true'
+      - name: Wait for release PR checks
+        if: steps.state.outputs.mode == 'bump' || steps.state.outputs.mode == 'orphan' || steps.state.outputs.mode == 'open'
+        id: checks
         env:
-          GH_TOKEN: ${{ secrets.RELEASE_FANOUT_TOKEN }}
-          PR_URL: ${{ steps.openpr.outputs.pr_url }}
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ steps.openpr.outputs.pr_url || steps.state.outputs.pr_url }}
+          VERSION: ${{ steps.input.outputs.version }}
+          CORE_SHA: ${{ steps.input.outputs.core_sha }}
+          STARTER_SHA: ${{ steps.input.outputs.starter_sha }}
         run: |
           set -euo pipefail
-          for attempt in $(seq 1 90); do
-            FAILED=$(gh pr view "$PR_URL" --json statusCheckRollup --jq '[.statusCheckRollup[]? | select(.status == "COMPLETED" and (.conclusion == "FAILURE" or .conclusion == "CANCELLED" or .conclusion == "TIMED_OUT" or .conclusion == "ACTION_REQUIRED"))] | length')
-            PENDING=$(gh pr view "$PR_URL" --json statusCheckRollup --jq '[.statusCheckRollup[]? | select(.status != "COMPLETED")] | length')
-            TOTAL=$(gh pr view "$PR_URL" --json statusCheckRollup --jq '[.statusCheckRollup[]?] | length')
-            if [ "$FAILED" != "0" ]; then
-              echo "::error::Release PR has failing checks: $PR_URL"
-              gh pr checks "$PR_URL" || true
+          EXPECTED='["exact packed Core","starter lockfiles","starter safety"]'
+          for attempt in $(seq 1 30); do
+            CHECKS=$(gh pr checks "$PR_URL" --json name,bucket 2>/dev/null || true)
+            FOUND=$(jq --argjson expected "$EXPECTED" '[.[].name] as $names | [$expected[] | select($names | index(.) != null)] | length' <<< "${CHECKS:-[]}")
+            [ "$FOUND" = 3 ] && break
+            echo "Waiting for release checks to register ($attempt/30; found=$FOUND/3)."
+            sleep 5
+          done
+          [ "${FOUND:-0}" = 3 ] || {
+            echo "::error::Expected release checks did not register: $PR_URL"
+            exit 1
+          }
+          gh pr checks "$PR_URL" --watch --fail-fast --interval 10
+
+          PR=$(gh pr view "$PR_URL" --json baseRefOid,headRefOid,headRepository,headRepositoryOwner,isCrossRepository,statusCheckRollup)
+          jq -e '.isCrossRepository == false and .headRepository.name == "mantle-starters" and .headRepositoryOwner.login == "aotter"' <<< "$PR" >/dev/null || {
+            echo "::error::Refusing non-canonical release PR: $PR_URL"
+            exit 1
+          }
+          BASE_SHA=$(jq -r '.baseRefOid' <<< "$PR")
+          [ "$BASE_SHA" = "$STARTER_SHA" ] || {
+            echo "::error::Release PR base advanced to $BASE_SHA from gated Starter $STARTER_SHA; rerun the Core controller"
+            exit 1
+          }
+          for NAME in "exact packed Core" "starter lockfiles" "starter safety"; do
+            PASSED=$(jq --arg name "$NAME" '[.statusCheckRollup[]? | select(.name == $name and .status == "COMPLETED" and .conclusion == "SUCCESS")] | length' <<< "$PR")
+            [ "$PASSED" -ge 1 ] || {
+              echo "::error::Required release check did not pass: $NAME"
               exit 1
-            fi
-            if [ "$TOTAL" != "0" ] && [ "$PENDING" = "0" ]; then
-              echo "Release PR checks completed."
-              exit 0
-            fi
-            echo "Release PR checks pending (attempt $attempt/90; total=$TOTAL pending=$PENDING)."
-            sleep 10
+            }
           done
-          echo "::error::Timed out waiting for release PR checks: $PR_URL"
-          exit 1
 
-      - name: Merge release PR
-        if: steps.released.outputs.done != 'true'
-        env:
-          GH_TOKEN: ${{ secrets.RELEASE_FANOUT_TOKEN }}
-          PR_URL: ${{ steps.openpr.outputs.pr_url }}
-        run: |
-          set -euo pipefail
-          if ! gh pr merge "$PR_URL" --admin --merge --delete-branch; then
-            echo "::error::Admin merge failed. RELEASE_FANOUT_TOKEN must be owned by an account allowed to bypass main's review gate."
-            exit 1
-          fi
+          HEAD_SHA=$(jq -r '.headRefOid' <<< "$PR")
+          git fetch origin "$HEAD_SHA"
+          node scripts/check-release-candidate.mjs "$HEAD_SHA" "$VERSION" "$CORE_SHA" "$STARTER_SHA"
+          echo "head_sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
 
-      - name: Wait for merge + complete fanout
-        if: steps.released.outputs.done != 'true'
+      - name: Merge checked release head atomically
+        if: steps.state.outputs.mode == 'bump' || steps.state.outputs.mode == 'orphan' || steps.state.outputs.mode == 'open'
+        id: merge
         env:
-          GH_TOKEN: ${{ secrets.RELEASE_FANOUT_TOKEN }}
-          PR_URL: ${{ steps.openpr.outputs.pr_url }}
+          GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.input.outputs.version }}
+          CORE_SHA: ${{ steps.input.outputs.core_sha }}
+          HEAD_SHA: ${{ steps.checks.outputs.head_sha }}
+          PR_URL: ${{ steps.openpr.outputs.pr_url || steps.state.outputs.pr_url }}
+          STARTER_SHA: ${{ steps.input.outputs.starter_sha }}
         run: |
           set -euo pipefail
-
-          for attempt in $(seq 1 90); do
-            MERGED_AT=$(gh pr view "$PR_URL" --json mergedAt --jq '.mergedAt // ""')
-            if [ -n "$MERGED_AT" ]; then
-              MERGE_SHA=$(gh pr view "$PR_URL" --json mergeCommit --jq '.mergeCommit.oid // ""')
-              if [ -z "$MERGE_SHA" ]; then
-                echo "::error::Release PR is merged but mergeCommit.oid is empty."
-                exit 1
-              fi
-              echo "Release PR merged at $MERGED_AT ($MERGE_SHA)"
-              break
-            fi
-            echo "Release PR not merged yet; waiting (attempt $attempt/90)."
-            sleep 10
-          done
-
-          if [ -z "${MERGE_SHA:-}" ]; then
-            echo "::error::Release PR did not merge before timeout."
+          DEVELOP_SHA=$(git ls-remote origin refs/heads/develop | awk '{print $1}')
+          [ "$DEVELOP_SHA" = "$STARTER_SHA" ] || {
+            echo "::error::develop advanced to $DEVELOP_SHA; rerun the Core controller"
             exit 1
-          fi
-
-          # Give tag-and-dispatch-landing.yml a chance to handle the
-          # normal main-push path. If that workflow is suppressed by
-          # GitHub's Actions-token rules, no tag appears and this step
-          # completes the fanout itself.
-          for attempt in $(seq 1 12); do
-            git fetch origin "refs/tags/v$VERSION:refs/tags/v$VERSION" >/dev/null 2>&1 || true
-            if git rev-parse "v$VERSION" >/dev/null 2>&1; then
-              echo "Tag v$VERSION already exists; downstream tag workflow handled the release."
-              exit 0
-            fi
-            echo "Tag v$VERSION not visible yet; waiting for downstream tag workflow (attempt $attempt/12)."
-            sleep 10
-          done
-
-          git fetch origin main --tags
-          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
-            echo "Tag v$VERSION already exists after final fetch; no fallback dispatch needed."
-            exit 0
-          fi
-
-          echo "Downstream tag workflow did not create v$VERSION; creating tag and dispatching landing."
-          git tag "v$VERSION" "$MERGE_SHA"
-          git push origin "v$VERSION"
-          gh api "repos/${{ github.repository_owner }}/mantle-landing/dispatches" \
-            -f event_type=starters-released \
-            -F "client_payload[starters_version]=$VERSION"
-          echo "Fallback dispatched mantle-landing bump-from-starters for v$VERSION"
-
-      - name: Sync released main back to develop
-        env:
-          VERSION: ${{ steps.input.outputs.version }}
-        run: |
-          set -euo pipefail
-
+          }
           git config user.name 'mantle-release-bot'
           git config user.email '49699333+dependabot[bot]@users.noreply.github.com'
-          git fetch origin \
-            '+refs/heads/main:refs/remotes/origin/main' \
-            '+refs/heads/develop:refs/remotes/origin/develop' \
-            --tags
+          git checkout --detach "$STARTER_SHA"
+          git merge --no-ff "$HEAD_SHA" -m "Merge release/v$VERSION into develop"
+          MERGE_SHA=$(git rev-parse HEAD)
+          node scripts/check-release-candidate.mjs "$MERGE_SHA" "$VERSION" "$CORE_SHA" "$STARTER_SHA"
+          gh auth setup-git
+          git push origin "$MERGE_SHA:refs/heads/develop"
+          for attempt in $(seq 1 15); do
+            RECORDED_SHA=$(gh pr view "$PR_URL" --json mergeCommit,mergedAt --jq 'select(.mergedAt != null) | .mergeCommit.oid // ""')
+            [ "$RECORDED_SHA" = "$MERGE_SHA" ] && break
+            sleep 2
+          done
+          [ "${RECORDED_SHA:-}" = "$MERGE_SHA" ] || {
+            echo "::error::GitHub did not record $MERGE_SHA as the release PR merge commit"
+            exit 1
+          }
+          echo "sha=$MERGE_SHA" >> "$GITHUB_OUTPUT"
 
-          MAIN_SHA=$(git rev-parse origin/main)
-          if git merge-base --is-ancestor "$MAIN_SHA" origin/develop; then
-            echo "origin/develop already contains released main ($MAIN_SHA); no backport needed."
-            exit 0
+      - name: Resolve release commit
+        id: release
+        env:
+          MODE: ${{ steps.state.outputs.mode }}
+          MERGE_SHA: ${{ steps.merge.outputs.sha }}
+          RECOVERED_SHA: ${{ steps.state.outputs.release_sha }}
+        run: |
+          set -euo pipefail
+          if [ "$MODE" = bump ] || [ "$MODE" = orphan ] || [ "$MODE" = open ]; then
+            SHA="$MERGE_SHA"
+          else
+            SHA="$RECOVERED_SHA"
           fi
+          [[ "${SHA:-}" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "::error::Could not resolve Starter release commit"
+            exit 1
+          }
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
 
-          git checkout -B "chore/backport-main-v$VERSION-to-develop" origin/develop
-          git merge --no-ff origin/main -m "chore: backport main v$VERSION to develop"
-          git push origin HEAD:develop
+      - name: Create immutable Starter tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.input.outputs.version }}
+          CORE_SHA: ${{ steps.input.outputs.core_sha }}
+          STARTER_SHA: ${{ steps.input.outputs.starter_sha }}
+          RELEASE_SHA: ${{ steps.release.outputs.sha }}
+        run: |
+          set -euo pipefail
+          git fetch origin '+refs/heads/develop:refs/remotes/origin/develop' --tags
+          git merge-base --is-ancestor "$RELEASE_SHA" origin/develop || {
+            echo "::error::$RELEASE_SHA is not on develop"
+            exit 1
+          }
+          node scripts/check-release-candidate.mjs "$RELEASE_SHA" "$VERSION" "$CORE_SHA" "$STARTER_SHA"
+          TAG_SHA=$(git rev-parse -q --verify "refs/tags/v$VERSION^{commit}" || true)
+          if [ -n "$TAG_SHA" ]; then
+            [ "$TAG_SHA" = "$RELEASE_SHA" ] || {
+              echo "::error::v$VERSION already points to $TAG_SHA, not $RELEASE_SHA"
+              exit 1
+            }
+            echo "v$VERSION already exists at $TAG_SHA; no-op."
+          else
+            git tag "v$VERSION" "$RELEASE_SHA"
+            gh auth setup-git
+            git push origin "v$VERSION"
+          fi

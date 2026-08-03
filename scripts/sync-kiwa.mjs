@@ -34,9 +34,7 @@ const enhanceFiles = [
   "chunk-XSYCANLE.js",
 ];
 const typedRecipe = "recipes/typed-web";
-// `blank` is the stable logical mirror recorded in the generated Kiwa
-// manifest; source-repo storage currently lives in the typed recipe.
-const mirrorRoots = ["kiwa", "blank"];
+const mirrorRoots = ["kiwa", "typed-web"];
 // Paths the typed recipe overrides with local versions or omits entirely;
 // sync only verifies the canonical kiwa/ copy for these files.
 const typedRecipeOverridePaths = new Set([
@@ -134,7 +132,7 @@ async function sync() {
       "src/web/client/kiwaEnhanceAssets.ts",
       `https://unpkg.com/@kiwa-ui/enhance@${enhanceVersion}/dist/`,
       enhanceModule,
-      ["blank"],
+      ["typed-web"],
     ),
   );
 
@@ -182,7 +180,7 @@ function checkManifest() {
   const failures = [];
   for (const file of manifest.files ?? []) {
     for (const mirror of file.mirrors ?? mirrorRoots) {
-      const sourceRoot = mirror === "blank" ? typedRecipe : mirror;
+      const sourceRoot = mirror === "typed-web" ? typedRecipe : mirror;
       const rel = sourceRoot === "kiwa" && file.path.startsWith("kiwa/")
         ? file.path
         : `${sourceRoot}/${file.path}`;
@@ -216,8 +214,8 @@ async function fetchText(url) {
 
 function writeMirrored(path, content) {
   for (const mirrorRoot of mirrorRoots) {
-    if (mirrorRoot === "blank" && typedRecipeOverridePaths.has(path)) continue;
-    const targetRoot = mirrorRoot === "blank" ? typedRecipe : mirrorRoot;
+    if (mirrorRoot === "typed-web" && typedRecipeOverridePaths.has(path)) continue;
+    const targetRoot = mirrorRoot === "typed-web" ? typedRecipe : mirrorRoot;
     writeOne(`${targetRoot}/${path}`, content);
   }
 }
@@ -229,8 +227,8 @@ function writeOne(path, content) {
 }
 
 function record(path, source, content, mirrors = mirrorRoots) {
-  const effectiveMirrors = mirrors.includes("blank") && typedRecipeOverridePaths.has(path)
-    ? mirrors.filter((mirror) => mirror !== "blank")
+  const effectiveMirrors = mirrors.includes("typed-web") && typedRecipeOverridePaths.has(path)
+    ? mirrors.filter((mirror) => mirror !== "typed-web")
     : mirrors;
   return {
     path,

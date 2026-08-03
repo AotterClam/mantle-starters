@@ -22,10 +22,21 @@ jobs:
         with:
           path: downstream
 
+      - name: Resolve exact released Core SHA
+        id: core
+        run: |
+          set -euo pipefail
+          SHA=$(node -p "require('./downstream/package.json').mantleCoreSha")
+          [[ "$SHA" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "::error::package.json does not pin an exact Core SHA"
+            exit 1
+          }
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@v7.0.0
         with:
           repository: aotter/mantle
-          ref: 4baf1dab571953c09c4a2906c85816a34e9ca3f4
+          ref: ${{ steps.core.outputs.sha }}
           path: core
 
       - uses: pnpm/action-setup@v6.0.9

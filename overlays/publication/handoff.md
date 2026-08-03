@@ -13,9 +13,9 @@ First useful shape:
 - replace the seeded publication cards and posts before adding custom
   archive/detail routes.
 
-Use `mantle:theme` for brand and Kiwa layout polish after the content
+Use `mantle:theme` for brand and visual polish after the content
 model works.
 
 Do not restore the old publication-specific starter or `theme.default`
-path. Publication now grows from the same blank Kiwa runtime as presence
+path. Publication now grows from the shared typed-web runtime as presence
 and intake.

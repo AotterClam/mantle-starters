@@ -26,12 +26,8 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Approve the PR first — develop branch protection requires 1
-      # approving review, dependabot can't self-approve, so without
-      # this the auto-merge queue stays BLOCKED forever. Repo Settings
-      # → Actions → "Allow GitHub Actions to create and approve PRs"
-      # must be on (it is; flipped 2026-05-17). Only approves patch /
-      # minor / digest — same gate as the merge step below.
+      # Keep approval scoped to the same low-risk updates as auto-merge so a
+      # future review rule does not broaden Dependabot's authority.
       - name: Auto-approve patch + minor + digest
         if: |
           steps.meta.outputs.update-type == 'version-update:semver-patch' ||
@@ -50,9 +46,6 @@ jobs:
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # Rebase merge: keeps develop linear and preserves dependabot's
-        # `chore(deps): bump X` subject as the head commit. Squash is
-        # disabled on this repo; merge-commit is allowed but produces
-        # 'Merge pull request #N from ...' subjects that would collide
-        # with the release-fanout filter on tag-and-dispatch-landing.yml.
+        # Rebase merge keeps develop linear and preserves dependabot's
+        # `chore(deps): bump X` subject. Squash is disabled on this repo.
         run: gh pr merge --auto --rebase "$PR_URL"

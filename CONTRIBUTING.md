@@ -1,14 +1,15 @@
 # Contributing to mantle-starters
 
-This repo holds the blank starter source, type bundle overlays, vendored Kiwa source, and the provision bundles consumed by Mantle landing.
+This repo holds the blank starter source, typed-web recipe, type overlays,
+replaceable vendored UI source, and deterministic provision bundles.
 
 Start here before changing code or docs. For project-wide doctrine, read the parent repo's [`CLAUDE.md`](https://github.com/aotter/mantle/blob/main/CLAUDE.md).
 
 ## Project shape
 
 - **`develop` is the integration branch for all PRs.** It's the repo's default branch — `gh repo clone` lands you on it.
-- `main` is release-only and moves through `develop → main` release merges, mirroring the parent `mantle` repo's branch model.
-- PRs target `develop`, not `main`.
+- Pre-v0.1 feature and release PRs target `develop`; `main` is not part of the
+  alpha release path.
 - Merge completed PRs with `gh pr merge --merge --delete-branch`. Do not squash; reviewable commits are preserved.
 - Feature work should normally start from an issue unless it is a tiny docs or hygiene fix.
 
@@ -118,9 +119,15 @@ This section only records the starters-specific expectations.
 Release process:
 
 1. Land changes on `develop`.
-2. Write the `CHANGELOG.md` entry for the new version. Aggregate the `git log` since the previous tag into Keep-a-Changelog buckets (`Added` / `Changed` / `Deprecated` / `Removed` / `Fixed` / `Security`). Prefix scope when relevant: `**transaction**: ...`. Cross-link the closing PR + issue. The entry lives under a new `## [vX.Y.Z] — YYYY-MM-DD` heading; no `[Unreleased]` placeholder.
-3. Normal alpha cadence is automated from the SDK release tag: `mantle/.github/workflows/release.yml` dispatches `bump-from-sdk.yml`; that workflow bumps package versions, refreshes lockfiles, rebuilds `provision-bundles/*.json`, opens and merges the release PR to `main`, tags `v<version>`, dispatches landing, then syncs `main` back to `develop`.
-4. Manual starter-only releases are exceptional. If needed, follow the parent release-process manual fallback and keep the same end state: `main` tagged, landing dispatched, and `main` merged back into `develop`.
+2. Run the explicit Core release controller. It validates the exact Starter
+   SHA before creating the Core tag and publishing packages.
+3. Core dispatches `bump-from-sdk.yml` with the version, Core SHA, and gated
+   Starter SHA. The worker bumps versions, locks, projected skills and bundles,
+   opens a validated PR to `develop`, and tags that exact merge commit.
+4. Core verifies the immutable Starter tag against published packages. Landing
+   moves only when the Core controller was explicitly invoked with that option.
+   Retry the Core controller to resume; do not hand-tag, backport `main`, or run
+   a standalone Starter release.
 
 Per-starter `@aotter/mantle-*` version pins move on their own cadence — independent of the tarball tag.
 

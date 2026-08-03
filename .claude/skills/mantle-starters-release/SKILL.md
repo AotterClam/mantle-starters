@@ -1,7 +1,6 @@
 # Mantle Starters Release Skill
 
-Use this skill for any `mantle-starters` release, starter version bump,
-or landing fanout repair.
+Use this skill for any `mantle-starters` release or Starter version bump.
 
 ## Required Reading
 
@@ -9,21 +8,19 @@ Read these files before changing versions, tags, release workflow files,
 or release tarball URLs:
 
 - `.github/workflows/bump-from-sdk.yml`
-- `.github/workflows/tag-and-dispatch-landing.yml`
+- `.github/workflows/validate.yml`
 - `package.json`
-- `sources.json`
 
-For full fanout context, also inspect sibling checkouts:
+For full controller context, also inspect the Core checkout:
 
 - `../mantle`
-- `../mantle-landing`
 
 ## First Principle
 
-Normal starter feature work lands on `develop`. Public release artifacts
-come from `main` plus a pushed `v*` tag. Do not hand-edit public release
-assets, retag an existing public version, or repair a published tarball
-in place.
+Normal Starter feature and release work lands on `develop`. The validated
+release merge commit receives the immutable `v*` tag. `main` is not part of
+the pre-v0.1 alpha path. Do not hand-edit public release assets, retag an
+existing public version, or repair a published tarball in place.
 
 If a public tarball is incomplete, fix forward with the next aligned
 Mantle alpha.
@@ -31,17 +28,26 @@ Mantle alpha.
 ## Normal Release Path
 
 1. Merge required starter content into `develop`.
-2. Publish the next SDK alpha from `../mantle`.
-3. Let the SDK release dispatch `bump-from-sdk.yml`.
-4. Let the generated release PR promote current `develop` starter
-   content to `main`, bump versions, and merge.
-5. Let `tag-and-dispatch-landing.yml` tag `vX.Y.Z` and dispatch
-   `mantle-landing`.
-6. Let `tag-and-dispatch-landing.yml` tag `vX.Y.Z` and dispatch
-   `mantle-landing`.
-7. Confirm `bump-from-sdk.yml` synced the released `main` commit back to
-   `develop`. The workflow opens and auto-merges a backport PR when
-   needed, so `develop` should not remain one release behind.
+2. Run the Core release controller from `../mantle`. It completes the exact
+   packed pre-tag gate, creates the Core tag, and publishes npm artifacts.
+3. Let Core dispatch `bump-from-sdk.yml` with the version, exact Core SHA, and
+   exact Starter SHA that passed the packed pre-tag gate. There is no separate
+   manual Starter release entry point; retry the Core controller to resume.
+4. The worker bumps versions, standalone locks, projected Core skills,
+   provision bundles, and the private root package's exact Core SHA. Starter
+   CI reads that SHA before checkout.
+5. The worker requires the named release gates, merges only the checked head
+   into `develop`, and tags that exact merge commit.
+6. Core checks out the Starter tag and repeats the gate against the published
+   npm packages. Landing moves only when the Core controller was explicitly
+   invoked with that option.
+
+`RELEASE_FANOUT_TOKEN` is Starter-only: grant contents and pull-request write
+access to `aotter/mantle-starters`, with no Landing or other repository scope.
+It is exposed only to PR creation, so install and build scripts cannot read it.
+Repository merges, pushes, and tags use the job-scoped `GITHUB_TOKEN`.
+A separate token is needed because
+PRs created by `GITHUB_TOKEN` do not trigger pull-request validation.
 
 ## Pre-Merge Gate For Starter Feature PRs
 
@@ -52,24 +58,32 @@ PR:
 pnpm check:starter-locks
 ```
 
-## Pre-Tag Gate
+## Release Evidence
 
-Before accepting a `v*` tag or release PR as complete:
+The Core controller owns this gate. If investigating it manually, use a clean
+detached checkout of the tag; do not run these checks against the current
+branch and call them tag evidence:
 
 ```bash
-gh -R aotter/mantle-starters release view vX.Y.Z
-gh -R aotter/mantle-landing pr list --search "X.Y.Z"
+git clone --branch vX.Y.Z --depth 1 https://github.com/aotter/mantle-starters.git ../mantle-starters-vX.Y.Z
+cd ../mantle-starters-vX.Y.Z
+pnpm install --frozen-lockfile
+pnpm check:starter-locks
+pnpm check:provision-bundle
+pnpm check:packed
 ```
 
 ## Red Flags
 
 Stop and explain the situation if any of these appear:
 
-- `main` has release-only changes that are not backported to `develop`
-  after the automatic sync step has had time to finish.
+- A release PR targets `main` or tries to merge/backport `main` into `develop`.
+- The private root package or `.github/workflows/validate.yml` does not pin and
+  consume the exact released Core SHA before checkout.
+- The dispatch's Starter SHA is not the current `develop` base for a fresh
+  release PR.
 - A tarball URL points to a version that has not been tagged yet and no
   matching SDK release is planned.
-- Landing points to a starter release different from the intended SDK
-  version.
+- Landing was dispatched without the Core controller's explicit option.
 - A production handoff points at a floating branch or local URL instead
   of a tagged release asset.
