@@ -28,9 +28,10 @@
     "check:kiwa": "node scripts/sync-kiwa.mjs --check",
     "check:starter-locks": "node scripts/refresh-starter-locks.mjs --check",
     "check:repo-local-skills": "node scripts/check-repo-local-skills.mjs",
+    "check:release-worker": "node scripts/release-check-state.mjs --self-test",
     "check:core-skills": "pnpm --dir blank exec mantle skills --check",
     "check:exact": "pnpm check:provision-bundle && pnpm check:repo-local-skills && pnpm check:starter-locks",
-    "check:packed": "pnpm --dir blank check && pnpm smoke:blank && pnpm smoke:provision-bundle && pnpm check:repo-local-skills && pnpm check:core-skills && pnpm --dir recipes/typed-web typecheck",
+    "check:packed": "pnpm check:release-worker && pnpm --dir blank check && pnpm smoke:blank && pnpm smoke:provision-bundle && pnpm check:repo-local-skills && pnpm check:core-skills && pnpm --dir recipes/typed-web typecheck",
     "refresh:starter-locks": "node scripts/refresh-starter-locks.mjs",
     "typecheck": "corepack pnpm@9.15.0 -r typecheck",
     "test": "corepack pnpm@9.15.0 -r test"

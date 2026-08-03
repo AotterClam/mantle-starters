@@ -16,9 +16,9 @@ on:
     types: [sdk-published]
 
 permissions:
+  actions: read
   contents: write
   pull-requests: read
-  checks: read
 
 concurrency:
   group: bump-from-sdk
@@ -73,6 +73,10 @@ jobs:
         run: |
           set -euo pipefail
           git fetch origin --prune --tags
+          [ "$(gh api repos/aotter/mantle-starters --jq '.default_branch')" = develop ] || {
+            echo "::error::Starter releases require develop to remain the default branch"
+            exit 1
+          }
 
           CORE_TAG_SHA=$(git ls-remote https://github.com/aotter/mantle.git "refs/tags/v$VERSION^{}" | awk '{print $1}')
           if [ -z "$CORE_TAG_SHA" ]; then
@@ -113,20 +117,12 @@ jobs:
             echo "::error::Multiple canonical release/v$VERSION PRs are open"
             exit 1
           }
-          PR_URL=$(jq -r '.[0].url // ""' <<< "$OPEN")
-          if [ -n "$PR_URL" ]; then
-            BASE_SHA=$(jq -r '.[0].baseRefOid' <<< "$OPEN")
-            [ "$BASE_SHA" = "$STARTER_SHA" ] || {
-              echo "::error::Release PR base is $BASE_SHA, not gated Starter $STARTER_SHA; rerun the Core controller"
-              exit 1
-            }
-            echo "mode=open" >> "$GITHUB_OUTPUT"
-            echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
-            echo "Resuming open release PR: $PR_URL"
-            exit 0
-          fi
 
           if [ -n "$MERGE_SHA" ]; then
+            [ "$OPEN_COUNT" = 0 ] || {
+              echo "::error::Merged release $MERGE_SHA conflicts with an open canonical release PR"
+              exit 1
+            }
             git fetch origin "$MERGE_SHA"
             git merge-base --is-ancestor "$MERGE_SHA" origin/develop || {
               echo "::error::Recovered release commit $MERGE_SHA is not on develop"
@@ -143,15 +139,29 @@ jobs:
             exit 0
           fi
 
-          ORPHAN_SHA=$(git ls-remote origin "refs/heads/release/v$VERSION" | awk '{print $1}')
-          if [ -n "$ORPHAN_SHA" ]; then
-            CLOSED=$(gh pr list --base develop --head "release/v$VERSION" --state closed --limit 10 \
-              --json url,headRepository,headRepositoryOwner,isCrossRepository \
-              --jq '[.[] | select(.isCrossRepository == false and .headRepository.name == "mantle-starters" and .headRepositoryOwner.login == "aotter")] | .[0].url // ""')
-            [ -z "$CLOSED" ] || {
-              echo "::error::Release branch belongs to closed PR $CLOSED; reopen it or remove the branch explicitly"
+          PR_URL=$(jq -r '.[0].url // ""' <<< "$OPEN")
+          if [ -n "$PR_URL" ]; then
+            BASE_SHA=$(jq -r '.[0].baseRefOid' <<< "$OPEN")
+            [ "$BASE_SHA" = "$STARTER_SHA" ] || {
+              echo "::error::Release PR base is $BASE_SHA, not gated Starter $STARTER_SHA; rerun the Core controller"
               exit 1
             }
+            echo "mode=open" >> "$GITHUB_OUTPUT"
+            echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+            echo "Resuming open release PR: $PR_URL"
+            exit 0
+          fi
+
+          CLOSED=$(gh pr list --base develop --head "release/v$VERSION" --state closed --limit 10 \
+            --json url,headRepository,headRepositoryOwner,isCrossRepository \
+            --jq '[.[] | select(.isCrossRepository == false and .headRepository.name == "mantle-starters" and .headRepositoryOwner.login == "aotter")] | .[0].url // ""')
+          [ -z "$CLOSED" ] || {
+            echo "::error::Canonical release PR $CLOSED was closed; reopen it explicitly"
+            exit 1
+          }
+
+          ORPHAN_SHA=$(git ls-remote origin "refs/heads/release/v$VERSION" | awk '{print $1}')
+          if [ -n "$ORPHAN_SHA" ]; then
             git fetch origin "$ORPHAN_SHA"
             node scripts/check-release-candidate.mjs "$ORPHAN_SHA" "$VERSION" "$CORE_SHA" "$STARTER_SHA"
             echo "mode=orphan" >> "$GITHUB_OUTPUT"
@@ -258,22 +268,8 @@ jobs:
           STARTER_SHA: ${{ steps.input.outputs.starter_sha }}
         run: |
           set -euo pipefail
-          EXPECTED='["exact packed Core","starter lockfiles","starter safety"]'
-          for attempt in $(seq 1 30); do
-            CHECKS=$(gh pr checks "$PR_URL" --json name,bucket 2>/dev/null || true)
-            FOUND=$(jq --argjson expected "$EXPECTED" '[.[].name] as $names | [$expected[] | select($names | index(.) != null)] | length' <<< "${CHECKS:-[]}")
-            [ "$FOUND" = 3 ] && break
-            echo "Waiting for release checks to register ($attempt/30; found=$FOUND/3)."
-            sleep 5
-          done
-          [ "${FOUND:-0}" = 3 ] || {
-            echo "::error::Expected release checks did not register: $PR_URL"
-            exit 1
-          }
-          gh pr checks "$PR_URL" --watch --fail-fast --interval 10
-
-          PR=$(gh pr view "$PR_URL" --json baseRefOid,headRefOid,headRepository,headRepositoryOwner,isCrossRepository,statusCheckRollup)
-          jq -e '.isCrossRepository == false and .headRepository.name == "mantle-starters" and .headRepositoryOwner.login == "aotter"' <<< "$PR" >/dev/null || {
+          PR=$(gh pr view "$PR_URL" --json state,baseRefName,baseRefOid,headRefName,headRefOid,headRepository,headRepositoryOwner,isCrossRepository)
+          jq -e --arg head "release/v$VERSION" '.state == "OPEN" and .baseRefName == "develop" and .headRefName == $head and .isCrossRepository == false and .headRepository.name == "mantle-starters" and .headRepositoryOwner.login == "aotter"' <<< "$PR" >/dev/null || {
             echo "::error::Refusing non-canonical release PR: $PR_URL"
             exit 1
           }
@@ -282,15 +278,45 @@ jobs:
             echo "::error::Release PR base advanced to $BASE_SHA from gated Starter $STARTER_SHA; rerun the Core controller"
             exit 1
           }
-          for NAME in "exact packed Core" "starter lockfiles" "starter safety"; do
-            PASSED=$(jq --arg name "$NAME" '[.statusCheckRollup[]? | select(.name == $name and .status == "COMPLETED" and .conclusion == "SUCCESS")] | length' <<< "$PR")
-            [ "$PASSED" -ge 1 ] || {
-              echo "::error::Required release check did not pass: $NAME"
-              exit 1
-            }
-          done
-
           HEAD_SHA=$(jq -r '.headRefOid' <<< "$PR")
+
+          for attempt in $(seq 1 180); do
+            RUN_ID=$(gh run list --workflow validate.yml --event pull_request --commit "$HEAD_SHA" --limit 1 \
+              --json databaseId --jq '.[0].databaseId // ""')
+            if [ -n "$RUN_ID" ]; then
+              RUN=$(gh run view "$RUN_ID" --json headSha,event,workflowName,status,conclusion,jobs)
+              STATE=$(node scripts/release-check-state.mjs "$HEAD_SHA" <<< "$RUN")
+            else
+              STATE=missing
+            fi
+            case "$STATE" in
+              success) break ;;
+              failure)
+                echo "::error::A required release check failed: $PR_URL"
+                exit 1
+                ;;
+              *) echo "Waiting for required release checks ($attempt/180; state=$STATE)." ;;
+            esac
+            sleep 10
+          done
+          [ "${STATE:-missing}" = success ] || {
+            echo "::error::Required release checks did not pass within 30 minutes: $PR_URL"
+            exit 1
+          }
+
+          CURRENT=$(gh pr view "$PR_URL" --json state,baseRefName,baseRefOid,headRefName,headRefOid,headRepository,headRepositoryOwner,isCrossRepository)
+          jq -e --arg head "release/v$VERSION" '.state == "OPEN" and .baseRefName == "develop" and .headRefName == $head and .isCrossRepository == false and .headRepository.name == "mantle-starters" and .headRepositoryOwner.login == "aotter"' <<< "$CURRENT" >/dev/null || {
+            echo "::error::Release PR changed while checks ran: $PR_URL"
+            exit 1
+          }
+          [ "$(jq -r '.baseRefOid' <<< "$CURRENT")" = "$STARTER_SHA" ] || {
+            echo "::error::Release PR base changed while checks ran: $PR_URL"
+            exit 1
+          }
+          [ "$(jq -r '.headRefOid' <<< "$CURRENT")" = "$HEAD_SHA" ] || {
+            echo "::error::Release PR head changed while checks ran: $PR_URL"
+            exit 1
+          }
           git fetch origin "$HEAD_SHA"
           node scripts/check-release-candidate.mjs "$HEAD_SHA" "$VERSION" "$CORE_SHA" "$STARTER_SHA"
           echo "head_sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
@@ -307,6 +333,10 @@ jobs:
           STARTER_SHA: ${{ steps.input.outputs.starter_sha }}
         run: |
           set -euo pipefail
+          [ "$(gh api repos/aotter/mantle-starters --jq '.default_branch')" = develop ] || {
+            echo "::error::Starter releases require develop to remain the default branch"
+            exit 1
+          }
           DEVELOP_SHA=$(git ls-remote origin refs/heads/develop | awk '{print $1}')
           [ "$DEVELOP_SHA" = "$STARTER_SHA" ] || {
             echo "::error::develop advanced to $DEVELOP_SHA; rerun the Core controller"
@@ -319,7 +349,13 @@ jobs:
           MERGE_SHA=$(git rev-parse HEAD)
           node scripts/check-release-candidate.mjs "$MERGE_SHA" "$VERSION" "$CORE_SHA" "$STARTER_SHA"
           gh auth setup-git
-          git push origin "$MERGE_SHA:refs/heads/develop"
+          # Both refs must advance so the server applies both leases in one transaction.
+          git push --atomic \
+            --force-with-lease="refs/heads/develop:$STARTER_SHA" \
+            --force-with-lease="refs/heads/release/v$VERSION:$HEAD_SHA" \
+            origin \
+            "$MERGE_SHA:refs/heads/develop" \
+            "$MERGE_SHA:refs/heads/release/v$VERSION"
           for attempt in $(seq 1 15); do
             RECORDED_SHA=$(gh pr view "$PR_URL" --json mergeCommit,mergedAt --jq 'select(.mergedAt != null) | .mergeCommit.oid // ""')
             [ "$RECORDED_SHA" = "$MERGE_SHA" ] && break

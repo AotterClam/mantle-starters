@@ -42,8 +42,9 @@ Mantle alpha.
    npm packages. Landing moves only when the Core controller was explicitly
    invoked with that option.
 
-`RELEASE_FANOUT_TOKEN` is Starter-only: grant contents and pull-request write
-access to `aotter/mantle-starters`, with no Landing or other repository scope.
+`RELEASE_FANOUT_TOKEN` is Starter-only: grant pull-request write access to
+`aotter/mantle-starters` plus GitHub's required metadata read, with no Contents
+write, Landing, or other repository scope.
 It is exposed only to PR creation, so install and build scripts cannot read it.
 Repository merges, pushes, and tags use the job-scoped `GITHUB_TOKEN`.
 A separate token is needed because
