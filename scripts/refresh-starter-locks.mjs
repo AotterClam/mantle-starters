@@ -12,10 +12,11 @@ const changed = [];
 const packageManager = JSON.parse(readFileSync(join(root, "package.json"), "utf8")).packageManager;
 const pnpmVersion = packageManager?.startsWith("pnpm@") ? packageManager.slice("pnpm@".length) : null;
 
-for (const starterPath of ["blank"]) {
+for (const starterPath of ["blank", "recipes/typed-web"]) {
   const tempRoot = mkdtempSync(join(tmpdir(), "mantle-lock-"));
   try {
     cpSync(join(root, "pnpm-workspace.yaml"), join(tempRoot, "pnpm-workspace.yaml"));
+    cpSync(join(root, "blank", ".npmrc"), join(tempRoot, ".npmrc"));
     cpSync(join(root, starterPath), join(tempRoot, starterPath), {
       recursive: true,
       filter: (path) => !path.includes(`${starterPath}/node_modules`),

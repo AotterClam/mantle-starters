@@ -7,9 +7,9 @@ starter_path: blank
 
 # Mantle project: `{{ARCHETYPE}}`
 
-This project was materialized from Mantle's shared blank base and the selected
+This project was materialized from Mantle's headless base and the selected
 `{{ARCHETYPE}}` provision bundle. The type layer is already composed; do not
-copy `blank/` or merge overlays.
+copy another starter or merge overlays again.
 
 Before editing:
 
@@ -27,8 +27,8 @@ production work and should happen only when the user asks to ship.
 
 ## Product work
 
-- Inspect the already composed manifest, pages, layout note, and seed data
-  before proposing custom structure.
+- Inspect the manifest first. For typed launches, inspect the composed pages,
+  layout note, and seed data before proposing custom structure.
 - Ask what the first useful page or workflow should prove.
 - Keep seed data tiny and remove blank examples when real content replaces
   them.

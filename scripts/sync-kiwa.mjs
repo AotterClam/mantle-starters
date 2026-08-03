@@ -33,10 +33,13 @@ const enhanceFiles = [
   "chunk-BZTFZYW6.js",
   "chunk-XSYCANLE.js",
 ];
+const typedRecipe = "recipes/typed-web";
+// `blank` is the stable logical mirror recorded in the generated Kiwa
+// manifest; source-repo storage currently lives in the typed recipe.
 const mirrorRoots = ["kiwa", "blank"];
-// Paths blank overrides with local versions or omits entirely; sync never
-// writes these into blank/ and check:kiwa only verifies the kiwa/ copy.
-const blankOverridePaths = new Set([
+// Paths the typed recipe overrides with local versions or omits entirely;
+// sync only verifies the canonical kiwa/ copy for these files.
+const typedRecipeOverridePaths = new Set([
   "components/ui/badge.tsx",
   "lib/placeholder-data.ts",
   "components/blocks/marketing/bento-02.tsx",
@@ -125,7 +128,7 @@ async function sync() {
     "export const kiwaEnhanceAssets: Readonly<Record<string, string>> = " +
     JSON.stringify(enhanceAssets, null, 2) +
     ";\n";
-  writeOne("blank/src/web/client/kiwaEnhanceAssets.ts", enhanceModule);
+  writeOne(`${typedRecipe}/src/web/client/kiwaEnhanceAssets.ts`, enhanceModule);
   files.push(
     record(
       "src/web/client/kiwaEnhanceAssets.ts",
@@ -178,10 +181,11 @@ function checkManifest() {
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   const failures = [];
   for (const file of manifest.files ?? []) {
-    for (const mirror of file.mirrors ?? ["kiwa", "blank"]) {
-      const rel = mirror === "kiwa" && file.path.startsWith("kiwa/")
+    for (const mirror of file.mirrors ?? mirrorRoots) {
+      const sourceRoot = mirror === "blank" ? typedRecipe : mirror;
+      const rel = sourceRoot === "kiwa" && file.path.startsWith("kiwa/")
         ? file.path
-        : `${mirror}/${file.path}`;
+        : `${sourceRoot}/${file.path}`;
       const path = join(root, rel);
       if (!existsSync(path)) {
         failures.push(`${rel} missing`);
@@ -212,8 +216,9 @@ async function fetchText(url) {
 
 function writeMirrored(path, content) {
   for (const mirrorRoot of mirrorRoots) {
-    if (mirrorRoot === "blank" && blankOverridePaths.has(path)) continue;
-    writeOne(`${mirrorRoot}/${path}`, content);
+    if (mirrorRoot === "blank" && typedRecipeOverridePaths.has(path)) continue;
+    const targetRoot = mirrorRoot === "blank" ? typedRecipe : mirrorRoot;
+    writeOne(`${targetRoot}/${path}`, content);
   }
 }
 
@@ -224,7 +229,7 @@ function writeOne(path, content) {
 }
 
 function record(path, source, content, mirrors = mirrorRoots) {
-  const effectiveMirrors = mirrors.includes("blank") && blankOverridePaths.has(path)
+  const effectiveMirrors = mirrors.includes("blank") && typedRecipeOverridePaths.has(path)
     ? mirrors.filter((mirror) => mirror !== "blank")
     : mirrors;
   return {

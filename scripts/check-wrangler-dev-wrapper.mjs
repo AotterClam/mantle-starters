@@ -13,7 +13,7 @@ import { tmpdir } from "node:os";
 import { delimiter, join, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
-const wrappers = ["blank/scripts/wrangler-dev.mjs"];
+const wrappers = ["recipes/typed-web/scripts/wrangler-dev.mjs"];
 
 for (const wrapper of wrappers) {
   const temp = mkdtempSync(join(tmpdir(), "wrangler-dev-wrapper-"));

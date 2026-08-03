@@ -4,7 +4,10 @@ Blank-first starter source for Mantle provisioning.
 
 Current launch contract:
 
-- `blank/` is the only first-launch base.
+- `blank/` is the headless first-launch base and uses Core's conventional
+  Worker facade.
+- `recipes/typed-web/` preserves established typed-site behavior while each
+  archetype is recut around that facade.
 - `provision-bundles/<type>.json` are generated artifacts used by landing and
   local cold starts.
 - `overlays/<type>/` contains small type intent overlays applied while
@@ -14,14 +17,23 @@ Current launch contract:
 - No first-run theme picker, full archetype starter fork, or Kiwa
   registry access is required to boot.
 
-Generated repos use a Hono JSX-friendly shape:
+Generated `blank` repos expose only the authored model and Worker entry:
+
+```txt
+manifests/site.yaml
+src/index.ts
+.mantle/generated/
+wrangler.toml
+```
+
+Typed bundles additionally own their Hono JSX UI and selected behavior:
 
 ```txt
 src/index.ts          Worker fetch entrypoint
 src/renderer.tsx      Hono JSX document renderer
-src/worker/           Cloudflare Worker/Hono app, routes, auth, feature code
+src/worker/           typed UI routes and selected feature code
 src/web/              public JSX page, seed-driven content, browser client JS
-src/mantle/           Mantle adapter config, manifest loader, handler registry
+src/mantle/           typed manifest loader and handler registry
 manifests/            4 atoms: Schema, View, Procedure, Trigger
 components/ lib/      Kiwa root-level convention from kiwa-ui.json
 styles/               Kiwa/Tailwind source and generated CSS
@@ -63,6 +75,8 @@ node scripts/sync-kiwa.mjs
 
 ```txt
 blank/
+recipes/
+  typed-web/
 overlays/
   presence/
   intake/
@@ -84,7 +98,8 @@ scripts/
   sync-kiwa.mjs
 ```
 
-Maintain bundles by editing `blank/`, `overlays/<type>/`, or `kiwa/`, then
+Maintain bundles by editing `blank/`, `recipes/typed-web/`,
+`overlays/<type>/`, or `kiwa/`, then
 running `pnpm build:provision-bundle`. Do not hand-edit generated
 `provision-bundles/*.json`.
 
@@ -92,6 +107,5 @@ running `pnpm build:provision-bundle`. Do not hand-edit generated
 project directory without installing dependencies, creating a remote repo, or
 touching Cloudflare. The output directory must be empty.
 
-Provisioned `README.md` files are generated from `blank/README.md` plus the
-selected overlay's `handoff.md` and `layout.md`, so the repo root explains both
-Mantle and the chosen launch type without maintaining seven copied READMEs.
+The blank README comes directly from `blank/README.md`. Typed READMEs combine
+the typed recipe with the selected overlay's `handoff.md` and `layout.md`.

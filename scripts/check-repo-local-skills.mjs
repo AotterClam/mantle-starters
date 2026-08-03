@@ -4,7 +4,6 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
-const coreRoot = resolve(root, "../mantle");
 const expected = [
   ["mantle-develop", "develop", "skills/develop/SKILL.md"],
   ["mantle-plugin", "plugin", "skills/plugin/SKILL.md"],
@@ -14,13 +13,11 @@ const expected = [
 const failures = [];
 
 for (const [dir, name, sourcePath] of expected) {
-  const agentPath = join(root, "blank", ".agent", "skills", dir, "SKILL.md.template");
-  const claudePath = join(root, "blank", ".claude", "skills", dir, "SKILL.md.template");
+  const agentPath = join(root, "blank", ".agent", "skills", dir, "SKILL.md");
+  const claudePath = join(root, "blank", ".claude", "skills", dir, "SKILL.md");
   assertSkill(agentPath, name, sourcePath);
   assertSkill(claudePath, name, sourcePath);
   assertSame(agentPath, claudePath);
-  const corePath = join(coreRoot, sourcePath);
-  if (existsSync(corePath)) assertSame(agentPath, corePath);
 }
 
 for (const base of [".agent", ".claude"]) {

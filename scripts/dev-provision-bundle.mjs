@@ -3,7 +3,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, delimiter, join, resolve } from "node:path";
-import { materializeBundle } from "../blank/scripts/materialize.mjs";
+import { materializeBundle } from "../recipes/typed-web/scripts/materialize.mjs";
 
 const root = new URL("..", import.meta.url).pathname;
 const archetype = process.argv[2];
@@ -42,7 +42,7 @@ if (output) {
   process.exit(0);
 }
 
-const nodeModules = join(root, "blank", "node_modules");
+const nodeModules = join(root, "node_modules");
 if (existsSync(nodeModules) && !existsSync(join(targetRoot, "node_modules"))) {
   symlinkSync(nodeModules, join(targetRoot, "node_modules"), "dir");
 }
@@ -54,7 +54,7 @@ run(process.execPath, ["scripts/build-styles.mjs"], targetRoot);
 if (!prepareOnly) {
   run(process.execPath, ["scripts/wrangler-dev.mjs"], targetRoot, {
     PATH: [
-      join(root, "blank", "node_modules", ".bin"),
+      join(root, "node_modules", ".bin"),
       join(targetRoot, "node_modules", ".bin"),
       process.env.PATH ?? "",
     ].join(delimiter),

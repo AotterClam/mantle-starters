@@ -15,10 +15,18 @@ permissions:
 
 jobs:
   starters:
-    name: starter blank
+    name: exact packed Core
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.0
+        with:
+          path: downstream
+
+      - uses: actions/checkout@v7.0.0
+        with:
+          repository: aotter/mantle
+          ref: 4baf1dab571953c09c4a2906c85816a34e9ca3f4
+          path: core
 
       - uses: pnpm/action-setup@v6.0.9
 
@@ -26,29 +34,19 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-          cache-dependency-path: blank/pnpm-lock.yaml
+          cache-dependency-path: core/pnpm-lock.yaml
 
-      - name: Install
-        working-directory: blank
+      - name: Install Core
+        working-directory: core
         run: pnpm install --frozen-lockfile
 
-      - name: Validate manifests
-        working-directory: blank
-        run: pnpm validate
+      - name: Build Core
+        working-directory: core
+        run: pnpm build
 
-      - name: Check index coverage
-        working-directory: blank
-        run: |
-          SDK_VERSION=$(node -p "require('./package.json').dependencies['@aotter/mantle']")
-          if [ "$SDK_VERSION" = "0.0.11-alpha.62" ]; then
-            echo "mantle-harness ships in alpha.63; alpha.62 transition skips this gate."
-          else
-            pnpm check:indexes
-          fi
-
-      - name: Typecheck
-        working-directory: blank
-        run: pnpm typecheck
+      - name: Validate exact packed Core in this checkout
+        working-directory: core
+        run: node scripts/check-packed-consumer.mjs --project ../downstream -- pnpm check:packed
 
   starter-locks:
     name: starter lockfiles
