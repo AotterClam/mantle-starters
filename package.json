@@ -30,7 +30,7 @@
     "check:core-skills": "pnpm --dir blank exec mantle skills --check",
     "check:wrangler-dev": "node scripts/check-wrangler-dev-wrapper.mjs",
     "check:exact": "pnpm check:provision-bundle && pnpm check:repo-local-skills && pnpm check:starter-locks",
-    "check:packed": "pnpm --dir blank check && pnpm smoke:blank && pnpm smoke:provision-bundle && pnpm check:repo-local-skills && pnpm check:core-skills && pnpm typecheck",
+    "check:packed": "pnpm --dir blank check && pnpm smoke:blank && pnpm smoke:provision-bundle && pnpm check:repo-local-skills && pnpm check:core-skills && pnpm --dir recipes/typed-web typecheck",
     "refresh:starter-locks": "node scripts/refresh-starter-locks.mjs",
     "typecheck": "corepack pnpm@9.15.0 -r typecheck",
     "test": "corepack pnpm@9.15.0 -r test"
