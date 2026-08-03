@@ -29,6 +29,8 @@ jobs:
           path: core
 
       - uses: pnpm/action-setup@v6.0.9
+        with:
+          version: 9.15.0
 
       - uses: actions/setup-node@v7.0.0
         with:
