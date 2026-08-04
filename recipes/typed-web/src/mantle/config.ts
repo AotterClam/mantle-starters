@@ -1,7 +1,7 @@
-import type { MantleCloudflareEnv } from "@aotter/mantle/cloudflare";
 import type { SiteDefaults } from "@aotter/mantle/spec";
+import type { MantleSiteAuthEnv } from "../auth.js";
 
-export interface Env extends MantleCloudflareEnv {
+export interface Env extends MantleSiteAuthEnv {
   readonly TURNSTILE_SITE_KEY?: string;
   readonly TURNSTILE_SECRET_KEY?: string;
 }

@@ -101,6 +101,45 @@ async function smokeBlank() {
       }
     },
   });
+
+  await withWorker({
+    cwd: join(root, "blank"),
+    command: "pnpm",
+    args: ["exec", "wrangler"],
+    devArgs: [
+      "--var", "MANTLE_AUTH_MODE:self-managed",
+      "--var", "BETTER_AUTH_SECRET:runtime-smoke-auth-secret-at-least-thirty-two-bytes",
+      "--var", "GITHUB_CLIENT_ID:runtime-smoke-github-client",
+      "--var", "GITHUB_CLIENT_SECRET:runtime-smoke-github-secret",
+      "--var", "ADMIN_GITHUB_LOGIN:runtime-smoke-owner",
+    ],
+    probe: "/api/auth/methods",
+    setupIncomplete: false,
+    async check(origin) {
+      const response = await fetch(`${origin}/api/auth/methods`);
+      if (response.status !== 200) throw new Error(`self-managed auth methods returned ${response.status}`);
+      const body = await response.json();
+      if (JSON.stringify(body) !== JSON.stringify({ methods: [{ kind: "social", provider: "github" }] })) {
+        throw new Error(`unexpected self-managed auth methods: ${JSON.stringify(body)}`);
+      }
+    },
+  });
+
+  await withWorker({
+    cwd: join(root, "blank"),
+    command: "pnpm",
+    args: ["exec", "wrangler"],
+    devArgs: [
+      "--var", "MANTLE_AUTH_MODE:self-managed",
+      "--var", "BETTER_AUTH_SECRET:runtime-smoke-auth-secret-at-least-thirty-two-bytes",
+      "--var", "GITHUB_CLIENT_ID:runtime-smoke-github-client",
+      "--var", "GITHUB_CLIENT_SECRET:runtime-smoke-github-secret",
+      "--var", "ADMIN_GITHUB_LOGIN:runtime-smoke-owner",
+      "--var", "MANTLE_HOSTED_AUTH_ISSUER:http://localhost:8788",
+    ],
+    probe: "/admin",
+    check: async () => undefined,
+  });
 }
 
 async function smokeTyped(archetype, check) {
@@ -129,7 +168,7 @@ async function smokeTyped(archetype, check) {
   });
 }
 
-async function withWorker({ cwd, command, args, probe, check }) {
+async function withWorker({ cwd, command, args, devArgs = [], probe, check, setupIncomplete = true }) {
   const state = mkdtempSync(join(tempRoot, "wrangler-"));
   const port = await freePort();
   const child = spawn(command, [
@@ -139,6 +178,7 @@ async function withWorker({ cwd, command, args, probe, check }) {
     "--port", String(port),
     "--inspector-port", "0",
     "--persist-to", state,
+    ...devArgs,
   ], {
     cwd,
     detached: process.platform !== "win32",
@@ -152,7 +192,7 @@ async function withWorker({ cwd, command, args, probe, check }) {
     const origin = `http://localhost:${port}`;
     await waitForWorker(`${origin}${probe}`, child);
     await check(origin);
-    await assertPrivateSurfaces(origin);
+    if (setupIncomplete) await assertPrivateSurfaces(origin);
   } catch (error) {
     throw new Error(`${error instanceof Error ? error.message : String(error)}\n${output}`);
   } finally {
