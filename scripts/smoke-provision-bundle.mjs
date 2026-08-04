@@ -63,6 +63,9 @@ for (const archetype of archetypes) {
     if (launchState.after_launch_skill_url !== replacements.AFTER_LAUNCH_SKILL_URL) throw new Error(`${archetype} missing after-launch skill URL`);
     const handoff = readFileSync(join(tempRoot, ".mantle", "handoff.md"), "utf8");
     if (!handoff.includes(`Auth intent: ${replacements.AUTH_MODE}`)) throw new Error(`${archetype} missing auth intent handoff`);
+    if (!readFileSync(join(tempRoot, "wrangler.toml"), "utf8").includes(`MANTLE_AUTH_MODE = "${replacements.AUTH_MODE}"`)) {
+      throw new Error(`${archetype} missing explicit runtime auth mode`);
+    }
 
     const features = JSON.parse(readFileSync(join(tempRoot, ".mantle", "features.json"), "utf8"));
     if (features?.archetype?.name !== archetype) throw new Error(`${archetype} features archetype mismatch`);
@@ -179,6 +182,7 @@ function assertGeneratedStylesCurrent(targetRoot, archetype) {
 function assertHeadlessBlank(root) {
   const files = [
     "manifests/site.yaml",
+    "src/auth.ts",
     "src/index.ts",
     ".mantle/generated/site.ts",
     ".mantle/generated/types.d.ts",
@@ -188,6 +192,7 @@ function assertHeadlessBlank(root) {
   if (!worker.includes("createMantleWorker") || !worker.includes(".mantle/generated/site.js")) {
     throw new Error("blank Worker does not use the generated manifest and Core facade");
   }
+  if (!worker.includes("auth: buildAuth")) throw new Error("blank Worker does not own its auth composition");
   const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
   if (JSON.stringify(Object.keys(manifest.dependencies ?? {})) !== '["@aotter/mantle"]') {
     throw new Error("blank production dependency must be @aotter/mantle only");

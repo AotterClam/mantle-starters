@@ -14,6 +14,8 @@ enabled = true
 # Post-deploy provisioning writes PUBLIC_ORIGIN and the chosen auth
 # client metadata here. Secrets stay in Cloudflare via `wrangler secret put`.
 #
+MANTLE_AUTH_MODE = "{{AUTH_MODE}}"
+#
 # Mantle Hosted Auth (public PKCE client; no client secret):
 # MANTLE_HOSTED_AUTH_ISSUER = "https://auth.mantle.tools"
 # MANTLE_HOSTED_AUTH_CLIENT_ID = "https://auth.mantle.tools/clients/<site-id>"

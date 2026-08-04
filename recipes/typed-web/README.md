@@ -93,12 +93,12 @@ cp .dev.vars.example .dev.vars
 > published since the lockfile was committed; the drift only surfaces
 > when CI rejects it.
 
-The seeded `/` preview and public HTTP Procedures work without auth. Mantle
-Hosted Auth uses `MANTLE_HOSTED_AUTH_ISSUER`,
+The seeded `/` preview and public HTTP Procedures work without auth. Set
+`MANTLE_AUTH_MODE=hosted` with `MANTLE_HOSTED_AUTH_ISSUER`,
 `MANTLE_HOSTED_AUTH_CLIENT_ID`, and `ADMIN_GITHUB_LOGIN`. Hosted clients are
 public PKCE clients and have no client secret.
-Standalone/self-hosted auth can still use `GITHUB_CLIENT_ID`,
-`GITHUB_CLIENT_SECRET`, and `ADMIN_GITHUB_LOGIN`. Fill one auth path only
+Set `MANTLE_AUTH_MODE=self-managed` with `GITHUB_CLIENT_ID`,
+`GITHUB_CLIENT_SECRET`, and `ADMIN_GITHUB_LOGIN`. Configure only the selected path
 when you want to exercise `/api/auth/*` or Staff MCP locally. Then:
 
 ```bash

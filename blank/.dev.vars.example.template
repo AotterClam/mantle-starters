@@ -1,0 +1,14 @@
+# Local-only vars for `wrangler dev`. Production values are written by
+# provisioning or configured through Cloudflare.
+PUBLIC_ORIGIN=http://localhost:8787
+MANTLE_AUTH_MODE={{AUTH_MODE}}
+BETTER_AUTH_SECRET=
+ADMIN_GITHUB_LOGIN={{ADMIN_GITHUB_LOGIN}}
+
+# Hosted Auth is a public PKCE client and has no client secret.
+# MANTLE_HOSTED_AUTH_ISSUER=https://auth.mantle.tools
+# MANTLE_HOSTED_AUTH_CLIENT_ID=https://auth.mantle.tools/clients/<site-id>
+
+# Self-managed mode uses the site's own GitHub OAuth App.
+# GITHUB_CLIENT_ID=<your_github_oauth_app_client_id>
+# GITHUB_CLIENT_SECRET=<your_github_oauth_app_client_secret>

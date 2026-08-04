@@ -171,6 +171,7 @@ function assertBundle(bundle, archetype) {
   for (const required of [
     "package.json",
     "wrangler.toml",
+    ".dev.vars.example",
     ".mantle/launch-state.json.template",
     ".mantle/features.json.template",
     ".mantle/handoff.md.template",
@@ -190,6 +191,12 @@ function assertBundle(bundle, archetype) {
   }
   if (!bundle.files["wrangler.toml"]?.includes("https://auth.mantle.tools")) {
     throw new Error(`${archetype} bundle must use the canonical Hosted Auth issuer`);
+  }
+  if (!bundle.files["wrangler.toml"]?.includes('MANTLE_AUTH_MODE = "{{AUTH_MODE}}"')) {
+    throw new Error(`${archetype} bundle must declare the explicit auth mode`);
+  }
+  if (!bundle.files["src/auth.ts"] || !bundle.files["src/index.ts"]?.includes("auth: buildAuth")) {
+    throw new Error(`${archetype} bundle must use the shared site-owned auth switch`);
   }
   if (bundle.files["wrangler.toml"]?.includes("MANTLE_PLATFORM_AUTH")) {
     throw new Error(`${archetype} bundle still contains preview Hosted Auth variables`);
@@ -253,6 +260,7 @@ function assertBundle(bundle, archetype) {
 function assertHeadlessBlank(bundle) {
   for (const required of [
     "manifests/site.yaml",
+    "src/auth.ts",
     "src/index.ts",
     ".mantle/generated/site.ts",
     ".mantle/generated/types.d.ts",
