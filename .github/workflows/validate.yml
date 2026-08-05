@@ -18,7 +18,7 @@ jobs:
     name: exact packed Core
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
         with:
           path: downstream
 
@@ -33,7 +33,7 @@ jobs:
           }
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
         with:
           repository: aotter/mantle
           ref: ${{ steps.core.outputs.sha }}
@@ -65,7 +65,7 @@ jobs:
     name: starter lockfiles
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
 
       - uses: pnpm/action-setup@v6.0.9
 
@@ -94,7 +94,7 @@ jobs:
     name: starter safety
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
       - uses: actions/setup-node@v7.0.0
         with:
           node-version: 22

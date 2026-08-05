@@ -51,7 +51,7 @@ jobs:
           echo "core_sha=$CORE_SHA" >> "$GITHUB_OUTPUT"
           echo "starter_sha=$STARTER_SHA" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
