@@ -67,12 +67,13 @@ export const manifest = [
       "schema": {
         "type": "object",
         "required": [
-          "productSlug",
+          "productId",
           "email"
         ],
         "properties": {
-          "productSlug": {
-            "type": "string"
+          "productId": {
+            "type": "string",
+            "x-mantle-ref": "products"
           },
           "email": {
             "type": "string",
@@ -87,7 +88,12 @@ export const manifest = [
           }
         }
       },
-      "lifecycle": "none"
+      "lifecycle": "none",
+      "indexes": [
+        [
+          "productId"
+        ]
+      ]
     }
   },
   {
@@ -134,12 +140,13 @@ export const manifest = [
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "productSlug",
+          "productId",
           "email"
         ],
         "properties": {
-          "productSlug": {
-            "type": "string"
+          "productId": {
+            "type": "string",
+            "x-mantle-ref": "products"
           },
           "email": {
             "type": "string",
