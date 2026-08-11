@@ -35,11 +35,6 @@ database_name = "mantle-blank-local"
 # Omit database_id in generated projects so Cloudflare's first Git
 # deploy can auto-provision the D1 database.
 
-[[kv_namespaces]]
-binding = "KV"
-# Omit id in generated projects so Cloudflare can auto-provision the
-# render KV namespace during the first Git deploy.
-
 # OAuth grant store for @cloudflare/workers-oauth-provider — client
 # registrations + grants + tokens for the MCP surfaces (/mcp + /mcp/staff).
 # Omit id in generated projects for the same first-deploy
