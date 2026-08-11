@@ -26,7 +26,4 @@ binding = "DB"
 database_name = "mantle-blank-local"
 
 [[kv_namespaces]]
-binding = "KV"
-
-[[kv_namespaces]]
 binding = "OAUTH_KV"

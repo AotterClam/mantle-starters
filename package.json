@@ -10,7 +10,7 @@
     "url": "git+https://github.com/aotter/mantle-starters.git"
   },
   "type": "module",
-  "mantleCoreSha": "7195d3dd8b30eaaf973729126659f48b3c649618",
+  "mantleCoreSha": "451b6f6b7129e42fbc891853ccf577dc0b8008ea",
   "engines": {
     "node": ">=22",
     "pnpm": ">=9"
