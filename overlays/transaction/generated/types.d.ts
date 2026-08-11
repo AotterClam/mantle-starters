@@ -14,7 +14,7 @@ export namespace MantleSite {
 
   /** Entry data for Schema 'product-inquiries' */
   export interface Entry_product_inquiries {
-    productSlug: string;
+    productId: string;
     email: string;
     note?: string;
     createdAt?: number;
@@ -22,7 +22,7 @@ export namespace MantleSite {
 
   /** Procedure 'submit-product-inquiry' input */
   export interface ProcInput_submit_product_inquiry {
-    productSlug: string;
+    productId: string;
     email: string;
     note?: string;
   }

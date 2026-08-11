@@ -39,10 +39,11 @@ spec:
   description: First-pass purchase intent capture. Replace with checkout later.
   schema:
     type: object
-    required: [productSlug, email]
+    required: [productId, email]
     properties:
-      productSlug:
+      productId:
         type: string
+        x-mantle-ref: products
       email:
         type: string
         format: email
@@ -52,6 +53,8 @@ spec:
         type: number
         x-mantle-bind: now
   lifecycle: none
+  indexes:
+    - [productId]
 ---
 apiVersion: cms.mantle.aotter.net/v1
 kind: View
@@ -74,9 +77,9 @@ spec:
   input:
     type: object
     additionalProperties: false
-    required: [productSlug, email]
+    required: [productId, email]
     properties:
-      productSlug: { type: string }
+      productId: { type: string, x-mantle-ref: products }
       email: { type: string, format: email }
       note: { type: string }
   output:
