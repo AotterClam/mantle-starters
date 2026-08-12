@@ -24,7 +24,7 @@ spec:
   indexes:
     - [publishedAt, slug]
   localized: false
-  lifecycle: simple
+  lifecycle: publishing
 ---
 apiVersion: cms.mantle.aotter.net/v1
 kind: Schema
@@ -47,7 +47,7 @@ spec:
       createdAt:
         type: number
         x-mantle-bind: now
-  lifecycle: none
+  lifecycle: operational
 ---
 apiVersion: cms.mantle.aotter.net/v1
 kind: View

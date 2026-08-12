@@ -41,7 +41,7 @@ export const manifest = [
         ]
       ],
       "localized": false,
-      "lifecycle": "simple"
+      "lifecycle": "publishing"
     }
   },
   {
