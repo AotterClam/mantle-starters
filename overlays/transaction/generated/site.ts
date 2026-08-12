@@ -12,7 +12,7 @@ export const manifest = [
     },
     "spec": {
       "title": "Products",
-      "description": "Minimal product catalog for a first transaction-shaped site.",
+      "description": "Published product catalog. Entries use the draft/publish lifecycle.",
       "schema": {
         "type": "object",
         "required": [
@@ -63,7 +63,7 @@ export const manifest = [
     },
     "spec": {
       "title": "Product inquiries",
-      "description": "First-pass purchase intent capture. Replace with checkout later.",
+      "description": "Operational purchase intent captured live, without draft or publish states. Replace with checkout later.",
       "schema": {
         "type": "object",
         "required": [
