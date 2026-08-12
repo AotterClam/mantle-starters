@@ -108,6 +108,7 @@ spec:
         x-mcp-hint: markdown
       publishedAt:
         type: number
+        x-mcp-hint: timestamp-ms
   uniqueIndexes:
     - [slug]
   indexes:

@@ -196,7 +196,8 @@ export const manifest = [
             "x-mcp-hint": "markdown"
           },
           "publishedAt": {
-            "type": "number"
+            "type": "number",
+            "x-mcp-hint": "timestamp-ms"
           }
         }
       },
