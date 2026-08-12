@@ -52,7 +52,7 @@ export const manifest = [
         ]
       ],
       "localized": false,
-      "lifecycle": "simple"
+      "lifecycle": "publishing"
     }
   },
   {
@@ -88,7 +88,7 @@ export const manifest = [
           }
         }
       },
-      "lifecycle": "none",
+      "lifecycle": "operational",
       "indexes": [
         [
           "productId"

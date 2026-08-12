@@ -22,7 +22,7 @@ spec:
         minimum: 1
       note:
         type: string
-  lifecycle: none
+  lifecycle: operational
 ---
 apiVersion: cms.mantle.aotter.net/v1
 kind: View

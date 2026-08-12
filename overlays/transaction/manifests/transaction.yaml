@@ -28,7 +28,7 @@ spec:
   uniqueIndexes:
     - [slug]
   localized: false
-  lifecycle: simple
+  lifecycle: publishing
 ---
 apiVersion: cms.mantle.aotter.net/v1
 kind: Schema
@@ -52,7 +52,7 @@ spec:
       createdAt:
         type: number
         x-mantle-bind: now
-  lifecycle: none
+  lifecycle: operational
   indexes:
     - [productId]
 ---

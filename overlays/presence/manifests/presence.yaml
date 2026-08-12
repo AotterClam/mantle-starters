@@ -138,7 +138,7 @@ spec:
   uniqueIndexes:
     - [type]
   localized: false
-  lifecycle: simple
+  lifecycle: publishing
 ---
 apiVersion: cms.mantle.aotter.net/v1
 kind: View
@@ -172,7 +172,7 @@ spec:
       createdAt:
         type: number
         x-mantle-bind: now
-  lifecycle: none
+  lifecycle: operational
 ---
 apiVersion: cms.mantle.aotter.net/v1
 kind: Procedure

@@ -321,8 +321,8 @@ function assertOperationalCollection(root, archetype) {
   const schema = parseAllDocuments(readFileSync(manifestPath, "utf8"))
     .map((document) => document.toJSON())
     .find((atom) => atom?.kind === "Schema" && atom?.metadata?.name === collection);
-  if (schema?.spec?.lifecycle !== "none") {
-    throw new Error(`${archetype} operational collection ${collection} must use lifecycle:none`);
+  if (schema?.spec?.lifecycle !== "operational") {
+    throw new Error(`${archetype} operational collection ${collection} must use lifecycle:operational`);
   }
   const seed = JSON.parse(
     readFileSync(join(root, ".mantle", "overlays", archetype, "seed.json"), "utf8"),
