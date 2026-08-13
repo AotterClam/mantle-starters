@@ -267,8 +267,15 @@ async function smokeBlank() {
       "--var", "ADMIN_GITHUB_LOGIN:runtime-smoke-owner",
       "--var", "MANTLE_HOSTED_AUTH_ISSUER:http://localhost:8788",
     ],
-    probe: "/admin",
-    check: async () => undefined,
+    probe: "/_mantle/admin/index.html",
+    async check(origin) {
+      const response = await fetch(`${origin}/_mantle/admin/index.html`);
+      const html = await response.text();
+      const script = html.match(/src="([^"]+\.js)"/)?.[1];
+      if (response.status !== 200 || !script || (await fetch(new URL(script, origin))).status !== 200) {
+        throw new Error(`Admin static assets returned ${response.status}`);
+      }
+    },
   });
 }
 
@@ -278,7 +285,7 @@ async function smokeTyped(archetype, check, replacementOverrides = {}) {
   materializeBundle(target, bundle, { ...replacements, ...replacementOverrides, ARCHETYPE: archetype });
   symlinkSync(join(root, "recipes", "typed-web", "node_modules"), join(target, "node_modules"), "dir");
   const mantle = join(root, "recipes", "typed-web", "node_modules", ".bin", "mantle");
-  for (const args of [["validate", "--phase", "deploy"], ["generate", "--check"]]) {
+  for (const args of [["validate", "--phase", "deploy"], ["generate"], ["generate", "--check"]]) {
     const result = spawnSync(mantle, args, { cwd: target, encoding: "utf8" });
     if (result.status !== 0) throw new Error(`${archetype} mantle ${args.join(" ")} failed: ${result.stderr || result.stdout}`);
   }
@@ -294,7 +301,14 @@ async function smokeTyped(archetype, check, replacementOverrides = {}) {
     command: join(root, "recipes", "typed-web", "node_modules", ".bin", "wrangler"),
     args: [],
     probe: "/",
-    check,
+    async check(origin) {
+      for (const path of ["/site-icon.svg", "/assets/styles.css"]) {
+        if ((await fetch(`${origin}${path}`)).status !== 200) {
+          throw new Error(`${archetype} static asset ${path} is unavailable`);
+        }
+      }
+      await check(origin);
+    },
   });
 }
 
