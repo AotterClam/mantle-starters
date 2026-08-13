@@ -1,7 +1,8 @@
 import type { FC } from 'hono/jsx'
+import { Languages } from 'lucide'
 import { cn } from '@/lib/utils'
 import { getButtonClasses } from '@/components/ui/button'
-import { MenuIcon, XIcon } from '@/components/ui/icon'
+import { ChevronDownIcon, Icon, MenuIcon, XIcon } from '@/components/ui/icon'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 type NavLink = {
@@ -17,6 +18,9 @@ type Nav02Props = {
   loginHref?: string
   ctaText?: string
   ctaHref?: string
+  locale?: string
+  locales?: readonly string[]
+  localePath?: string
   labels: {
     openNavigation: string
     closeNavigation: string
@@ -36,6 +40,9 @@ export const Nav02: FC<Nav02Props> = ({
   loginHref = '#',
   ctaText,
   ctaHref = '#',
+  locale,
+  locales = [],
+  localePath = '/:locale',
   labels,
   class: className,
 }) => (
@@ -69,6 +76,7 @@ export const Nav02: FC<Nav02Props> = ({
               {ctaText}
             </a>
           )}
+          <LocaleSwitch locale={locale} locales={locales} path={localePath} />
           <ThemeToggle labels={labels} />
         </div>
 
@@ -133,6 +141,7 @@ export const Nav02: FC<Nav02Props> = ({
         </div>
 
         <div class="mt-auto flex flex-col gap-2 pt-8">
+          <LocaleSwitch locale={locale} locales={locales} path={localePath} showLabel />
           <ThemeToggle labels={labels} showLabel class="w-full" />
           {loginText && (
             <a href={loginHref} data-mobile-nav-close="true" class={cn(getButtonClasses('ghost', 'sm'), 'w-full')}>
@@ -149,5 +158,35 @@ export const Nav02: FC<Nav02Props> = ({
     </div>
   </nav>
 )
+
+const LocaleSwitch: FC<{
+  locale?: string
+  locales: readonly string[]
+  path: string
+  showLabel?: boolean
+}> = ({ locale, locales, path, showLabel = false }) => locales.length > 1 && locale ? (
+  <details data-locale-switch class="group relative">
+    <summary class={cn(getButtonClasses('ghost', showLabel ? 'sm' : 'iconSm'), showLabel && 'w-full justify-start')}>
+      <Icon iconNode={Languages} class="size-4 shrink-0" />
+      {showLabel && <span class="uppercase">{locale}</span>}
+      {showLabel && <ChevronDownIcon class="ml-auto size-3.5 transition-transform group-open:rotate-180" />}
+      <span class="sr-only">Language: {locale}</span>
+    </summary>
+    <div class={cn(
+      'z-50 min-w-28 rounded-lg border border-border bg-popover p-1 shadow-md',
+      showLabel ? 'mt-1 w-full' : 'absolute right-0 mt-1',
+    )}>
+      {locales.map((option) => (
+        <a
+          href={path.replace(':locale', option.toLowerCase())}
+          aria-current={option === locale ? 'page' : undefined}
+          class="flex h-8 items-center rounded-md px-2.5 text-sm uppercase text-popover-foreground hover:bg-accent aria-[current=page]:bg-primary-soft aria-[current=page]:font-semibold"
+        >
+          {option}
+        </a>
+      ))}
+    </div>
+  </details>
+) : null
 
 export default Nav02

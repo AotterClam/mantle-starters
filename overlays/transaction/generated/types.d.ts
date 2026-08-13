@@ -4,7 +4,14 @@ export namespace MantleSite {
 
   /** Entry data for Schema 'page' */
   export interface Entry_page {
-    type: "home";
+    slug: string;
+    type: "home" | "page";
+  }
+
+  /** Entry data for Schema 'page-translations' */
+  export interface Entry_page_translations {
+    slug: string;
+    locale: string;
     title: string;
     summary?: string;
     sections: {
@@ -37,11 +44,17 @@ export namespace MantleSite {
   /** Entry data for Schema 'products' */
   export interface Entry_products {
     slug: string;
-    title: string;
-    summary?: string;
     priceMinor: number;
     currency: string;
     coverAssetId?: string;
+  }
+
+  /** Entry data for Schema 'product-translations' */
+  export interface Entry_product_translations {
+    slug: string;
+    locale: string;
+    title: string;
+    summary?: string;
   }
 
   /** Entry data for Schema 'product-inquiries' */
@@ -63,10 +76,16 @@ export namespace MantleSite {
   export interface ProcOutput_submit_product_inquiry {
   }
 
+  /** Parameters accepted by View 'home' */
+  export type ViewParams_home = {
+    locale: string;
+  };
+
   /** Row shape returned by GET /api/views/home */
   export interface ViewRow_home {
     id: string;
-    type?: "home";
+    slug?: string;
+    locale?: string;
     title?: string;
     summary?: string;
     sections?: {
@@ -97,15 +116,58 @@ export namespace MantleSite {
     updatedAt: number;
   }
 
+  /** Parameters accepted by View 'public-pages' */
+  export type ViewParams_public_pages = {
+    locale: string;
+  };
+
+  /** Row shape returned by GET /api/views/public-pages */
+  export interface ViewRow_public_pages {
+    id: string;
+    slug?: string;
+    locale?: string;
+    title?: string;
+    summary?: string;
+    sections?: {
+  type: "hero" | "features" | "content" | "faq" | "cta";
+  id?: string;
+  eyebrow?: string;
+  title: string;
+  body?: string;
+  showImage?: boolean;
+  image?: {
+  src: string;
+  alt: string;
+};
+  action?: {
+  label?: string;
+  href?: string;
+};
+  secondaryAction?: {
+  label?: string;
+  href?: string;
+};
+  items?: {
+  title?: string;
+  body?: string;
+  icon?: string;
+}[];
+}[];
+    updatedAt: number;
+  }
+
+  /** Parameters accepted by View 'public-products' */
+  export type ViewParams_public_products = {
+    locale: string;
+  };
+
   /** Row shape returned by GET /api/views/public-products */
   export interface ViewRow_public_products {
     id: string;
     slug?: string;
+    locale?: string;
     title?: string;
     summary?: string;
-    priceMinor?: number;
-    currency?: string;
-    coverAssetId?: string;
     updatedAt: number;
   }
 

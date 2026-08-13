@@ -1,4 +1,6 @@
 import type { Child } from "hono/jsx";
+import { raw } from "hono/html";
+import { renderSeoTagsHtml, type SeoMeta } from "@aotter/mantle/runtime";
 import { asset } from "./web/assets.js";
 import { siteContent } from "./web/content/siteContent.js";
 
@@ -14,9 +16,15 @@ const themeBootScript = `(() => {
 export function PageDocument({
   children,
   locale,
+  title = siteContent.brand,
+  description = siteContent.description,
+  seo,
 }: {
   readonly children: Child;
   readonly locale?: string;
+  readonly title?: string;
+  readonly description?: string;
+  readonly seo?: SeoMeta;
 }) {
   return (
     <html lang={locale ?? "en"}>
@@ -25,8 +33,9 @@ export function PageDocument({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="mantle:site" content="v1" />
         <meta name="mantle:archetype" content={archetype} />
-        <title>{siteContent.brand}</title>
-        <meta name="description" content={siteContent.description} />
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        {seo && raw(renderSeoTagsHtml(seo))}
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
         <link rel="stylesheet" href={asset("/assets/styles.css")} />
       </head>

@@ -2,34 +2,34 @@ const mantleOceanHeroSvg = String.raw`<svg xmlns="http://www.w3.org/2000/svg" vi
   <style>
     :root {
       color-scheme: light dark;
-      --bg-0: #fbfaf6;
-      --bg-1: #eef8f8;
-      --bg-2: #d9eef1;
-      --line: #6caab5;
-      --line-soft: #aacfd3;
-      --frame: #5aaebb;
-      --ink: #40616a;
-      --accent: #3ab7df;
-      --glow: #8de7ff;
+      --bg-0: #f6f8fc;
+      --bg-1: #edf1f8;
+      --bg-2: #d9e2f3;
+      --line: #4d6aac;
+      --line-soft: #8fa0c8;
+      --frame: #345093;
+      --ink: #1a3062;
+      --accent: #345093;
+      --glow: #4d6aac;
       --panel: #ffffff;
       --panel-opacity: .54;
-      --surface: #e5f3f5;
+      --surface: #e7ecf6;
       --dot-opacity: .48;
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg-0: #071216;
-        --bg-1: #0a1f25;
-        --bg-2: #0f3138;
-        --line: #66d8e7;
-        --line-soft: #b8fbff;
-        --frame: #76edff;
-        --ink: #dbfbff;
-        --accent: #52dcff;
-        --glow: #65e8ff;
-        --panel: #dffcff;
+        --bg-0: #02050d;
+        --bg-1: #050a18;
+        --bg-2: #0a1124;
+        --line: #4d6aac;
+        --line-soft: #91a2cf;
+        --frame: #4d6aac;
+        --ink: #f1f4fb;
+        --accent: #4d6aac;
+        --glow: #4d6aac;
+        --panel: #eef2fb;
         --panel-opacity: .055;
-        --surface: #dffcff;
+        --surface: #eef2fb;
         --dot-opacity: .82;
       }
     }

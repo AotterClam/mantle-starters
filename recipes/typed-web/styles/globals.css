@@ -125,6 +125,10 @@
 :root {
   --radius: 0.625rem;
 
+  --mantle-blue-deep: #1a3062;
+  --mantle-blue-mid: #345093;
+  --mantle-blue-light: #4d6aac;
+
   --background: oklch(98.5% 0 0);
   --background-raised: oklch(100% 0 0);
   --background-subtle: oklch(97% 0 0);
@@ -138,11 +142,11 @@
   --popover: var(--background-raised);
   --popover-foreground: var(--foreground);
 
-  --primary: oklch(60.9% 0.126 221.723);
+  --primary: var(--mantle-blue-deep);
   --primary-foreground: oklch(100% 0 0);
-  --primary-soft: oklch(98.4% 0.019 200.873);
-  --primary-hover: oklch(52% 0.105 223.128);
-  --primary-active: oklch(45% 0.085 224.283);
+  --primary-soft: color-mix(in srgb, var(--mantle-blue-light) 10%, white);
+  --primary-hover: var(--mantle-blue-mid);
+  --primary-active: var(--mantle-blue-deep);
 
   --secondary: oklch(97% 0 0);
   --secondary-foreground: oklch(20.5% 0 0);
@@ -198,11 +202,11 @@
   --popover: var(--background-raised);
   --popover-foreground: var(--foreground);
 
-  --primary: oklch(78.9% 0.154 211.53);
+  --primary: var(--mantle-blue-light);
   --primary-foreground: oklch(100% 0 0);
   --primary-soft: color-mix(in oklch, var(--primary) 22%, transparent);
-  --primary-hover: oklch(86.5% 0.127 207.078);
-  --primary-active: oklch(91.7% 0.08 205.041);
+  --primary-hover: color-mix(in srgb, var(--mantle-blue-light) 82%, white);
+  --primary-active: color-mix(in srgb, var(--mantle-blue-light) 68%, white);
 
   /* Secondary — neutral-700, distinct from card so hovers are visible */
   --secondary: oklch(37.1% 0 0);             /* neutral-700 — was dup of card */
@@ -405,6 +409,14 @@
 
 [data-theme-toggle][data-theme="light"] [data-theme-icon="sun"],
 [data-theme-toggle][data-theme="dark"] [data-theme-icon="moon"] {
+  display: none;
+}
+
+[data-locale-switch] > summary {
+  list-style: none;
+}
+
+[data-locale-switch] > summary::-webkit-details-marker {
   display: none;
 }
 

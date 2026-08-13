@@ -54,6 +54,7 @@ for (const archetype of archetypes) {
       assertStylesheetMounted(tempRoot, archetype);
       assertEdgeCacheContract(tempRoot, archetype);
       assertSectionImageContract(tempRoot, archetype);
+      assertLocaleNavigation(tempRoot, archetype);
       assertRuntimeHasNoKiwaDemoCopy(tempRoot, archetype);
     }
     const launchState = JSON.parse(readFileSync(join(tempRoot, ".mantle", "launch-state.json"), "utf8"));
@@ -92,6 +93,7 @@ for (const archetype of archetypes) {
       }
       if (archetype === "transaction") {
         assertTransactionSeed(tempRoot);
+        assertTransactionPublicSurface(tempRoot);
       }
     }
   } finally {
@@ -297,10 +299,11 @@ function assertSectionImageContract(root, archetype) {
   const atoms = parseAllDocuments(readFileSync(manifestPath, "utf8"))
     .map((document) => document.toJSON());
   const page = atoms
-    .find((atom) => atom?.kind === "Schema" && atom?.metadata?.name === "page");
+    .find((atom) => atom?.kind === "Schema" && atom?.metadata?.name === "page-translations")
+    ?? atoms.find((atom) => atom?.kind === "Schema" && atom?.metadata?.name === "page");
   if (!page) throw new Error(`${archetype} seed homepage has no page Schema`);
   const home = atoms.find((atom) => atom?.kind === "View" && atom?.metadata?.name === "home");
-  if (home?.spec?.from !== "page" || home.spec?.filter?.eq?.field !== "status") {
+  if (!["page", "page-translations"].includes(home?.spec?.from)) {
     throw new Error(`${archetype} page lifecycle has no published home View`);
   }
   if (page.spec?.schema?.properties?.sections?.items?.properties?.showImage?.type !== "boolean") {
@@ -321,12 +324,13 @@ function assertSectionImageContract(root, archetype) {
   const seed = JSON.parse(
     readFileSync(join(root, ".mantle", "overlays", archetype, "seed.json"), "utf8"),
   );
-  const hero = seed.collections?.page?.[0]?.sections?.find((section) => section.type === "hero");
+  const pageSeed = seed.collections?.["page-translations"] ?? seed.collections?.page;
+  const hero = pageSeed?.[0]?.sections?.find((section) => section.type === "hero");
   if (hero?.image?.src !== "/assets/mantle-ocean-hero-light.svg" || hero.image.alt !== "") {
     throw new Error(`${archetype} seed does not reference the shared ocean hero`);
   }
   const homeContent = readFileSync(join(root, "src", "web", "content", "homeContent.ts"), "utf8");
-  if (!homeContent.includes('views["home"]()')) {
+  if (!homeContent.includes('views["home"](')) {
     throw new Error(`${archetype} homepage never reads its home View`);
   }
   const assets = readFileSync(join(root, "src", "worker", "routes", "assets.ts"), "utf8");
@@ -339,6 +343,13 @@ function assertSectionImageContract(root, archetype) {
   }
   if (!svg.includes("mantleOceanHeroLightSvg") || !svg.includes("mantleOceanHeroDarkSvg")) {
     throw new Error(`${archetype} bundle does not contain the shared ocean hero`);
+  }
+}
+
+function assertLocaleNavigation(root, archetype) {
+  const nav = readFileSync(join(root, "components", "blocks", "marketing", "nav-02.tsx"), "utf8");
+  if (!nav.includes("data-locale-switch") || !nav.includes("locales.length > 1")) {
+    throw new Error(`${archetype} does not expose the shared locale switch`);
   }
 }
 
@@ -592,8 +603,40 @@ function assertSeedDrivenHome(root, archetype) {
 function assertTransactionSeed(root) {
   const seed = readFileSync(join(root, ".mantle", "overlays", "transaction", "seed.json"), "utf8");
   const parsed = JSON.parse(seed);
-  if (!seed.includes('"type": "home"') || parsed.collections?.products?.length !== 3) {
+  if (
+    !seed.includes('"type": "home"')
+    || parsed.collections?.products?.length !== 3
+    || parsed.collections?.["product-translations"]?.length !== 3
+    || parsed.collections?.["page-translations"]?.length < 1
+  ) {
     throw new Error("transaction seed does not include a visible home and three products");
+  }
+  const schemas = parseAllDocuments(readFileSync(join(root, "manifests", "site.yaml"), "utf8"))
+    .map((document) => document.toJSON())
+    .filter((atom) => atom?.kind === "Schema");
+  for (const [childName, parentName] of [["page-translations", "page"], ["product-translations", "products"]]) {
+    const child = schemas.find((schema) => schema.metadata?.name === childName);
+    if (child?.spec?.localized !== true || child.spec?.translates?.parent !== parentName || child.spec.translates.on !== "slug") {
+      throw new Error(`transaction ${childName} must translate ${parentName} by slug`);
+    }
+  }
+}
+
+function assertTransactionPublicSurface(root) {
+  const worker = readFileSync(join(root, "src", "index.ts"), "utf8");
+  const surface = readFileSync(join(root, "src", "web", "publicSite.tsx"), "utf8");
+  if (!worker.includes("mountPublicRoutes") || !worker.includes("publicPathResolver")) {
+    throw new Error("transaction Worker does not mount the Core public route surface");
+  }
+  for (const required of [
+    'registerEntryTemplate("product-translations"',
+    'registerListTemplate("product-translations"',
+    'registerEntryTemplate("page-translations"',
+    'registerListTemplate("page-translations"',
+    'segment: "products"',
+    'segment: "pages"',
+  ]) {
+    if (!surface.includes(required)) throw new Error(`transaction public surface missing ${required}`);
   }
 }
 

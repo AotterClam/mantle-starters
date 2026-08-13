@@ -437,7 +437,7 @@ function applyOverlaySeedContent(files, archetype, seedText) {
     'const homePage = (seedData.collections?.page ?? []).find((page) => page.type === "home");',
     "export const homeContent: HomeContent = { sections: homePage?.sections ?? [] };",
     "export const homeLocale = seedData.locale;",
-    "export async function resolveHomeContent(getRuntime: () => Promise<CmsRuntime>): Promise<HomeContent> {",
+    "export async function resolveHomeContent(getRuntime: () => Promise<CmsRuntime>, _locale = homeLocale): Promise<HomeContent> {",
     '  const result = await bindMantleSite(await getRuntime()).views["home"]();',
     '  if (!result.ok) console.warn("Mantle home View failed; showing seed homepage", result.diagnostic);',
     "  const sections = result.ok ? result.result.rows[0]?.sections as readonly HomeSection[] | undefined : undefined;",
@@ -546,13 +546,16 @@ function selectTypedSurface(files, archetype) {
 
 function selectedSectionNames(files, archetype) {
   const seed = JSON.parse(files[`.mantle/overlays/${archetype}/seed.json`] ?? "{}");
-  const seeded = [...new Set((seed.collections?.page ?? [])
+  const pageCollection = seed.collections?.["page-translations"] ?? seed.collections?.page ?? [];
+  const seeded = [...new Set(pageCollection
     .flatMap((page) => page.sections ?? [])
     .map((section) => section.type)
     .filter(Boolean))];
-  const pageSchema = parseAllDocuments(files["manifests/site.yaml"] ?? "")
+  const schemas = parseAllDocuments(files["manifests/site.yaml"] ?? "")
     .map((document) => document.toJSON())
-    .find((atom) => atom?.kind === "Schema" && atom?.metadata?.name === "page");
+    .filter((atom) => atom?.kind === "Schema");
+  const pageSchema = schemas.find((atom) => atom?.metadata?.name === "page-translations")
+    ?? schemas.find((atom) => atom?.metadata?.name === "page");
   if (!pageSchema) throw new Error(`${archetype} manifest must declare the seeded page Schema`);
   const declared = pageSchema?.spec?.schema?.properties?.sections?.items?.properties?.type?.enum;
   if (!Array.isArray(declared)) return seeded;

@@ -12,20 +12,65 @@ export const manifest = [
     },
     "spec": {
       "title": "Pages",
-      "description": "Public page content for a transaction site.",
+      "description": "Stable page identities shared by every language version.",
       "schema": {
         "type": "object",
         "required": [
-          "type",
+          "slug",
+          "type"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "home",
+              "page"
+            ]
+          }
+        }
+      },
+      "uniqueIndexes": [
+        [
+          "slug"
+        ]
+      ],
+      "localized": false,
+      "lifecycle": "publishing"
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Schema",
+    "metadata": {
+      "name": "page-translations"
+    },
+    "spec": {
+      "title": "Page translations",
+      "description": "Localized page copy and sections.",
+      "localized": true,
+      "translates": {
+        "parent": "page",
+        "on": "slug"
+      },
+      "schema": {
+        "type": "object",
+        "required": [
+          "slug",
+          "locale",
           "title",
           "sections"
         ],
         "properties": {
-          "type": {
+          "slug": {
             "type": "string",
-            "enum": [
-              "home"
-            ]
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "locale": {
+            "type": "string"
           },
           "title": {
             "type": "string"
@@ -131,10 +176,16 @@ export const manifest = [
       },
       "uniqueIndexes": [
         [
-          "type"
+          "slug",
+          "locale"
         ]
       ],
-      "localized": false,
+      "indexes": [
+        [
+          "locale",
+          "slug"
+        ]
+      ],
       "lifecycle": "publishing"
     }
   },
@@ -145,22 +196,110 @@ export const manifest = [
       "name": "home"
     },
     "spec": {
-      "from": "page",
+      "from": "page-translations",
+      "params": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "locale"
+        ],
+        "properties": {
+          "locale": {
+            "type": "string"
+          }
+        }
+      },
       "fields": [
         "id",
-        "type",
+        "slug",
+        "locale",
         "title",
         "summary",
         "sections",
         "updatedAt"
       ],
       "filter": {
-        "eq": {
-          "field": "status",
-          "value": "published"
-        }
+        "and": [
+          {
+            "eq": {
+              "field": "status",
+              "value": "published"
+            }
+          },
+          {
+            "eq": {
+              "field": "slug",
+              "value": "home"
+            }
+          },
+          {
+            "eq": {
+              "field": "locale",
+              "value": {
+                "$param": "locale"
+              }
+            }
+          }
+        ]
       },
       "limit": 1
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "View",
+    "metadata": {
+      "name": "public-pages"
+    },
+    "spec": {
+      "surface": "public",
+      "from": "page-translations",
+      "params": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "locale"
+        ],
+        "properties": {
+          "locale": {
+            "type": "string"
+          }
+        }
+      },
+      "fields": [
+        "id",
+        "slug",
+        "locale",
+        "title",
+        "summary",
+        "sections",
+        "updatedAt"
+      ],
+      "filter": {
+        "and": [
+          {
+            "eq": {
+              "field": "status",
+              "value": "published"
+            }
+          },
+          {
+            "eq": {
+              "field": "locale",
+              "value": {
+                "$param": "locale"
+              }
+            }
+          }
+        ]
+      },
+      "orderBy": [
+        {
+          "field": "slug",
+          "direction": "asc"
+        }
+      ],
+      "limit": 100
     }
   },
   {
@@ -171,12 +310,11 @@ export const manifest = [
     },
     "spec": {
       "title": "Products",
-      "description": "Published product catalog. Entries use the draft/publish lifecycle.",
+      "description": "Stable product identity, price, and media shared by every language version.",
       "schema": {
         "type": "object",
         "required": [
           "slug",
-          "title",
           "priceMinor",
           "currency"
         ],
@@ -184,12 +322,6 @@ export const manifest = [
           "slug": {
             "type": "string",
             "pattern": "^[a-z0-9-]+$"
-          },
-          "title": {
-            "type": "string"
-          },
-          "summary": {
-            "type": "string"
           },
           "priceMinor": {
             "type": "integer",
@@ -211,6 +343,58 @@ export const manifest = [
         ]
       ],
       "localized": false,
+      "lifecycle": "publishing"
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Schema",
+    "metadata": {
+      "name": "product-translations"
+    },
+    "spec": {
+      "title": "Product translations",
+      "description": "Localized product titles and summaries.",
+      "localized": true,
+      "translates": {
+        "parent": "products",
+        "on": "slug"
+      },
+      "schema": {
+        "type": "object",
+        "required": [
+          "slug",
+          "locale",
+          "title"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        }
+      },
+      "uniqueIndexes": [
+        [
+          "slug",
+          "locale"
+        ]
+      ],
+      "indexes": [
+        [
+          "locale",
+          "slug"
+        ]
+      ],
       "lifecycle": "publishing"
     }
   },
@@ -262,27 +446,50 @@ export const manifest = [
       "name": "public-products"
     },
     "spec": {
-      "from": "products",
+      "surface": "public",
+      "from": "product-translations",
+      "params": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "locale"
+        ],
+        "properties": {
+          "locale": {
+            "type": "string"
+          }
+        }
+      },
       "fields": [
         "id",
         "slug",
+        "locale",
         "title",
         "summary",
-        "priceMinor",
-        "currency",
-        "coverAssetId",
         "updatedAt"
       ],
       "filter": {
-        "eq": {
-          "field": "status",
-          "value": "published"
-        }
+        "and": [
+          {
+            "eq": {
+              "field": "status",
+              "value": "published"
+            }
+          },
+          {
+            "eq": {
+              "field": "locale",
+              "value": {
+                "$param": "locale"
+              }
+            }
+          }
+        ]
       },
       "orderBy": [
         {
-          "field": "updatedAt",
-          "direction": "desc"
+          "field": "slug",
+          "direction": "asc"
         }
       ],
       "limit": 100
@@ -354,20 +561,32 @@ export interface MantleViewOptions {
 export function bindMantleSite(runtime: CmsRuntime) {
   return {
     views: {
-      "home": (request: MantleViewOptions = {}) =>
+      "home": (request: MantleViewOptions & { readonly params: MantleGenerated.MantleSite.ViewParams_home }) =>
         runtime.executeView.execute<MantleGenerated.MantleSite.ViewRow_home>({
-          view: manifest[1],
+          view: manifest[2],
           ctx: request.ctx,
           options: {
+            params: request.params,
             page: request.page,
             show: request.show,
           },
         }),
-      "public-products": (request: MantleViewOptions = {}) =>
-        runtime.executeView.execute<MantleGenerated.MantleSite.ViewRow_public_products>({
-          view: manifest[4],
+      "public-pages": (request: MantleViewOptions & { readonly params: MantleGenerated.MantleSite.ViewParams_public_pages }) =>
+        runtime.executeView.execute<MantleGenerated.MantleSite.ViewRow_public_pages>({
+          view: manifest[3],
           ctx: request.ctx,
           options: {
+            params: request.params,
+            page: request.page,
+            show: request.show,
+          },
+        }),
+      "public-products": (request: MantleViewOptions & { readonly params: MantleGenerated.MantleSite.ViewParams_public_products }) =>
+        runtime.executeView.execute<MantleGenerated.MantleSite.ViewRow_public_products>({
+          view: manifest[7],
+          ctx: request.ctx,
+          options: {
+            params: request.params,
             page: request.page,
             show: request.show,
           },

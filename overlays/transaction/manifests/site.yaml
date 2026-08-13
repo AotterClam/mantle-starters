@@ -4,14 +4,42 @@ metadata:
   name: page
 spec:
   title: Pages
-  description: Public page content for a transaction site.
+  description: Stable page identities shared by every language version.
   schema:
     type: object
-    required: [type, title, sections]
+    required: [slug, type]
     properties:
+      slug:
+        type: string
+        pattern: "^[a-z0-9-]+$"
       type:
         type: string
-        enum: [home]
+        enum: [home, page]
+  uniqueIndexes:
+    - [slug]
+  localized: false
+  lifecycle: publishing
+---
+apiVersion: cms.mantle.aotter.net/v1
+kind: Schema
+metadata:
+  name: page-translations
+spec:
+  title: Page translations
+  description: Localized page copy and sections.
+  localized: true
+  translates:
+    parent: page
+    on: slug
+  schema:
+    type: object
+    required: [slug, locale, title, sections]
+    properties:
+      slug:
+        type: string
+        pattern: "^[a-z0-9-]+$"
+      locale:
+        type: string
       title: { type: string }
       summary: { type: string }
       sections:
@@ -58,8 +86,9 @@ spec:
                     x-mcp-hint: markdown
                   icon: { type: string }
   uniqueIndexes:
-    - [type]
-  localized: false
+    - [slug, locale]
+  indexes:
+    - [locale, slug]
   lifecycle: publishing
 ---
 apiVersion: cms.mantle.aotter.net/v1
@@ -67,11 +96,42 @@ kind: View
 metadata:
   name: home
 spec:
-  from: page
-  fields: [id, type, title, summary, sections, updatedAt]
+  from: page-translations
+  params:
+    type: object
+    additionalProperties: false
+    required: [locale]
+    properties:
+      locale: { type: string }
+  fields: [id, slug, locale, title, summary, sections, updatedAt]
   filter:
-    eq: { field: status, value: published }
+    and:
+      - eq: { field: status, value: published }
+      - eq: { field: slug, value: home }
+      - eq: { field: locale, value: { $param: locale } }
   limit: 1
+---
+apiVersion: cms.mantle.aotter.net/v1
+kind: View
+metadata:
+  name: public-pages
+spec:
+  surface: public
+  from: page-translations
+  params:
+    type: object
+    additionalProperties: false
+    required: [locale]
+    properties:
+      locale: { type: string }
+  fields: [id, slug, locale, title, summary, sections, updatedAt]
+  filter:
+    and:
+      - eq: { field: status, value: published }
+      - eq: { field: locale, value: { $param: locale } }
+  orderBy:
+    - { field: slug, direction: asc }
+  limit: 100
 ---
 apiVersion: cms.mantle.aotter.net/v1
 kind: Schema
@@ -79,18 +139,14 @@ metadata:
   name: products
 spec:
   title: Products
-  description: Published product catalog. Entries use the draft/publish lifecycle.
+  description: Stable product identity, price, and media shared by every language version.
   schema:
     type: object
-    required: [slug, title, priceMinor, currency]
+    required: [slug, priceMinor, currency]
     properties:
       slug:
         type: string
         pattern: "^[a-z0-9-]+$"
-      title:
-        type: string
-      summary:
-        type: string
       priceMinor:
         type: integer
         minimum: 0
@@ -103,6 +159,34 @@ spec:
   uniqueIndexes:
     - [slug]
   localized: false
+  lifecycle: publishing
+---
+apiVersion: cms.mantle.aotter.net/v1
+kind: Schema
+metadata:
+  name: product-translations
+spec:
+  title: Product translations
+  description: Localized product titles and summaries.
+  localized: true
+  translates:
+    parent: products
+    on: slug
+  schema:
+    type: object
+    required: [slug, locale, title]
+    properties:
+      slug:
+        type: string
+        pattern: "^[a-z0-9-]+$"
+      locale:
+        type: string
+      title: { type: string }
+      summary: { type: string }
+  uniqueIndexes:
+    - [slug, locale]
+  indexes:
+    - [locale, slug]
   lifecycle: publishing
 ---
 apiVersion: cms.mantle.aotter.net/v1
@@ -136,12 +220,21 @@ kind: View
 metadata:
   name: public-products
 spec:
-  from: products
-  fields: [id, slug, title, summary, priceMinor, currency, coverAssetId, updatedAt]
+  surface: public
+  from: product-translations
+  params:
+    type: object
+    additionalProperties: false
+    required: [locale]
+    properties:
+      locale: { type: string }
+  fields: [id, slug, locale, title, summary, updatedAt]
   filter:
-    eq: { field: status, value: published }
+    and:
+      - eq: { field: status, value: published }
+      - eq: { field: locale, value: { $param: locale } }
   orderBy:
-    - { field: updatedAt, direction: desc }
+    - { field: slug, direction: asc }
   limit: 100
 ---
 apiVersion: cms.mantle.aotter.net/v1
