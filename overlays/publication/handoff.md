@@ -8,7 +8,7 @@ First useful shape:
   `.mantle/overlays/publication/seed.json`;
 - use `site` for nav/footer/brand metadata and
   `collections.page[0].sections` for every visible homepage block;
-- keep `posts` as the core Schema;
+- keep `posts` as the stable parent and `post-translations` as its localized child;
 - expose `published-posts` at `/api/views/published-posts`;
 - replace the seeded publication cards and posts before adding custom
   archive/detail routes.

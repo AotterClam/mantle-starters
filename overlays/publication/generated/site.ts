@@ -172,11 +172,47 @@ export const manifest = [
     },
     "spec": {
       "title": "Posts",
-      "description": "Publication posts for the first public content surface.",
+      "description": "Stable post identities shared by every language version.",
+      "schema": {
+        "type": "object",
+        "required": [
+          "slug"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          }
+        }
+      },
+      "uniqueIndexes": [
+        [
+          "slug"
+        ]
+      ],
+      "localized": false,
+      "lifecycle": "publishing"
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Schema",
+    "metadata": {
+      "name": "post-translations"
+    },
+    "spec": {
+      "title": "Post translations",
+      "description": "Localized titles and bodies for each post.",
+      "localized": true,
+      "translates": {
+        "parent": "posts",
+        "on": "slug"
+      },
       "schema": {
         "type": "object",
         "required": [
           "slug",
+          "locale",
           "title",
           "publishedAt"
         ],
@@ -184,6 +220,9 @@ export const manifest = [
           "slug": {
             "type": "string",
             "pattern": "^[a-z0-9-]+$"
+          },
+          "locale": {
+            "type": "string"
           },
           "title": {
             "type": "string"
@@ -202,16 +241,16 @@ export const manifest = [
       },
       "uniqueIndexes": [
         [
-          "slug"
+          "slug",
+          "locale"
         ]
       ],
       "indexes": [
         [
-          "publishedAt",
-          "slug"
+          "locale",
+          "publishedAt"
         ]
       ],
-      "localized": false,
       "lifecycle": "publishing"
     }
   },
@@ -222,10 +261,23 @@ export const manifest = [
       "name": "published-posts"
     },
     "spec": {
-      "from": "posts",
+      "from": "post-translations",
+      "params": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "locale"
+        ],
+        "properties": {
+          "locale": {
+            "type": "string"
+          }
+        }
+      },
       "fields": [
         "id",
         "slug",
+        "locale",
         "title",
         "excerpt",
         "body",
@@ -241,6 +293,14 @@ export const manifest = [
             }
           },
           {
+            "eq": {
+              "field": "locale",
+              "value": {
+                "$param": "locale"
+              }
+            }
+          },
+          {
             "gte": {
               "field": "publishedAt",
               "value": 0
@@ -251,10 +311,6 @@ export const manifest = [
       "orderBy": [
         {
           "field": "publishedAt",
-          "direction": "desc"
-        },
-        {
-          "field": "slug",
           "direction": "desc"
         }
       ],
@@ -370,11 +426,12 @@ export function bindMantleSite(runtime: CmsRuntime) {
             show: request.show,
           },
         }),
-      "published-posts": (request: MantleViewOptions = {}) =>
+      "published-posts": (request: MantleViewOptions & { readonly params: MantleGenerated.MantleSite.ViewParams_published_posts }) =>
         runtime.executeView.execute<MantleGenerated.MantleSite.ViewRow_published_posts>({
-          view: manifest[3],
+          view: manifest[4],
           ctx: request.ctx,
           options: {
+            params: request.params,
             page: request.page,
             show: request.show,
           },

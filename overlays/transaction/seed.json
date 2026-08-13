@@ -112,7 +112,7 @@
               },
               {
                 "title": "Where does the product model live?",
-                "body": "The products Schema and public-products View live in manifests/transaction.yaml."
+                "body": "The products Schema and public-products View live in manifests/site.yaml."
               }
             ]
           },

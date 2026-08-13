@@ -37,6 +37,12 @@ export namespace MantleSite {
   /** Entry data for Schema 'posts' */
   export interface Entry_posts {
     slug: string;
+  }
+
+  /** Entry data for Schema 'post-translations' */
+  export interface Entry_post_translations {
+    slug: string;
+    locale: string;
     title: string;
     excerpt?: string;
     body?: string;
@@ -96,10 +102,16 @@ export namespace MantleSite {
     updatedAt: number;
   }
 
+  /** Parameters accepted by View 'published-posts' */
+  export type ViewParams_published_posts = {
+    locale: string;
+  };
+
   /** Row shape returned by GET /api/views/published-posts */
   export interface ViewRow_published_posts {
     id: string;
     slug?: string;
+    locale?: string;
     title?: string;
     excerpt?: string;
     body?: string;

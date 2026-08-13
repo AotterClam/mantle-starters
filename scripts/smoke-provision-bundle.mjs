@@ -74,7 +74,6 @@ for (const archetype of archetypes) {
       assertFourAtoms(tempRoot, archetype);
       assertPublicMutationInputsStrict(tempRoot, archetype);
       assertOperationalCollection(tempRoot, archetype);
-      assertNoBlankExampleManifest(tempRoot, archetype);
       assertSeedDrivenHome(tempRoot, archetype);
       readFileSync(join(tempRoot, ".mantle", "overlays", archetype, "seed.json"), "utf8");
       if (archetype === "presence") {
@@ -89,6 +88,7 @@ for (const archetype of archetypes) {
       }
       if (archetype === "publication") {
         assertPublicationSeed(tempRoot);
+        assertTranslationPair(tempRoot);
       }
       if (archetype === "transaction") {
         assertTransactionSeed(tempRoot);
@@ -288,7 +288,7 @@ function assertSectionImageContract(root, archetype) {
   if (!renderer.includes("image={section.image}")) {
     throw new Error(`${archetype} hero does not render its declared image`);
   }
-  const manifestPath = join(root, "manifests", `${archetype}.yaml`);
+  const manifestPath = join(root, "manifests", "site.yaml");
   if (!existsSync(manifestPath)) return;
   const page = parseAllDocuments(readFileSync(manifestPath, "utf8"))
     .map((document) => document.toJSON())
@@ -317,7 +317,7 @@ function assertSectionImageContract(root, archetype) {
 function assertOperationalCollection(root, archetype) {
   const collection = operationalCollections[archetype];
   if (!collection) return;
-  const manifestPath = join(root, "manifests", `${archetype}.yaml`);
+  const manifestPath = join(root, "manifests", "site.yaml");
   const schema = parseAllDocuments(readFileSync(manifestPath, "utf8"))
     .map((document) => document.toJSON())
     .find((atom) => atom?.kind === "Schema" && atom?.metadata?.name === collection);
@@ -381,7 +381,7 @@ function assertRuntimeHasNoKiwaDemoCopy(root, archetype) {
 }
 
 function assertFourAtoms(root, archetype) {
-  const text = readFileSync(join(root, "manifests", `${archetype}.yaml`), "utf8");
+  const text = readFileSync(join(root, "manifests", "site.yaml"), "utf8");
   for (const atom of ["Schema", "View", "Procedure", "Trigger"]) {
     if (!new RegExp(`kind:\\s*${atom}\\b`).test(text)) {
       throw new Error(`${archetype} manifest missing ${atom}`);
@@ -390,7 +390,7 @@ function assertFourAtoms(root, archetype) {
 }
 
 function assertPublicMutationInputsStrict(root, archetype) {
-  const text = readFileSync(join(root, "manifests", `${archetype}.yaml`), "utf8");
+  const text = readFileSync(join(root, "manifests", "site.yaml"), "utf8");
   const publicMutations = parseAllDocuments(text)
     .map((document) => document.toJSON())
     .filter((atom) =>
@@ -454,7 +454,7 @@ function assertIntakeForm(root) {
     "utf8",
   );
   const seed = readFileSync(join(root, ".mantle", "overlays", "intake", "seed.json"), "utf8");
-  const manifest = readFileSync(join(root, "manifests", "intake.yaml"), "utf8");
+  const manifest = readFileSync(join(root, "manifests", "site.yaml"), "utf8");
   const notify = readFileSync(
     join(root, "src", "worker", "features", "intake", "notifyIntake.ts"),
     "utf8",
@@ -534,8 +534,22 @@ function assertPublicationSeed(root) {
   if (!seed.includes('"site"') || !seed.includes('"type": "home"')) {
     throw new Error("publication seed does not drive site/page content");
   }
-  if (!seed.includes('"posts"') || !seed.includes('"slug": "welcome"')) {
+  if (!seed.includes('"posts"') || !seed.includes('"post-translations"') || !seed.includes('"slug": "welcome"')) {
     throw new Error("publication seed does not include starter posts");
+  }
+}
+
+function assertTranslationPair(root) {
+  const schemas = parseAllDocuments(readFileSync(join(root, "manifests", "site.yaml"), "utf8"))
+    .map((document) => document.toJSON())
+    .filter((atom) => atom?.kind === "Schema");
+  const parent = schemas.find((schema) => schema.metadata?.name === "posts");
+  const child = schemas.find((schema) => schema.metadata?.name === "post-translations");
+  if (parent?.spec?.localized || child?.spec?.localized !== true) {
+    throw new Error("publication translation pair must have a non-localized parent and localized child");
+  }
+  if (child?.spec?.translates?.parent !== "posts" || child.spec.translates.on !== "slug") {
+    throw new Error("publication translation pair must join post-translations to posts by slug");
   }
 }
 
@@ -553,15 +567,6 @@ function assertTransactionSeed(root) {
   if (!seed.includes('"type": "home"') || parsed.collections?.products?.length !== 3) {
     throw new Error("transaction seed does not include a visible home and three products");
   }
-}
-
-function assertNoBlankExampleManifest(root, archetype) {
-  try {
-    readFileSync(join(root, "manifests", "example.yaml"), "utf8");
-  } catch {
-    return;
-  }
-  throw new Error(`${archetype} bundle still includes blank example manifest`);
 }
 
 function readSource(root) {

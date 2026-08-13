@@ -9,7 +9,7 @@ First useful shape:
 - do not build cart, payment, inventory, accounts, or admin flows until
   the user asks for them.
 
-Lifecycle references in `manifests/transaction.yaml`:
+Lifecycle references in `manifests/site.yaml`:
 
 - `products` uses `publishing`: staff draft and publish catalog content;
 - `product-inquiries` uses `operational`: submissions are live immediately

@@ -62,7 +62,6 @@ function buildBundleFiles(archetype) {
     applyOverlay(files, archetype);
     selectTypedSurface(files, archetype);
     pruneRuntimeSource(files);
-    delete files["manifests/example.yaml"];
     // This UI revision keeps its licensed snapshot as an offline agent palette.
     walk(files, "kiwa", "kiwa");
     compileBundleStyles(files, archetype);
@@ -201,11 +200,8 @@ function assertBundle(bundle, archetype) {
   if (bundle.files["wrangler.toml"]?.includes("MANTLE_PLATFORM_AUTH")) {
     throw new Error(`${archetype} bundle still contains preview Hosted Auth variables`);
   }
-  if (archetype !== "blank" && !bundle.files[`manifests/${archetype}.yaml`]) {
+  if (!bundle.files["manifests/site.yaml"]) {
     throw new Error(`${archetype} bundle missing applied manifest`);
-  }
-  if (archetype !== "blank" && bundle.files["manifests/example.yaml"]) {
-    throw new Error(`${archetype} bundle should not include blank example manifest`);
   }
   if (archetype === "blank") {
     assertHeadlessBlank(bundle);
@@ -292,7 +288,7 @@ function applyProvisionedReadme(files, archetype) {
   if (archetype === "blank") return;
   const reusableStart = base.indexOf("## Kiwa UI Credit");
   const reusableBody = reusableStart === -1 ? base : base.slice(reusableStart);
-  const manifestPath = `manifests/${archetype}.yaml`;
+  const manifestPath = "manifests/site.yaml";
   const overview = [
     "# {{BRAND}}",
     "",
@@ -350,7 +346,7 @@ function assertProvisionedReadme(bundle, archetype) {
   if (readme.includes("aotter/mantle-starters/blank")) {
     throw new Error(`${archetype} README still reads like the source starter README`);
   }
-  const manifestPath = `manifests/${archetype}.yaml`;
+  const manifestPath = "manifests/site.yaml";
   if (!readme.includes(manifestPath)) throw new Error(`${archetype} README missing manifest path`);
   if (archetype !== "blank") {
     for (const required of [
@@ -543,7 +539,7 @@ function selectedSectionNames(files, archetype) {
     .flatMap((page) => page.sections ?? [])
     .map((section) => section.type)
     .filter(Boolean))];
-  const pageSchema = parseAllDocuments(files[`manifests/${archetype}.yaml`] ?? "")
+  const pageSchema = parseAllDocuments(files["manifests/site.yaml"] ?? "")
     .map((document) => document.toJSON())
     .find((atom) => atom?.kind === "Schema" && atom?.metadata?.name === "page");
   const declared = pageSchema?.spec?.schema?.properties?.sections?.items?.properties?.type?.enum;

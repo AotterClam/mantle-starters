@@ -45,14 +45,14 @@ src/
     config.ts                 # environment and site defaults
     handlers/index.ts         # Procedure handler registry
 
-manifests/                    # 4 atoms: Schema, View, Procedure, Trigger
+manifests/site.yaml           # 4 atoms: Schema, View, Procedure, Trigger
 components/, lib/, styles/     # selected runtime-facing UI surface
 kiwa/                         # current revision's optional offline UI palette
 .mantle/generated/            # generated manifest/types consumed by Worker
 .mantle/                      # launch state, overlay notes, handoff
 ```
 
-`manifests/` is the authoritative Mantle model. `mantle generate` compiles it
+`manifests/site.yaml` is the authoritative Mantle model. `mantle generate` compiles it
 to `.mantle/generated/`; `src/index.ts` passes that output to
 `createMantleWorker`. In this revision, runtime components stay at root
 because `kiwa-ui.json` uses Kiwa's `@/components` and `@/lib/utils`
@@ -106,7 +106,7 @@ pnpm dev      # safe wrangler dev — http://localhost:8787
 ```
 
 Open `http://localhost:8787/`, then inspect
-`manifests/{{ARCHETYPE}}.yaml` for the selected View and Procedure names.
+`manifests/site.yaml` for the selected View and Procedure names.
 The homepage starts from `.mantle/overlays/{{ARCHETYPE}}/seed.json`; content
 created later through Staff MCP lives in D1.
 
@@ -119,7 +119,7 @@ auth or self-hosted GitHub OAuth. The public homepage does not.
 ## Editing the launch
 
 1. Edit `.mantle/overlays/{{ARCHETYPE}}/seed.json` for auth-free local copy.
-2. Edit `manifests/{{ARCHETYPE}}.yaml` when the Schema, View, Procedure, or
+2. Edit `manifests/site.yaml` when the Schema, View, Procedure, or
    Trigger contract changes, then run `pnpm generate`.
 3. Register only ref Procedure handlers in `src/mantle/handlers/index.ts`;
    builtin handlers come from Core.
