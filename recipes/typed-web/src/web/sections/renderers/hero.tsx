@@ -1,5 +1,4 @@
 import { Hero02 } from "@/components/blocks/marketing/hero-02";
-import { asset } from "../../assets.js";
 import type { SectionRenderer } from "../renderSection.js";
 import { sectionKey } from "../helpers.js";
 
@@ -10,7 +9,7 @@ export const renderHero: SectionRenderer = (section, index) => (
     description={section.body}
     primaryCta={section.action}
     secondaryCta={section.secondaryAction}
-    image={section.image ? { ...section.image, src: asset(section.image.src) } : undefined}
+    image={section.image}
     showImage={section.showImage}
   />
 );

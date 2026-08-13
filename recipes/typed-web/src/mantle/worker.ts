@@ -1,7 +1,6 @@
 import { createMantleWorker, mountPublicRoutes } from "@aotter/mantle/cloudflare";
 import { manifest } from "../../.mantle/generated/site.js";
 import { buildAuth } from "../auth.js";
-import { mountAssetRoutes } from "../worker/routes/assets.js";
 import {
   publicCollectionRoutes,
   publicPathResolver,
@@ -31,7 +30,6 @@ export const mantle = createMantleWorker<Env>({
         notFoundRenderer: renderNotFound,
       });
       mountTypeRoutes(app, getRuntime);
-      mountAssetRoutes(app);
     },
   }),
 });

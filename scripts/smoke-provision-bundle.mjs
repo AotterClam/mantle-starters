@@ -45,6 +45,7 @@ for (const archetype of archetypes) {
     materializeBundle(tempRoot, bundle, { ...replacements, ARCHETYPE: archetype });
     assertNoLeftovers(tempRoot, bundle.files);
     assertProjectScripts(tempRoot, archetype);
+    assertStaticAssets(tempRoot, archetype);
     if (archetype === "blank") {
       assertHeadlessBlank(tempRoot);
     } else {
@@ -192,7 +193,7 @@ function smokeLocalMaterializer() {
 }
 
 function assertGeneratedStylesMatchStarterLock(root) {
-  const css = readFileSync(join(root, "styles", "generated.css"), "utf8");
+  const css = readFileSync(join(root, "public", "assets", "styles.css"), "utf8");
   const lock = readFileSync(join(root, "pnpm-lock.yaml"), "utf8");
   const cssVersion = css.match(/tailwindcss v([^\s]+)/)?.[1];
   const lockVersion = lock.match(/^\s+tailwindcss:\n\s+specifier:[^\n]+\n\s+version:\s+([^\s]+)/m)?.[1];
@@ -263,12 +264,12 @@ function assertMantleSiteSignature(root, archetype) {
 
 function assertStylesheetMounted(root, archetype) {
   const source = readSource(root);
-  const css = readFileSync(join(root, "styles", "generated.css"), "utf8");
+  const css = readFileSync(join(root, "public", "assets", "styles.css"), "utf8");
   if (!source.includes("/assets/styles.css")) {
     throw new Error(`${archetype} homepage does not link generated stylesheet`);
   }
-  if (!source.includes("stylesCss")) {
-    throw new Error(`${archetype} worker does not mount generated stylesheet`);
+  if (source.includes("mountAssetRoutes") || source.includes("stylesCss")) {
+    throw new Error(`${archetype} still serves generated assets through the Worker`);
   }
   if (!css.includes("tailwindcss") || !css.includes(".bg-primary")) {
     throw new Error(`${archetype} generated stylesheet does not include Kiwa/Tailwind utilities`);
@@ -299,7 +300,6 @@ function assertEdgeCacheContract(root, archetype) {
     throw new Error(`${archetype} still loads the render-blocking remote Inter font`);
   }
   for (const required of [
-    "public, max-age=31536000, immutable",
     'width="1200"',
     'height="900"',
     'fetchpriority="high"',
@@ -308,8 +308,16 @@ function assertEdgeCacheContract(root, archetype) {
       throw new Error(`${archetype} cache/LCP contract missing ${required}`);
     }
   }
-  if (!source.includes("?v=${assetBuild}")) {
-    throw new Error(`${archetype} immutable assets are not content-versioned`);
+}
+
+function assertStaticAssets(root, archetype) {
+  const wrangler = readFileSync(join(root, "wrangler.toml"), "utf8");
+  if (!wrangler.includes('[assets]\ndirectory = "./public"\nbinding = "ASSETS"')) {
+    throw new Error(`${archetype} does not use Cloudflare Static Assets`);
+  }
+  const icon = readFileSync(join(root, "public", "site-icon.svg"), "utf8");
+  if (!icon.startsWith("<svg") || !readSource(root).includes('src: "/site-icon.svg"')) {
+    throw new Error(`${archetype} does not declare one shared site icon`);
   }
 }
 
@@ -319,12 +327,12 @@ function isWorkersCacheEnabled(wrangler) {
 
 function assertSectionImageContract(root, archetype) {
   const renderer = readFileSync(join(root, "src", "web", "sections", "renderers", "hero.tsx"), "utf8");
-  if (!renderer.includes("asset(section.image.src)")) {
+  if (!renderer.includes("image={section.image}")) {
     throw new Error(`${archetype} hero does not render its declared image`);
   }
   const contentRendererPath = join(root, "src", "web", "sections", "renderers", "content.tsx");
   if (existsSync(contentRendererPath)
-      && !readFileSync(contentRendererPath, "utf8").includes("asset(section.image.src)")) {
+      && !readFileSync(contentRendererPath, "utf8").includes("image={section.image}")) {
     throw new Error(`${archetype} content does not render its declared image`);
   }
   const manifestPath = join(root, "manifests", "site.yaml");
@@ -367,16 +375,12 @@ function assertSectionImageContract(root, archetype) {
   if (!homeContent.includes('views["home"](')) {
     throw new Error(`${archetype} homepage never reads its home View`);
   }
-  const assets = readFileSync(join(root, "src", "worker", "routes", "assets.ts"), "utf8");
   const theme = readFileSync(join(root, "src", "web", "client", "themeClient.ts"), "utf8");
-  const svg = readFileSync(join(root, "src", "web", "mantleOceanHero.ts"), "utf8");
   for (const path of ["mantle-ocean-hero-light.svg", "mantle-ocean-hero-dark.svg"]) {
-    if (!assets.includes(path) || !theme.includes(path)) {
-      throw new Error(`${archetype} ocean hero ${path} is not wired through assets and theme`);
+    const svg = readFileSync(join(root, "public", "assets", path), "utf8");
+    if (!svg.startsWith("<svg") || !theme.includes(path)) {
+      throw new Error(`${archetype} ocean hero ${path} is not wired through static assets and theme`);
     }
-  }
-  if (!svg.includes("mantleOceanHeroLightSvg") || !svg.includes("mantleOceanHeroDarkSvg")) {
-    throw new Error(`${archetype} bundle does not contain the shared ocean hero`);
   }
 }
 
