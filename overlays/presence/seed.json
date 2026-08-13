@@ -299,13 +299,6 @@
           }
         ]
       }
-    ],
-    "contact": [
-      {
-        "name": "Sample Visitor",
-        "email": "hello@example.com",
-        "message": "I would like to learn more about {{BRAND}}."
-      }
     ]
   }
 }

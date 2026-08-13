@@ -399,8 +399,8 @@ function assertOperationalCollection(root, archetype) {
   const seed = JSON.parse(
     readFileSync(join(root, ".mantle", "overlays", archetype, "seed.json"), "utf8"),
   );
-  if ((seed.collections?.[collection] ?? []).some((entry) => entry.status === "draft")) {
-    throw new Error(`${archetype} operational seed ${collection} still declares a draft`);
+  if ((seed.collections?.[collection] ?? []).length > 0) {
+    throw new Error(`${archetype} seed contains fake operational data for ${collection}`);
   }
 }
 
@@ -557,7 +557,6 @@ function assertIntakeForm(root) {
   if (
     !seed.includes('"locale": "en"')
     || !seed.includes('"intakeLabels"')
-    || !seed.includes('"replyLocale"')
   ) {
     throw new Error("intake seed does not define localized chrome and reply language");
   }
@@ -626,9 +625,14 @@ function assertTranslationPair(root) {
 
 function assertSeedDrivenHome(root, archetype) {
   const homeContent = readFileSync(join(root, "src", "web", "content", "homeContent.ts"), "utf8");
-  const seedImport = `../../../.mantle/overlays/${archetype}/seed.json`;
-  if (!homeContent.includes(seedImport)) {
-    throw new Error(`${archetype} homepage content is not driven by the overlay seed`);
+  const seedRuntime = readFileSync(join(root, "src", "mantle", "seed.ts"), "utf8");
+  const worker = readFileSync(join(root, "src", "index.ts"), "utf8");
+  const seedImport = `../../.mantle/overlays/${archetype}/seed.json`;
+  if (!seedRuntime.includes(seedImport) || !worker.includes("createSeededRuntime")) {
+    throw new Error(`${archetype} does not initialize D1 from the overlay seed`);
+  }
+  if (homeContent.includes(seedImport) || homeContent.includes("fallback")) {
+    throw new Error(`${archetype} homepage still has a seed fallback`);
   }
 }
 

@@ -257,9 +257,9 @@ function assertBundle(bundle, archetype) {
     if (!bundle.files["src/worker/routes/assets.ts"]?.includes("max-age=31536000, immutable")) {
       throw new Error(`${archetype} versioned homepage assets must be immutable`);
     }
-    const seedImport = `../../../.mantle/overlays/${archetype}/seed.json`;
-    if (!bundle.files["src/web/content/homeContent.ts"]?.includes(seedImport)) {
-      throw new Error(`${archetype} homeContent must read the overlay seed`);
+    const seedImport = `../../.mantle/overlays/${archetype}/seed.json`;
+    if (!bundle.files["src/mantle/seed.ts"]?.includes(seedImport)) {
+      throw new Error(`${archetype} initial seed must read the overlay seed`);
     }
     if (!bundle.files["src/index.ts"]?.includes("createMantleWorker") ||
         !bundle.files["src/index.ts"]?.includes(".mantle/generated/site.js")) {
@@ -442,12 +442,25 @@ function applyOverlay(files, archetype) {
 
 function applyOverlaySeedContent(files, archetype, seedText) {
   const seed = JSON.parse(seedText);
+  const seedRuntimeImport = `../../.mantle/overlays/${archetype}/seed.json`;
+  files["src/mantle/seed.ts"] = [
+    `import seed from "${seedRuntimeImport}";`,
+    'import type { CmsRuntime } from "@aotter/mantle/runtime";',
+    'import { createInitialSeedRuntime } from "./initialSeed.js";',
+    "",
+    "export function createSeededRuntime<Env>(",
+    "  getRuntime: (env: Env) => Promise<CmsRuntime>,",
+    "): (env: Env) => Promise<CmsRuntime> {",
+    "  return createInitialSeedRuntime(seed, getRuntime);",
+    "}",
+    "",
+  ].join("\n");
   if (seed?.locales) return;
-  const seedImport = `../../../.mantle/overlays/${archetype}/seed.json`;
   if (!seed?.site) throw new Error(`${archetype} seed must define site chrome`);
   assertLocalizedChrome(seed, archetype);
+  const seedContentImport = `../../../.mantle/overlays/${archetype}/seed.json`;
   files["src/web/content/siteContent.ts"] = [
-    `import seed from "${seedImport}";`,
+    `import seed from "${seedContentImport}";`,
     'import type { SiteContent } from "./types.js";',
     "",
     "type Seed = { readonly site: SiteContent };",
@@ -460,25 +473,16 @@ function applyOverlaySeedContent(files, archetype, seedText) {
     throw new Error(`${archetype} seed must define collections.page`);
   }
   files["src/web/content/homeContent.ts"] = [
-    `import seed from "${seedImport}";`,
-    'import { bindMantleSite } from "../../../.mantle/generated/site.js";',
+    'import { DiagnosticError } from "@aotter/mantle/spec";',
     'import type { CmsRuntime } from "@aotter/mantle/runtime";',
+    'import { bindMantleSite } from "../../../.mantle/generated/site.js";',
     'import type { HomeContent, HomeSection } from "./types.js";',
     "",
-    "type SeedPage = { readonly type?: string; readonly sections?: readonly HomeSection[] };",
-    "type Seed = {",
-    "  readonly locale?: string;",
-    "  readonly collections?: { readonly page?: readonly SeedPage[] };",
-    "};",
-    "const seedData = seed as Seed;",
-    'const homePage = (seedData.collections?.page ?? []).find((page) => page.type === "home");',
-    "export const homeContent: HomeContent = { sections: homePage?.sections ?? [] };",
-    "export const homeLocale = seedData.locale;",
-    "export async function resolveHomeContent(getRuntime: () => Promise<CmsRuntime>, _locale = homeLocale): Promise<HomeContent> {",
+    "export async function resolveHomeContent(getRuntime: () => Promise<CmsRuntime>): Promise<HomeContent> {",
     '  const result = await bindMantleSite(await getRuntime()).views["home"]();',
-    '  if (!result.ok) console.warn("Mantle home View failed; showing seed homepage", result.diagnostic);',
-    "  const sections = result.ok ? result.result.rows[0]?.sections as readonly HomeSection[] | undefined : undefined;",
-    "  return sections?.length ? { sections } : homeContent;",
+    "  if (!result.ok) throw new DiagnosticError(result.diagnostic);",
+    "  const sections = result.result.rows[0]?.sections as readonly HomeSection[] | undefined;",
+    "  return { sections: sections ?? [] };",
     "}",
     "",
   ].join("\n");

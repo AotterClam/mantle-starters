@@ -263,18 +263,6 @@
           }
         ]
       }
-    ],
-    "intake-submissions": [
-      {
-        "name": "Sample Responder",
-        "email": "hello@example.com",
-        "attendance": "maybe",
-        "role": "Example operator",
-        "session": "either",
-        "note": "I would like details before confirming.",
-        "resultKey": "follow-up",
-        "replyLocale": "{{CANONICAL_LOCALE}}"
-      }
     ]
   }
 }

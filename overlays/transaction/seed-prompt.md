@@ -1,7 +1,7 @@
 # Transaction seed prompt
 
-Use `.mantle/overlays/transaction/seed.json` as the local, auth-free first
-content surface. It contains shared Page/Product parents and locale packs for
+Use `.mantle/overlays/transaction/seed.json` as the initial D1 content. It
+contains shared Page/Product parents and locale packs for
 their translations; `.mantle/overlays/transaction/messages.json` contains the
 matching functional UI copy. Provision keeps only the selected locales.
 Replace the sample product for `{{BRAND}}`; keep integer `priceMinor`, one

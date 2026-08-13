@@ -1,24 +1,23 @@
 import type { Child } from "hono/jsx";
 import { Footer02 } from "@/components/blocks/marketing/footer-02";
 import { Nav02 } from "@/components/blocks/marketing/nav-02";
-import { homeContent, homeLocale } from "../content/homeContent.js";
 import { siteContent, siteContentForLocale } from "../content/siteContent.js";
 import type { HomeContent } from "../content/types.js";
 import { renderSection } from "../sections/renderSection.js";
 
 type HomePageProps = {
-  readonly content?: HomeContent;
+  readonly content: HomeContent;
   readonly turnstileSiteKey?: string;
-  readonly locale?: string;
+  readonly locale: string;
   readonly locales?: readonly string[];
   readonly localePath?: string;
   readonly brand?: string;
 };
 
 export function HomePage({
-  content = homeContent,
+  content,
   turnstileSiteKey,
-  locale = homeLocale ?? "en",
+  locale,
   locales = [locale],
   localePath = "/:locale",
   brand = siteContent.brand,

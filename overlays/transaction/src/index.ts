@@ -3,6 +3,7 @@ import { bindMantleSite, manifest } from "../.mantle/generated/site.js";
 import { buildAuth } from "./auth.js";
 import { buildSiteDefaults, type Env } from "./mantle/config.js";
 import { buildHandlers } from "./mantle/handlers/index.js";
+import { createSeededRuntime } from "./mantle/seed.js";
 import {
   publicCollectionRoutes,
   publicPathResolver,
@@ -33,15 +34,20 @@ const mantle = createMantleWorker<Env>({
   }),
 });
 
+const getRuntime = createSeededRuntime((env: Env) => mantle.getRuntime(env));
+
 export { InventoryCoordinator } from "./commerce/InventoryCoordinator.js";
 
 export default {
-  fetch: mantle.fetch,
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    await getRuntime(env);
+    return mantle.fetch(request, env, ctx);
+  },
 
   async queue(batch: MessageBatch<unknown>, env: Env, ctx: ExecutionContext): Promise<void> {
     let site: ReturnType<typeof bindMantleSite>;
     try {
-      site = bindMantleSite(await mantle.getRuntime(env));
+      site = bindMantleSite(await getRuntime(env));
     } catch (error) {
       console.error("[transaction queue] runtime unavailable", error);
       batch.retryAll();
@@ -76,7 +82,7 @@ export default {
   },
 
   async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
-    const site = bindMantleSite(await mantle.getRuntime(env));
+    const site = bindMantleSite(await getRuntime(env));
     const result = await site.procedures["sweep-expired-orders"]({ now: Date.now() }, internalContext(env, ctx));
     if (!result.ok) throw new Error(`scheduled expiry sweep failed: ${result.diagnostic.code}`);
   },

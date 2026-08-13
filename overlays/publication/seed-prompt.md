@@ -1,6 +1,7 @@
 # Publication seed prompt
 
-The homepage is seeded through `.mantle/overlays/publication/seed.json`:
+Initial page and post entries are written to D1 from
+`.mantle/overlays/publication/seed.json`:
 
 - `site` controls nav/footer/brand metadata.
 - `collections.page[0].sections` controls every visible homepage block.

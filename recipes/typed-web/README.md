@@ -39,7 +39,7 @@ src/
     features/                 # type overlays add server behavior here
   web/
     pages/HomePage.tsx        # public page body
-    content/                  # seed-driven site/home content modules
+    content/                  # runtime-backed site/home content modules
     client/                   # browser behavior served as /assets/kiwa-home.js
   mantle/
     config.ts                 # environment and site defaults
@@ -93,7 +93,7 @@ cp .dev.vars.example .dev.vars
 > published since the lockfile was committed; the drift only surfaces
 > when CI rejects it.
 
-The seeded `/` preview and public HTTP Procedures work without auth. Set
+The initial `/` preview and public HTTP Procedures work without auth. Set
 `MANTLE_AUTH_MODE=hosted` with `MANTLE_HOSTED_AUTH_ISSUER`,
 `MANTLE_HOSTED_AUTH_CLIENT_ID`, and `ADMIN_GITHUB_LOGIN`. Hosted clients are
 public PKCE clients and have no client secret.
@@ -107,8 +107,9 @@ pnpm dev      # safe wrangler dev — http://localhost:8787
 
 Open `http://localhost:8787/`, then inspect
 `manifests/site.yaml` for the selected View and Procedure names.
-The homepage reads the published `page` through the `home` View, then falls
-back to `.mantle/overlays/{{ARCHETYPE}}/seed.json` until one exists in D1.
+On the first request, the starter writes missing entries from
+`.mantle/overlays/{{ARCHETYPE}}/seed.json` to D1 through Core authoring use
+cases. The homepage then reads only the published `page` through the `home` View.
 
 For production, push the generated repo and configure Cloudflare, or use
 Mantle landing to automate the GitHub and Cloudflare steps.
@@ -118,8 +119,8 @@ auth or self-hosted GitHub OAuth. The public homepage does not.
 
 ## Editing the launch
 
-1. Edit `.mantle/overlays/{{ARCHETYPE}}/seed.json` for the auth-free fallback.
-   Publishing a `page` through Admin or Staff MCP replaces it on `/`.
+1. Edit `.mantle/overlays/{{ARCHETYPE}}/seed.json` before the first request.
+   After initialization, edit and publish entries through Admin or Staff MCP.
 2. Edit `manifests/site.yaml` when the Schema, View, Procedure, or
    Trigger contract changes, then run `pnpm generate`.
 3. Register only ref Procedure handlers in `src/mantle/handlers/index.ts`;

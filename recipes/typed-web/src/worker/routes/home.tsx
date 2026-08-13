@@ -2,7 +2,7 @@ import type { MantleExtensionApp } from "@aotter/mantle/cloudflare";
 import type { CmsRuntime } from "@aotter/mantle/runtime";
 import { toUrlLocale } from "@aotter/mantle/runtime";
 import { HomePage } from "../../web/pages/HomePage.js";
-import { homeLocale, resolveHomeContent } from "../../web/content/homeContent.js";
+import { resolveHomeContent } from "../../web/content/homeContent.js";
 import { PageDocument } from "../../renderer.js";
 import type { Env } from "../../mantle/config.js";
 
@@ -14,8 +14,8 @@ export function mountHomeRoute(
     c.header("cache-control", "public, max-age=0, s-maxage=300");
     const runtime = await getRuntime();
     const site = await runtime.siteConfig.load();
-    const locale = site.canonicalLocale ?? site.locales[0] ?? homeLocale ?? "en";
-    const content = await resolveHomeContent(async () => runtime, locale);
+    const locale = site.canonicalLocale ?? site.locales[0] ?? "en";
+    const content = await resolveHomeContent(async () => runtime);
     return c.html(
       <PageDocument locale={locale}>
         <HomePage
@@ -35,7 +35,7 @@ export function mountHomeRoute(
     const locale = site.locales.find((candidate) => toUrlLocale(candidate) === requested);
     if (!locale) return c.notFound();
     c.header("cache-control", "public, max-age=0, s-maxage=300");
-    const content = await resolveHomeContent(async () => runtime, locale);
+    const content = await resolveHomeContent(async () => runtime);
     return c.html(
       <PageDocument locale={locale}>
         <HomePage

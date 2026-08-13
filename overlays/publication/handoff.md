@@ -4,7 +4,7 @@ Use this when the launch type intent is `publication`.
 
 First useful shape:
 
-- keep the public homepage driven by
+- initialize the public homepage in D1 from
   `.mantle/overlays/publication/seed.json`;
 - use `site` for nav/footer/brand metadata and
   `collections.page[0].sections` for every visible homepage block;

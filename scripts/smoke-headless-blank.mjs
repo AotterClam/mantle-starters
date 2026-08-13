@@ -28,21 +28,26 @@ const replacements = {
 try {
   await smokeBlank();
   for (const archetype of ["presence", "publication", "community"]) {
-    await smokeTyped(archetype);
+    await smokeTyped(archetype, assertSeededHome);
   }
   await smokeTyped("transaction", async (origin) => {
     const home = await fetch(`${origin}/`);
     const html = await home.text();
     if (home.status !== 200 || !html.includes("Sample product")) {
-      throw new Error(`transaction homepage did not render its auth-free seed catalog (${home.status})`);
+      throw new Error(`transaction homepage did not render its D1 seed catalog (${home.status})`);
     }
     const view = await fetch(`${origin}/api/views/public-products?locale=en`);
     const body = await view.json();
-    if (view.status !== 200 || !Array.isArray(body?.data?.rows) || body.data.rows.length !== 0) {
+    if (view.status !== 200 || !Array.isArray(body?.data?.rows) || body.data.rows.length !== 1) {
       throw new Error(`transaction View returned ${view.status}: ${JSON.stringify(body)}`);
+    }
+    const about = await fetch(`${origin}/en/pages/about`);
+    if (about.status !== 200 || !(await about.text()).includes("About Runtime Smoke")) {
+      throw new Error(`transaction seeded About returned ${about.status}`);
     }
   });
   await smokeTyped("intake", async (origin) => {
+    await assertSeededHome(origin);
     const home = await fetch(`${origin}/`);
     const html = await home.text();
     if (home.status !== 200 || !html.includes("data-intake-form")) {
@@ -64,6 +69,7 @@ try {
     }
   });
   await smokeTyped("reservation", async (origin) => {
+    await assertSeededHome(origin);
     const home = await fetch(`${origin}/`);
     if (home.status !== 200 || !(await home.text()).includes("data-mantle-form")) {
       throw new Error(`reservation homepage did not render its form (${home.status})`);
@@ -82,9 +88,21 @@ try {
       throw new Error(`reservation request returned ${request.status}`);
     }
   });
-  console.log("blank + transaction + intake + reservation runtime smoke passed");
+  console.log("blank + all typed starter runtime smoke passed");
 } finally {
   rmSync(tempRoot, { recursive: true, force: true });
+}
+
+async function assertSeededHome(origin) {
+  const first = await fetch(`${origin}/`);
+  if (first.status !== 200 || !(await first.text()).includes("Runtime Smoke")) {
+    throw new Error(`seeded homepage returned ${first.status}`);
+  }
+  const view = await fetch(`${origin}/api/views/home`);
+  const body = await view.json();
+  if (view.status !== 200 || !Array.isArray(body?.data?.rows) || body.data.rows.length !== 1) {
+    throw new Error(`seeded home View returned ${view.status}: ${JSON.stringify(body)}`);
+  }
 }
 
 async function smokeBlank() {
