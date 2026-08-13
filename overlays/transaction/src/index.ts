@@ -1,40 +1,6 @@
-import { createMantleWorker, mountPublicRoutes } from "@aotter/mantle/cloudflare";
-import { bindMantleSite, manifest } from "../.mantle/generated/site.js";
-import { buildAuth } from "./auth.js";
-import { buildSiteDefaults, type Env } from "./mantle/config.js";
-import { buildHandlers } from "./mantle/handlers/index.js";
-import { createSeededRuntime } from "./mantle/seed.js";
-import {
-  publicCollectionRoutes,
-  publicPathResolver,
-  renderNotFound,
-  renderPublicHome,
-  templates,
-} from "./web/publicSite.js";
-import { mountAssetRoutes } from "./worker/routes/assets.js";
-import { mountCommerceRoutes } from "./web/commerceRoutes.js";
-
-const mantle = createMantleWorker<Env>({
-  manifest,
-  auth: buildAuth,
-  siteDefaults: buildSiteDefaults,
-  templates,
-  publicPathResolver,
-  extend: ({ getRuntime }) => ({
-    handlers: buildHandlers(getRuntime),
-    mount({ app, ref }) {
-      mountPublicRoutes(app as unknown as Parameters<typeof mountPublicRoutes>[0], ref, {
-        collectionRoutes: publicCollectionRoutes,
-        homeRenderer: renderPublicHome,
-        notFoundRenderer: renderNotFound,
-      });
-      mountCommerceRoutes(app, getRuntime);
-      mountAssetRoutes(app);
-    },
-  }),
-});
-
-const getRuntime = createSeededRuntime((env: Env) => mantle.getRuntime(env));
+import { bindMantleSite } from "../.mantle/generated/site.js";
+import type { Env } from "./mantle/config.js";
+import { getRuntime, mantle } from "./mantle/worker.js";
 
 export { InventoryCoordinator } from "./commerce/InventoryCoordinator.js";
 

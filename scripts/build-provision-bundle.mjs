@@ -218,7 +218,8 @@ function assertBundle(bundle, archetype) {
   if (!bundle.files["wrangler.toml"]?.includes('MANTLE_AUTH_MODE = "{{AUTH_MODE}}"')) {
     throw new Error(`${archetype} bundle must declare the explicit auth mode`);
   }
-  if (!bundle.files["src/auth.ts"] || !bundle.files["src/index.ts"]?.includes("auth: buildAuth")) {
+  const worker = archetype === "blank" ? bundle.files["src/index.ts"] : bundle.files["src/mantle/worker.ts"];
+  if (!bundle.files["src/auth.ts"] || !worker?.includes("auth: buildAuth")) {
     throw new Error(`${archetype} bundle must use the shared site-owned auth switch`);
   }
   if (bundle.files["wrangler.toml"]?.includes("MANTLE_PLATFORM_AUTH")) {
@@ -261,8 +262,8 @@ function assertBundle(bundle, archetype) {
     if (!bundle.files["src/mantle/seed.ts"]?.includes(seedImport)) {
       throw new Error(`${archetype} initial seed must read the overlay seed`);
     }
-    if (!bundle.files["src/index.ts"]?.includes("createMantleWorker") ||
-        !bundle.files["src/index.ts"]?.includes(".mantle/generated/site.js")) {
+    if (!bundle.files["src/mantle/worker.ts"]?.includes("createMantleWorker") ||
+        !bundle.files["src/mantle/worker.ts"]?.includes(".mantle/generated/site.js")) {
       throw new Error(`${archetype} Worker must use Core's facade and generated manifest`);
     }
     for (const path of Object.keys(bundle.files)) {
@@ -478,7 +479,7 @@ function applyOverlaySeedContent(files, archetype, seedText) {
     'import { bindMantleSite } from "../../../.mantle/generated/site.js";',
     'import type { HomeContent, HomeSection } from "./types.js";',
     "",
-    "export async function resolveHomeContent(getRuntime: () => Promise<CmsRuntime>): Promise<HomeContent> {",
+    "export async function resolveHomeContent(getRuntime: () => Promise<CmsRuntime>, _locale?: string): Promise<HomeContent> {",
     '  const result = await bindMantleSite(await getRuntime()).views["home"]();',
     "  if (!result.ok) throw new DiagnosticError(result.diagnostic);",
     "  const sections = result.result.rows[0]?.sections as readonly HomeSection[] | undefined;",

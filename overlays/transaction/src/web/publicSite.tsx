@@ -1,7 +1,8 @@
-import type { CollectionRouteConfig, PublicRouteContext } from "@aotter/mantle/cloudflare";
+import type { CollectionRouteConfig, PublicContentContext, PublicRouteContext } from "@aotter/mantle/cloudflare";
 import {
   TemplateRegistry,
   createPublicPathResolver,
+  serializeEntryAsMarkdown,
   toUrlLocale,
 } from "@aotter/mantle/runtime";
 import type { Entry } from "@aotter/mantle/spec";
@@ -118,12 +119,22 @@ templates.registerListTemplate("page-translations", ({ entries, locale, site, se
 export async function renderPublicHome(ctx: PublicRouteContext): Promise<Response> {
   const content = await resolveHomeContent(async () => ctx.runtime, ctx.locale);
   return new Response(renderToString(
-    <PageDocument locale={ctx.locale} title={ctx.site.brand} description={ctx.site.description}>
+    <PageDocument locale={ctx.locale} title={ctx.site.brand} description={ctx.site.description} seo={ctx.seo}>
       <HomePage content={content} locale={ctx.locale} locales={ctx.site.locales} brand={ctx.site.brand} />
     </PageDocument>,
   ), {
     headers: { "cache-control": "public, max-age=0, s-maxage=300", "content-type": "text/html; charset=utf-8" },
   });
+}
+
+export async function renderHomeMarkdown(ctx: PublicContentContext): Promise<string | null> {
+  const entry = await ctx.runtime.entryReader.readBySlug({
+    collection: "page-translations",
+    slug: "home",
+    locale: ctx.locale,
+    status: "published",
+  });
+  return entry ? serializeEntryAsMarkdown(entry) : null;
 }
 
 export async function renderNotFound(ctx: PublicRouteContext): Promise<Response> {

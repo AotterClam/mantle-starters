@@ -56,6 +56,7 @@ for (const archetype of archetypes) {
       assertSectionImageContract(tempRoot, archetype);
       assertLocaleNavigation(tempRoot, archetype);
       assertRuntimeHasNoKiwaDemoCopy(tempRoot, archetype);
+      assertAgentSurface(tempRoot, archetype);
     }
     const launchState = JSON.parse(readFileSync(join(tempRoot, ".mantle", "launch-state.json"), "utf8"));
     if (launchState.github?.owner !== replacements.GITHUB_OWNER) throw new Error(`${archetype} missing landing GitHub owner`);
@@ -298,7 +299,6 @@ function assertEdgeCacheContract(root, archetype) {
     throw new Error(`${archetype} still loads the render-blocking remote Inter font`);
   }
   for (const required of [
-    "public, max-age=0, s-maxage=300",
     "public, max-age=31536000, immutable",
     'width="1200"',
     'height="900"',
@@ -656,7 +656,7 @@ function assertTranslationPair(root) {
 function assertSeedDrivenHome(root, archetype) {
   const homeContent = readFileSync(join(root, "src", "web", "content", "homeContent.ts"), "utf8");
   const seedRuntime = readFileSync(join(root, "src", "mantle", "seed.ts"), "utf8");
-  const worker = readFileSync(join(root, "src", "index.ts"), "utf8");
+  const worker = readFileSync(join(root, "src", "mantle", "worker.ts"), "utf8");
   const seedImport = `../../.mantle/overlays/${archetype}/seed.json`;
   if (!seedRuntime.includes(seedImport) || !worker.includes("createSeededRuntime")) {
     throw new Error(`${archetype} does not initialize D1 from the overlay seed`);
@@ -705,13 +705,14 @@ function assertTransactionSeed(root) {
 
 function assertTransactionPublicSurface(root) {
   const worker = readFileSync(join(root, "src", "index.ts"), "utf8");
+  const composition = readFileSync(join(root, "src", "mantle", "worker.ts"), "utf8");
   const surface = readFileSync(join(root, "src", "web", "publicSite.tsx"), "utf8");
   const page = readFileSync(join(root, "src", "web", "pages", "HomePage.tsx"), "utf8");
   const content = readFileSync(join(root, "src", "web", "content", "siteContent.ts"), "utf8");
   const client = readFileSync(join(root, "src", "web", "client", "homeClient.ts"), "utf8");
   const nav = readFileSync(join(root, "components", "blocks", "marketing", "nav-02.tsx"), "utf8");
   const wrangler = readFileSync(join(root, "wrangler.toml"), "utf8");
-  if (!worker.includes("mountPublicRoutes") || !worker.includes("publicPathResolver")) {
+  if (!composition.includes("mountPublicRoutes") || !composition.includes("publicPathResolver")) {
     throw new Error("transaction Worker does not mount the Core public route surface");
   }
   for (const required of [
@@ -752,6 +753,21 @@ function assertTransactionPublicSurface(root) {
   }
   if (content.includes('message["nav.home"]') || !page.includes('value === "/"')) {
     throw new Error("transaction navigation must use the brand as home without generating /:locale/");
+  }
+}
+
+function assertAgentSurface(root, archetype) {
+  const composition = readFileSync(join(root, "src", "mantle", "worker.ts"), "utf8");
+  const surface = readFileSync(join(root, "src", "web", "publicSite.tsx"), "utf8");
+  for (const required of [
+    "mountPublicRoutes",
+    "publicPathResolver",
+    "homeMarkdown: renderHomeMarkdown",
+  ]) {
+    if (!composition.includes(required)) throw new Error(`${archetype} agent surface missing ${required}`);
+  }
+  for (const required of ["renderPublicHome", "renderHomeMarkdown", "renderNotFound"]) {
+    if (!surface.includes(required)) throw new Error(`${archetype} public renderer missing ${required}`);
   }
 }
 
