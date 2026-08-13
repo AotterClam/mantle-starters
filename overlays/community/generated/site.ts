@@ -373,5 +373,13 @@ export function bindMantleSite(runtime: CmsRuntime) {
           },
         }),
     },
+    procedures: {
+      "submit-community-signup": (input: MantleGenerated.MantleSite.ProcInput_submit_community_signup, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_submit_community_signup>({
+          procedure: manifest[5],
+          input,
+          ctx,
+        }),
+    },
   } as const;
 }

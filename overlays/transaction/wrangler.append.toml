@@ -1,0 +1,23 @@
+
+# Transaction inventory authority and abandoned-checkout cleanup.
+[[durable_objects.bindings]]
+name = "INVENTORY_COORDINATOR"
+class_name = "InventoryCoordinator"
+
+[[migrations]]
+tag = "transaction-inventory-v1"
+new_sqlite_classes = ["InventoryCoordinator"]
+
+[[queues.producers]]
+binding = "ORDER_EXPIRY_QUEUE"
+queue = "{{PROJECT_NAME}}-order-expiry"
+
+[[queues.consumers]]
+queue = "{{PROJECT_NAME}}-order-expiry"
+max_batch_size = 10
+max_retries = 5
+retry_delay = 30
+dead_letter_queue = "{{PROJECT_NAME}}-order-expiry-dlq"
+
+[triggers]
+crons = ["*/5 * * * *"]

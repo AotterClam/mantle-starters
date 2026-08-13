@@ -12,7 +12,7 @@ const operationalCollections = {
   presence: "contact",
   intake: "intake-submissions",
   publication: "post-suggestions",
-  transaction: "product-inquiries",
+  transaction: "orders",
   reservation: "reservation-requests",
   community: "community-signups",
 };
@@ -430,13 +430,12 @@ function assertFourAtoms(root, archetype) {
 
 function assertPublicMutationInputsStrict(root, archetype) {
   const text = readFileSync(join(root, "manifests", "site.yaml"), "utf8");
-  const publicMutations = parseAllDocuments(text)
-    .map((document) => document.toJSON())
-    .filter((atom) =>
-      atom?.kind === "Procedure"
-      && atom?.spec?.handler?.kind === "builtin"
-      && atom?.spec?.handler?.op === "create"
-    );
+  const atoms = parseAllDocuments(text).map((document) => document.toJSON());
+  const publicNames = new Set(atoms
+    .filter((atom) => atom?.kind === "Trigger" && atom?.spec?.source?.kind === "http")
+    .map((atom) => atom?.spec?.target?.procedure)
+    .filter(Boolean));
+  const publicMutations = atoms.filter((atom) => atom?.kind === "Procedure" && publicNames.has(atom?.metadata?.name));
   if (!publicMutations.length) throw new Error(`${archetype} missing public mutation`);
   for (const procedure of publicMutations) {
     if (procedure.spec.input?.additionalProperties !== false) {
@@ -620,11 +619,17 @@ function assertTransactionSeed(root) {
       throw new Error(`transaction ${childName} must translate ${parentName} by slug`);
     }
   }
+  const orders = schemas.find((schema) => schema.metadata?.name === "orders");
+  if (!orders?.spec?.schema?.properties?.orderLocale || orders.spec.schema.properties.locale) {
+    throw new Error("transaction orders must store orderLocale without using the reserved entry locale field");
+  }
 }
 
 function assertTransactionPublicSurface(root) {
   const worker = readFileSync(join(root, "src", "index.ts"), "utf8");
   const surface = readFileSync(join(root, "src", "web", "publicSite.tsx"), "utf8");
+  const client = readFileSync(join(root, "src", "web", "client", "homeClient.ts"), "utf8");
+  const wrangler = readFileSync(join(root, "wrangler.toml"), "utf8");
   if (!worker.includes("mountPublicRoutes") || !worker.includes("publicPathResolver")) {
     throw new Error("transaction Worker does not mount the Core public route surface");
   }
@@ -638,6 +643,21 @@ function assertTransactionPublicSurface(root) {
   ]) {
     if (!surface.includes(required)) throw new Error(`transaction public surface missing ${required}`);
   }
+  for (const required of [
+    'name = "INVENTORY_COORDINATOR"',
+    'binding = "ORDER_EXPIRY_QUEUE"',
+    'crons = ["*/5 * * * *"]',
+  ]) {
+    if (!wrangler.includes(required)) throw new Error(`transaction Worker binding missing ${required}`);
+  }
+  for (const required of [
+    'procedures["expire-order"]',
+    'procedures["sweep-expired-orders"]',
+    "for (const message of batch.messages)",
+  ]) {
+    if (!worker.includes(required)) throw new Error(`transaction lifecycle worker missing ${required}`);
+  }
+  if (!client.includes("commerceClientJs")) throw new Error("transaction client bundle is missing cart behavior");
 }
 
 function readSource(root) {

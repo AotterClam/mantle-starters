@@ -650,5 +650,25 @@ export function bindMantleSite(runtime: CmsRuntime) {
           },
         }),
     },
+    procedures: {
+      "submit-intake": (input: MantleGenerated.MantleSite.ProcInput_submit_intake, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_submit_intake>({
+          procedure: manifest[3],
+          input,
+          ctx,
+        }),
+      "verify-intake-turnstile": (input: MantleGenerated.MantleSite.ProcInput_verify_intake_turnstile, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_verify_intake_turnstile>({
+          procedure: manifest[5],
+          input,
+          ctx,
+        }),
+      "notify-intake": (input: MantleGenerated.MantleSite.ProcInput_notify_intake, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_notify_intake>({
+          procedure: manifest[7],
+          input,
+          ctx,
+        }),
+    },
   } as const;
 }

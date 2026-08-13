@@ -437,5 +437,13 @@ export function bindMantleSite(runtime: CmsRuntime) {
           },
         }),
     },
+    procedures: {
+      "submit-post-suggestion": (input: MantleGenerated.MantleSite.ProcInput_submit_post_suggestion, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_submit_post_suggestion>({
+          procedure: manifest[6],
+          input,
+          ctx,
+        }),
+    },
   } as const;
 }

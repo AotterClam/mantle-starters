@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readdirSync,
@@ -387,6 +388,10 @@ function walk(files, from, to) {
 
 function applyOverlay(files, archetype) {
   walk(files, `overlays/${archetype}/manifests`, "manifests");
+  const wranglerAppend = join(root, "overlays", archetype, "wrangler.append.toml");
+  if (existsSync(wranglerAppend)) {
+    files["wrangler.toml"] = `${files["wrangler.toml"].trimEnd()}\n${readFileSync(wranglerAppend, "utf8")}`;
+  }
   let seedText = null;
   for (const name of ["handoff.md", "layout.md", "seed-prompt.md", "seed.json"]) {
     const path = join(root, "overlays", archetype, name);
@@ -493,6 +498,7 @@ function selectTypedSurface(files, archetype) {
     "nav",
     ...(selected.includes("intake") ? ["intake"] : []),
     ...(selected.includes("form") || selected.includes("intake") ? ["form"] : []),
+    ...(archetype === "transaction" ? ["commerce"] : []),
   ];
   files["src/web/client/homeClient.ts"] = [
     ...clients.map((name) => `import { ${name}ClientJs } from "./${name}Client.js";`),

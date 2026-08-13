@@ -372,5 +372,13 @@ export function bindMantleSite(runtime: CmsRuntime) {
           },
         }),
     },
+    procedures: {
+      "submit-reservation-request": (input: MantleGenerated.MantleSite.ProcInput_submit_reservation_request, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_submit_reservation_request>({
+          procedure: manifest[4],
+          input,
+          ctx,
+        }),
+    },
   } as const;
 }

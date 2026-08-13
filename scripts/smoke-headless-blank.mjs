@@ -36,7 +36,7 @@ try {
     if (home.status !== 200 || !["Runtime Smoke Starter", "Runtime Smoke Plus", "Runtime Smoke Complete"].every((text) => html.includes(text))) {
       throw new Error(`transaction homepage did not render its auth-free seed catalog (${home.status})`);
     }
-    const view = await fetch(`${origin}/api/views/public-products`);
+    const view = await fetch(`${origin}/api/views/public-products?locale=en`);
     const body = await view.json();
     if (view.status !== 200 || !Array.isArray(body?.data?.rows) || body.data.rows.length !== 0) {
       throw new Error(`transaction View returned ${view.status}: ${JSON.stringify(body)}`);

@@ -17,15 +17,16 @@
       { "label": "How it works", "href": "#how-it-works" },
       { "label": "Questions", "href": "#questions" }
     ],
-    "navAction": { "label": "Browse products", "href": "/products" },
+    "navAction": { "label": "Cart", "href": "/cart" },
     "footer": {
-      "tagline": "A small catalog ready for real products.",
+      "tagline": "A working guest shop with inventory and order operations.",
       "copyright": "Copyright {{BRAND}}.",
       "columns": [
         {
           "title": "Shop",
           "links": [
             { "label": "Products", "href": "/products" },
+            { "label": "Cart", "href": "/cart" },
             { "label": "Pages", "href": "/pages" },
             { "label": "How it works", "href": "#how-it-works" }
           ]
@@ -75,7 +76,7 @@
             "id": "products",
             "eyebrow": "Products",
             "title": "Three offers to replace with the real catalog",
-            "body": "Edit this seed locally before setting up auth or a production checkout.",
+            "body": "Edit this seed locally, restock through Staff MCP, then run the complete guest checkout.",
             "items": [
               {
                 "icon": "sparkles",
@@ -85,12 +86,12 @@
               {
                 "icon": "layout",
                 "title": "{{BRAND}} Plus",
-                "body": "A broader option for customers who need more. USD 59.00; no checkout is implied."
+                "body": "A broader option for customers who need more. USD 59.00 with the included demo checkout."
               },
               {
                 "icon": "check",
                 "title": "{{BRAND}} Complete",
-                "body": "The highest starter tier for comparing demand. USD 99.00; connect payment only when requested."
+                "body": "The highest starter tier for comparing demand. USD 99.00 with tracked stock and orders."
               }
             ]
           },
@@ -98,20 +99,20 @@
             "type": "content",
             "id": "how-it-works",
             "eyebrow": "How it works",
-            "title": "Start with a catalog and one clear intent path",
-            "body": "This transaction shape deliberately stops before cart, payment, inventory, and accounts.",
+            "title": "Run the full guest-order lifecycle",
+            "body": "Cart, fake payment, real orders, atomic inventory, expiry Queue, and recovery Cron are included; customer accounts and real payment credentials are not.",
             "items": [
               {
                 "title": "Shape the offer",
                 "body": "Replace the seed products and homepage cards with the first real catalog."
               },
               {
-                "title": "Validate demand",
-                "body": "Add a lightweight inquiry flow only when the owner wants to collect purchase intent."
+                "title": "Restock and operate",
+                "body": "Use Staff MCP to inspect, restock, adjust, fulfill, or cancel orders."
               },
               {
-                "title": "Choose checkout later",
-                "body": "Select a payment provider after the public product surface is useful."
+                "title": "Replace fake payment later",
+                "body": "Swap the demo payment action for a real provider only when the business is ready."
               }
             ]
           },
@@ -119,7 +120,7 @@
             "type": "faq",
             "id": "questions",
             "eyebrow": "Questions",
-            "title": "Decisions before adding commerce code",
+            "title": "Commerce starter questions",
             "items": [
               {
                 "title": "Can I edit this without GitHub OAuth?",
@@ -127,7 +128,7 @@
               },
               {
                 "title": "Is checkout already enabled?",
-                "body": "No. The starter avoids fake payment claims and keeps checkout as an explicit next decision."
+                "body": "Yes. It creates a real operational order and changes stock, while the payment screen is explicitly simulated."
               },
               {
                 "title": "Where does the product model live?",
@@ -138,7 +139,7 @@
           {
             "type": "cta",
             "title": "Turn this seed into the real {{BRAND}} catalog",
-            "body": "Replace the three products, refine the visual direction, then decide whether inquiry or checkout is the next useful workflow.",
+            "body": "Replace the three products, restock them through Staff MCP, then place and fulfill the first guest order.",
             "action": { "label": "Browse products", "href": "/products" }
           }
         ]

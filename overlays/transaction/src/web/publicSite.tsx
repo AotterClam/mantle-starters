@@ -7,6 +7,7 @@ import {
 import type { Entry } from "@aotter/mantle/spec";
 import { renderToString } from "hono/jsx/dom/server";
 import { PageDocument } from "../renderer.js";
+import { commerceCopy } from "./commerceRoutes.js";
 import { resolveHomeContent } from "./content/homeContent.js";
 import type { HomeSection } from "./content/types.js";
 import { HomePage, SitePage } from "./pages/HomePage.js";
@@ -27,20 +28,31 @@ export const templates = new TemplateRegistry();
 
 templates.registerEntryTemplate("product-translations", ({ entry, site, seo }) => {
   const locale = entry.locale ?? site.canonicalLocale ?? site.locales[0] ?? "en";
+  const copy = commerceCopy(locale);
   const slug = text(entry.data["slug"], entry.id);
   const title = text(entry.data["title"], "Product");
   const summary = text(entry.data["summary"]);
+  const productPrice = rawPrice(entry);
   return renderToString(
     <PageDocument locale={locale} title={`${title} · ${site.brand}`} description={summary} seo={seo}>
       <SitePage locale={locale} locales={site.locales} localePath={`/:locale/products/${slug}`} brand={site.brand}>
         <article class="mx-auto max-w-3xl px-4 py-16 sm:px-6 md:py-24 lg:px-8">
-          <p class="text-xs font-medium uppercase tracking-wide text-primary">Product</p>
+          <p class="text-xs font-medium uppercase tracking-wide text-primary">{copy.product}</p>
           <h1 class="mt-3 text-4xl tracking-tight sm:text-5xl">{title}</h1>
           {summary && <p class="mt-5 text-lg text-foreground-muted">{summary}</p>}
           <p class="mt-8 text-2xl font-semibold">{price(entry, locale)}</p>
-          <a href={`/${toUrlLocale(locale)}/products`} class="mt-10 inline-flex text-sm font-medium text-primary hover:underline">
-            Back to products
-          </a>
+          <div class="mt-10 flex flex-wrap items-center gap-4">
+            {productPrice && <button
+              type="button"
+              class="rounded-lg bg-primary px-5 py-3 font-medium text-primary-foreground"
+              data-add-to-cart
+              data-product-slug={slug}
+              data-added-label={copy.added}
+            >{copy.add}</button>}
+            <a href={`/${toUrlLocale(locale)}/products`} class="text-sm font-medium text-primary hover:underline">
+              {copy.back}
+            </a>
+          </div>
         </article>
       </SitePage>
     </PageDocument>,
@@ -51,8 +63,8 @@ templates.registerListTemplate("product-translations", ({ entries, locale, site,
   <PageDocument locale={locale} title={`Products · ${site.brand}`} description={`Products from ${site.brand}`} seo={seo}>
     <SitePage locale={locale} locales={site.locales} localePath="/:locale/products" brand={site.brand}>
       <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24 lg:px-8">
-        <p class="text-xs font-medium uppercase tracking-wide text-primary">Catalog</p>
-        <h1 class="mt-3 text-4xl tracking-tight sm:text-5xl">Products</h1>
+        <p class="text-xs font-medium uppercase tracking-wide text-primary">{commerceCopy(locale).shop}</p>
+        <h1 class="mt-3 text-4xl tracking-tight sm:text-5xl">{commerceCopy(locale).products}</h1>
         <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {entries.map((entry) => <ProductCard entry={entry} locale={locale} />)}
         </div>
@@ -125,21 +137,36 @@ export async function renderNotFound(ctx: PublicRouteContext): Promise<Response>
 
 function ProductCard({ entry, locale }: { readonly entry: Entry; readonly locale: string }) {
   const slug = text(entry.data["slug"], entry.id);
+  const copy = commerceCopy(locale);
   return (
-    <a href={`/${toUrlLocale(locale)}/products/${slug}`} class="rounded-xl border border-border bg-card p-5 shadow-sm transition hover:border-border-strong hover:shadow">
-      <h2 class="text-xl tracking-tight">{text(entry.data["title"], "Untitled product")}</h2>
+    <article class="rounded-xl border border-border bg-card p-5 shadow-sm transition hover:border-border-strong hover:shadow">
+      <a href={`/${toUrlLocale(locale)}/products/${slug}`}>
+      <h2 class="text-xl tracking-tight hover:text-primary">{text(entry.data["title"], "Untitled product")}</h2>
       <p class="mt-2 min-h-10 text-sm text-foreground-muted">{text(entry.data["summary"])}</p>
+      </a>
       <p class="mt-6 font-semibold">{price(entry, locale)}</p>
-    </a>
+      {rawPrice(entry) && <button
+        type="button"
+        class="mt-5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+        data-add-to-cart
+        data-product-slug={slug}
+        data-added-label={copy.added}
+      >{copy.add}</button>}
+    </article>
   );
 }
 
 function price(entry: Entry, locale: string): string {
+  const value = rawPrice(entry);
+  return value
+    ? new Intl.NumberFormat(locale, { style: "currency", currency: value.currency }).format(value.priceMinor / 100)
+    : "";
+}
+
+function rawPrice(entry: Entry): { readonly priceMinor: number; readonly currency: string } | null {
   const priceMinor = entry.data["priceMinor"];
   const currency = entry.data["currency"];
-  return typeof priceMinor === "number" && typeof currency === "string"
-    ? new Intl.NumberFormat(locale, { style: "currency", currency }).format(priceMinor / 100)
-    : "";
+  return typeof priceMinor === "number" && typeof currency === "string" ? { priceMinor, currency } : null;
 }
 
 function sections(entry: Entry): readonly HomeSection[] {
