@@ -382,7 +382,12 @@ function assertSectionImageContract(root, archetype) {
 
 function assertLocaleNavigation(root, archetype) {
   const nav = readFileSync(join(root, "components", "blocks", "marketing", "nav-02.tsx"), "utf8");
-  if (!nav.includes("data-locale-switch") || !nav.includes("locales.length > 1")) {
+  if (
+    !nav.includes("data-locale-switch")
+    || !nav.includes("locales.length > 1")
+    || !nav.includes("Intl.DisplayNames")
+    || !nav.includes("bottom-full")
+  ) {
     throw new Error(`${archetype} does not expose the shared locale switch`);
   }
 }
@@ -679,6 +684,10 @@ function assertTransactionSeed(root) {
   if (JSON.stringify(Object.keys(messages.locales)) !== JSON.stringify(locales)) {
     throw new Error("transaction entry and message locale catalogs differ");
   }
+  const about = parsed.locales[locales[0]]?.["page-translations"]?.find((entry) => entry.slug === "about");
+  if (about?.sections?.[0]?.image?.src !== "/assets/mantle-ocean-hero-light.svg") {
+    throw new Error("transaction About seed is missing its image");
+  }
   const schemas = parseAllDocuments(readFileSync(join(root, "manifests", "site.yaml"), "utf8"))
     .map((document) => document.toJSON())
     .filter((atom) => atom?.kind === "Schema");
@@ -697,6 +706,8 @@ function assertTransactionSeed(root) {
 function assertTransactionPublicSurface(root) {
   const worker = readFileSync(join(root, "src", "index.ts"), "utf8");
   const surface = readFileSync(join(root, "src", "web", "publicSite.tsx"), "utf8");
+  const page = readFileSync(join(root, "src", "web", "pages", "HomePage.tsx"), "utf8");
+  const content = readFileSync(join(root, "src", "web", "content", "siteContent.ts"), "utf8");
   const client = readFileSync(join(root, "src", "web", "client", "homeClient.ts"), "utf8");
   const nav = readFileSync(join(root, "components", "blocks", "marketing", "nav-02.tsx"), "utf8");
   const wrangler = readFileSync(join(root, "wrangler.toml"), "utf8");
@@ -738,6 +749,9 @@ function assertTransactionPublicSurface(root) {
   if (!client.includes("commerceClientJs")) throw new Error("transaction client bundle is missing cart behavior");
   if (!nav.includes("ShoppingCartIcon") || !nav.includes("data-cart-count")) {
     throw new Error("transaction navigation is missing the cart icon/count surface");
+  }
+  if (content.includes('message["nav.home"]') || !page.includes('value === "/"')) {
+    throw new Error("transaction navigation must use the brand as home without generating /:locale/");
   }
 }
 
