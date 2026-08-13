@@ -185,28 +185,37 @@ const LocaleSwitch: FC<{
   languageLabel?: string
   showLabel?: boolean
 }> = ({ locale, locales, path, languageLabel = 'Language', showLabel = false }) => locales.length > 1 && locale ? (
-  <details data-locale-switch class="group relative">
+  <details data-locale-switch class={cn('group relative', showLabel && 'w-full')}>
     <summary class={cn(getButtonClasses('ghost', showLabel ? 'sm' : 'iconSm'), showLabel && 'w-full justify-start')}>
       <Icon iconNode={Languages} class="size-4 shrink-0" />
-      {showLabel && <span class="uppercase">{locale}</span>}
+      {showLabel && <span class="min-w-0 truncate">{languageName(locale)}</span>}
       {showLabel && <ChevronDownIcon class="ml-auto size-3.5 transition-transform group-open:rotate-180" />}
-      <span class="sr-only">{languageLabel}: {locale}</span>
+      <span class="sr-only">{languageLabel}: {languageName(locale)} ({locale})</span>
     </summary>
     <div class={cn(
-      'z-50 min-w-28 rounded-lg border border-border bg-popover p-1 shadow-md',
-      showLabel ? 'mt-1 w-full' : 'absolute right-0 mt-1',
+      'absolute z-50 max-h-56 overflow-y-auto rounded-lg border border-border bg-popover p-1 shadow-md',
+      showLabel ? 'bottom-full mb-1 w-full' : 'right-0 mt-1 min-w-48',
     )}>
       {locales.map((option) => (
         <a
           href={path.replace(':locale', option.toLowerCase())}
           aria-current={option === locale ? 'page' : undefined}
-          class="flex h-8 items-center rounded-md px-2.5 text-sm uppercase text-popover-foreground hover:bg-accent aria-[current=page]:bg-primary-soft aria-[current=page]:font-semibold"
+          class="flex min-h-9 min-w-0 items-center gap-3 rounded-md px-2.5 text-sm text-popover-foreground hover:bg-accent aria-[current=page]:bg-primary-soft aria-[current=page]:font-semibold"
         >
-          {option}
+          <span class="min-w-0 flex-1 truncate">{languageName(option)}</span>
+          <span class="shrink-0 text-xs uppercase text-foreground-soft">{option}</span>
         </a>
       ))}
     </div>
   </details>
 ) : null
+
+function languageName(locale: string): string {
+  try {
+    return new Intl.DisplayNames([locale], { type: 'language' }).of(locale) ?? locale
+  } catch {
+    return locale
+  }
+}
 
 export default Nav02

@@ -61,7 +61,9 @@ export function SitePage({
 }) {
   const copy = siteContentForLocale(locale);
   const homeHref = `/${locale.toLowerCase()}`;
-  const href = (value: string) => value.startsWith("/") &&
+  const href = (value: string) => value === "/"
+    ? homeHref
+    : value.startsWith("/") &&
       !value.startsWith("//") &&
       value !== homeHref &&
       !value.startsWith(`${homeHref}/`)

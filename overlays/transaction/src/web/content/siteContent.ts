@@ -8,7 +8,6 @@ export function siteContentForLocale(locale: string): SiteContent {
     brand: seed.site.brand,
     description: seed.site.description,
     navLinks: [
-      { label: message["nav.home"], href: "/" },
       { label: message["nav.products"], href: "/products" },
       { label: message["nav.about"], href: "/pages/about" },
     ],

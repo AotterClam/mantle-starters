@@ -39,7 +39,7 @@
           "title": "About",
           "summary": "About {{BRAND}}.",
           "status": "published",
-          "sections": [{ "type": "content", "title": "About {{BRAND}}", "body": "This is a small storefront built with Mantle." }]
+          "sections": [{ "type": "content", "title": "About {{BRAND}}", "body": "This is a small storefront built with Mantle.", "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" } }]
         }
       ],
       "product-translations": [
@@ -71,7 +71,7 @@
           "title": "關於",
           "summary": "關於 {{BRAND}}。",
           "status": "published",
-          "sections": [{ "type": "content", "title": "關於 {{BRAND}}", "body": "這是一間使用 Mantle 建立的小型商店。" }]
+          "sections": [{ "type": "content", "title": "關於 {{BRAND}}", "body": "這是一間使用 Mantle 建立的小型商店。", "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" } }]
         }
       ],
       "product-translations": [
@@ -103,7 +103,7 @@
           "title": "关于",
           "summary": "关于 {{BRAND}}。",
           "status": "published",
-          "sections": [{ "type": "content", "title": "关于 {{BRAND}}", "body": "这是一家使用 Mantle 构建的小型商店。" }]
+          "sections": [{ "type": "content", "title": "关于 {{BRAND}}", "body": "这是一家使用 Mantle 构建的小型商店。", "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" } }]
         }
       ],
       "product-translations": [
@@ -135,7 +135,7 @@
           "title": "私たちについて",
           "summary": "{{BRAND}}について。",
           "status": "published",
-          "sections": [{ "type": "content", "title": "{{BRAND}}について", "body": "Mantleで構築された小さなオンラインショップです。" }]
+          "sections": [{ "type": "content", "title": "{{BRAND}}について", "body": "Mantleで構築された小さなオンラインショップです。", "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" } }]
         }
       ],
       "product-translations": [
@@ -167,7 +167,7 @@
           "title": "소개",
           "summary": "{{BRAND}} 소개.",
           "status": "published",
-          "sections": [{ "type": "content", "title": "{{BRAND}} 소개", "body": "Mantle로 만든 작은 온라인 상점입니다." }]
+          "sections": [{ "type": "content", "title": "{{BRAND}} 소개", "body": "Mantle로 만든 작은 온라인 상점입니다.", "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" } }]
         }
       ],
       "product-translations": [
@@ -199,7 +199,7 @@
           "title": "Nosotros",
           "summary": "Acerca de {{BRAND}}.",
           "status": "published",
-          "sections": [{ "type": "content", "title": "Acerca de {{BRAND}}", "body": "Esta es una pequeña tienda creada con Mantle." }]
+          "sections": [{ "type": "content", "title": "Acerca de {{BRAND}}", "body": "Esta es una pequeña tienda creada con Mantle.", "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" } }]
         }
       ],
       "product-translations": [
@@ -231,7 +231,7 @@
           "title": "À propos",
           "summary": "À propos de {{BRAND}}.",
           "status": "published",
-          "sections": [{ "type": "content", "title": "À propos de {{BRAND}}", "body": "Voici une petite boutique créée avec Mantle." }]
+          "sections": [{ "type": "content", "title": "À propos de {{BRAND}}", "body": "Voici une petite boutique créée avec Mantle.", "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" } }]
         }
       ],
       "product-translations": [
@@ -263,7 +263,7 @@
           "title": "Über uns",
           "summary": "Über {{BRAND}}.",
           "status": "published",
-          "sections": [{ "type": "content", "title": "Über {{BRAND}}", "body": "Dies ist ein kleiner, mit Mantle erstellter Shop." }]
+          "sections": [{ "type": "content", "title": "Über {{BRAND}}", "body": "Dies ist ein kleiner, mit Mantle erstellter Shop.", "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" } }]
         }
       ],
       "product-translations": [
@@ -295,7 +295,7 @@
           "title": "Chi siamo",
           "summary": "Informazioni su {{BRAND}}.",
           "status": "published",
-          "sections": [{ "type": "content", "title": "Informazioni su {{BRAND}}", "body": "Questo è un piccolo negozio creato con Mantle." }]
+          "sections": [{ "type": "content", "title": "Informazioni su {{BRAND}}", "body": "Questo è un piccolo negozio creato con Mantle.", "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" } }]
         }
       ],
       "product-translations": [
@@ -327,7 +327,7 @@
           "title": "О нас",
           "summary": "О {{BRAND}}.",
           "status": "published",
-          "sections": [{ "type": "content", "title": "О {{BRAND}}", "body": "Это небольшой магазин, созданный с помощью Mantle." }]
+          "sections": [{ "type": "content", "title": "О {{BRAND}}", "body": "Это небольшой магазин, созданный с помощью Mantle.", "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" } }]
         }
       ],
       "product-translations": [
@@ -359,7 +359,7 @@
           "title": "Tentang kami",
           "summary": "Tentang {{BRAND}}.",
           "status": "published",
-          "sections": [{ "type": "content", "title": "Tentang {{BRAND}}", "body": "Ini adalah toko kecil yang dibuat dengan Mantle." }]
+          "sections": [{ "type": "content", "title": "Tentang {{BRAND}}", "body": "Ini adalah toko kecil yang dibuat dengan Mantle.", "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" } }]
         }
       ],
       "product-translations": [
@@ -391,7 +391,7 @@
           "title": "Sobre nós",
           "summary": "Sobre a {{BRAND}}.",
           "status": "published",
-          "sections": [{ "type": "content", "title": "Sobre a {{BRAND}}", "body": "Esta é uma pequena loja criada com Mantle." }]
+          "sections": [{ "type": "content", "title": "Sobre a {{BRAND}}", "body": "Esta é uma pequena loja criada com Mantle.", "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" } }]
         }
       ],
       "product-translations": [

@@ -53,7 +53,7 @@ kiwa/                         # current revision's optional offline UI palette
 ```
 
 `manifests/site.yaml` is the authoritative Mantle model. `mantle generate` compiles it
-to `.mantle/generated/`; `src/index.ts` passes that output to
+to `.mantle/generated/`; `src/mantle/worker.ts` passes that output to
 `createMantleWorker`. In this revision, runtime components stay at root
 because `kiwa-ui.json` uses Kiwa's `@/components` and `@/lib/utils`
 convention.
@@ -63,23 +63,27 @@ convention.
 ```
 GET  /api/views/<name>            view REST per View atom
 METHOD <trigger path>             manifest-declared HTTP Trigger routes
+GET  /{locale}                    localized public home
+GET  /{locale}/<segment>[/<slug>] configured public list/entry pages
+GET  /{public-path}.md             non-empty agent-readable mirror
+GET  /llms.txt, /{locale}/llms.txt agent indexes
+GET  /sitemap.xml, /robots.txt     discovery files
 ALL  /mcp/staff                   Staff MCP JSON-RPC dispatcher
 ALL  /mcp                         User/read MCP JSON-RPC dispatcher
 ```
 
-No public read routes (`/{locale}/...`, `/sitemap.xml`, `.md` mirrors,
-`llms.txt`). Add `mountPublicRoutes` from
-`@aotter/mantle/cloudflare` only together with matching templates and a
-`publicPathResolver`; Core does not auto-publish every Schema.
+The shared typed recipe mounts Core's public route contract with matching
+templates and one `publicPathResolver`. Only declared public collections are
+mapped; operational and parent-only Schemas remain private. Anonymous public
+responses use Cloudflare Workers Caching, while auth/admin/API/MCP/commerce
+responses remain `private, no-store`.
 
 ### Auth
 
 MCP requests must carry a verified bearer token. The runtime's
 Cloudflare adapter now uses Better Auth for browser sign-in and MCP
 OAuth/DCR. This starter wires the dual MCP surface (`/mcp/staff` for
-staff authoring, `/mcp` for end-user/read tools), but ships only a small
-public homepage for `/`. Add your own frontend and policy surface before
-claiming a custom production workflow.
+staff authoring, `/mcp` for end-user/read tools) alongside the public surface.
 
 ## Getting started
 

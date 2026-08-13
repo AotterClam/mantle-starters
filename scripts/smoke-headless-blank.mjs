@@ -27,9 +27,18 @@ const replacements = {
 
 try {
   await smokeBlank();
-  for (const archetype of ["presence", "publication", "community"]) {
-    await smokeTyped(archetype, assertSeededHome);
-  }
+  await smokeTyped("presence", async (origin) => {
+    await assertSeededHome(origin);
+    await assertAgentSurface(origin);
+  });
+  await smokeTyped("publication", async (origin) => {
+    await assertSeededHome(origin);
+    await assertAgentSurface(origin, [{ segment: "posts", slug: "welcome" }]);
+  });
+  await smokeTyped("community", async (origin) => {
+    await assertSeededHome(origin);
+    await assertAgentSurface(origin, [{ segment: "updates", slug: "welcome" }]);
+  });
   await smokeTyped("transaction", async (origin) => {
     const home = await fetch(`${origin}/`);
     const html = await home.text();
@@ -45,9 +54,16 @@ try {
     if (about.status !== 200 || !(await about.text()).includes("About Runtime Smoke")) {
       throw new Error(`transaction seeded About returned ${about.status}`);
     }
+    await assertAgentSurface(origin, [
+      { segment: "products", slug: "sample-product" },
+      { segment: "pages", slug: "about" },
+    ], ["en", "zh-TW", "ja", "ko", "fr"]);
+  }, {
+    LOCALES: '["en","zh-TW","ja","ko","fr"]',
   });
   await smokeTyped("intake", async (origin) => {
     await assertSeededHome(origin);
+    await assertAgentSurface(origin);
     const home = await fetch(`${origin}/`);
     const html = await home.text();
     if (home.status !== 200 || !html.includes("data-intake-form")) {
@@ -70,6 +86,7 @@ try {
   });
   await smokeTyped("reservation", async (origin) => {
     await assertSeededHome(origin);
+    await assertAgentSurface(origin);
     const home = await fetch(`${origin}/`);
     if (home.status !== 200 || !(await home.text()).includes("data-mantle-form")) {
       throw new Error(`reservation homepage did not render its form (${home.status})`);
@@ -102,6 +119,101 @@ async function assertSeededHome(origin) {
   const body = await view.json();
   if (view.status !== 200 || !Array.isArray(body?.data?.rows) || body.data.rows.length !== 1) {
     throw new Error(`seeded home View returned ${view.status}: ${JSON.stringify(body)}`);
+  }
+}
+
+async function assertAgentSurface(origin, routes = [], locales = ["en"]) {
+  const home = await fetch(`${origin}/en`);
+  const homeHtml = await home.text();
+  assertPublicDocument(home, homeHtml, "/en", locales);
+
+  const homeMarkdown = await fetch(`${origin}/en.md`);
+  if (homeMarkdown.status !== 200 || !(await homeMarkdown.text()).trim()) {
+    throw new Error(`home markdown returned ${homeMarkdown.status} or an empty body`);
+  }
+
+  const localeIndex = await fetch(`${origin}/en/llms.txt`);
+  const localeIndexText = await localeIndex.text();
+  if (localeIndex.status !== 200 || !localeIndexText.includes("/en.md")) {
+    throw new Error(`locale llms.txt returned ${localeIndex.status} without the home markdown URL`);
+  }
+
+  const rootIndex = await fetch(`${origin}/llms.txt`);
+  const rootIndexText = await rootIndex.text();
+  if (rootIndex.status !== 200 || !rootIndexText.includes("/en.md")) {
+    throw new Error(`root llms.txt returned ${rootIndex.status} without public markdown URLs`);
+  }
+  for (const locale of locales) {
+    if (!rootIndexText.includes(`Locale: ${locale}`) || !rootIndexText.includes(`/${locale.toLowerCase()}.md`)) {
+      throw new Error(`root llms.txt omitted ${locale}`);
+    }
+  }
+
+  const sitemap = await fetch(`${origin}/sitemap.xml`);
+  const sitemapText = await sitemap.text();
+  if (sitemap.status !== 200 || !sitemapText.includes("/en</loc>")) {
+    throw new Error(`sitemap returned ${sitemap.status} without the home URL`);
+  }
+
+  for (const { segment, slug } of routes) {
+    const listPath = `/en/${segment}`;
+    const list = await fetch(`${origin}${listPath}`);
+    assertPublicDocument(list, await list.text(), listPath, locales);
+
+    const listMarkdown = await fetch(`${origin}${listPath}.md`);
+    const listMarkdownText = await listMarkdown.text();
+    if (listMarkdown.status !== 200 || !listMarkdownText.includes(`${listPath}/${slug}.md`)) {
+      throw new Error(`${listPath}.md returned ${listMarkdown.status} without its public entry URL`);
+    }
+
+    const entryPath = `${listPath}/${slug}`;
+    const entry = await fetch(`${origin}${entryPath}`);
+    assertPublicDocument(entry, await entry.text(), entryPath, locales);
+
+    const markdown = await fetch(`${origin}${entryPath}.md`);
+    if (markdown.status !== 200 || !(await markdown.text()).trim()) {
+      throw new Error(`${entryPath}.md returned ${markdown.status} or an empty body`);
+    }
+    if (!localeIndexText.includes(`${entryPath}.md`)) {
+      throw new Error(`llms.txt omitted ${entryPath}.md`);
+    }
+    if (!sitemapText.includes(`${entryPath}</loc>`) || !sitemapText.includes(`${listPath}</loc>`)) {
+      throw new Error(`sitemap omitted ${listPath} or ${entryPath}`);
+    }
+  }
+
+  const missing = await fetch(`${origin}/nope.md`);
+  if (missing.status !== 404 || (await missing.text()).trim() !== "not found") {
+    throw new Error(`missing markdown returned ${missing.status} instead of an explicit 404`);
+  }
+
+  const authenticated = await fetch(`${origin}/en`, { headers: { cookie: "session=smoke" } });
+  if (authenticated.headers.get("cache-control") !== "private, no-store" || authenticated.headers.has("cache-tag")) {
+    throw new Error("cookie-bearing public request was eligible for anonymous cache");
+  }
+}
+
+function assertPublicDocument(response, html, path, locales) {
+  if (response.status !== 200) throw new Error(`${path} returned ${response.status}`);
+  if (!response.headers.get("cache-control")?.includes("s-maxage=300")) {
+    throw new Error(`${path} is missing anonymous cache freshness`);
+  }
+  if (response.headers.get("cache-tag") !== "mantle-public") {
+    throw new Error(`${path} is missing the site-level cache tag`);
+  }
+  for (const required of [
+    'rel="canonical"',
+    'rel="alternate" type="text/markdown"',
+    'property="og:url"',
+    'name="twitter:card"',
+    'type="application/ld+json"',
+    'hreflang="x-default"',
+    `href="http://localhost:8787${path}"`,
+  ]) {
+    if (!html.includes(required)) throw new Error(`${path} head is missing ${required}`);
+  }
+  for (const locale of locales) {
+    if (!html.includes(`hreflang="${locale}"`)) throw new Error(`${path} is missing hreflang ${locale}`);
   }
 }
 
@@ -160,10 +272,10 @@ async function smokeBlank() {
   });
 }
 
-async function smokeTyped(archetype, check) {
+async function smokeTyped(archetype, check, replacementOverrides = {}) {
   const target = join(tempRoot, archetype);
   const bundle = JSON.parse(readFileSync(join(root, "provision-bundles", `${archetype}.json`), "utf8"));
-  materializeBundle(target, bundle, { ...replacements, ARCHETYPE: archetype });
+  materializeBundle(target, bundle, { ...replacements, ...replacementOverrides, ARCHETYPE: archetype });
   symlinkSync(join(root, "recipes", "typed-web", "node_modules"), join(target, "node_modules"), "dir");
   const mantle = join(root, "recipes", "typed-web", "node_modules", ".bin", "mantle");
   for (const args of [["validate", "--phase", "deploy"], ["generate", "--check"]]) {
