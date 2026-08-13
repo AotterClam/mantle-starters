@@ -30,6 +30,7 @@ Generated `blank` repos expose only the authored model and Worker entry:
 manifests/site.yaml
 src/index.ts
 .mantle/generated/
+public/site-icon.svg
 wrangler.toml
 ```
 
@@ -44,8 +45,12 @@ src/mantle/           site defaults and selected handler registry
 manifests/site.yaml   4 atoms: Schema, View, Procedure, Trigger
 components/ lib/      selected runtime-facing Kiwa surface
 kiwa/                  complete offline reference palette; not runtime source
-styles/               Kiwa/Tailwind source and generated CSS
+styles/               Kiwa/Tailwind source
+public/               Cloudflare Static Assets: site icon, CSS, JS, SVG
 ```
+
+`mantle generate` also materializes the version-matched Admin SPA under
+`public/_mantle/admin/`; that generated directory stays out of git.
 
 The 4 atoms stay in root `manifests/site.yaml` because they are project config,
 not Worker route code. Type overlays may add server behavior under
