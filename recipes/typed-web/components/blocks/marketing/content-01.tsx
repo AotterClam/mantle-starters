@@ -7,7 +7,10 @@ type Content01Props = {
   title?: string
   description?: string
   paragraphs?: string[]
-  image?: string
+  image?: {
+    src: string
+    alt: string
+  }
   imagePosition?: 'left' | 'right'
   showImage?: boolean
   showHeader?: boolean
@@ -65,8 +68,8 @@ export const Content01: FC<Content01Props> = ({
           <div>
             {image ? (
               <img
-                src={image}
-                alt=""
+                src={image.src}
+                alt={image.alt}
                 class="aspect-[4/3] w-full rounded-2xl object-cover shadow-sm"
               />
             ) : (

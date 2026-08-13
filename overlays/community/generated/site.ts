@@ -8,6 +8,163 @@ export const manifest = [
     "apiVersion": "cms.mantle.aotter.net/v1",
     "kind": "Schema",
     "metadata": {
+      "name": "page"
+    },
+    "spec": {
+      "title": "Pages",
+      "description": "Public page content for a community site.",
+      "schema": {
+        "type": "object",
+        "required": [
+          "type",
+          "title",
+          "sections"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "home"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "sections": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "title"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "hero",
+                    "features",
+                    "cta"
+                  ]
+                },
+                "id": {
+                  "type": "string"
+                },
+                "eyebrow": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "body": {
+                  "type": "string",
+                  "x-mcp-hint": "markdown"
+                },
+                "showImage": {
+                  "type": "boolean"
+                },
+                "image": {
+                  "type": "object",
+                  "required": [
+                    "src",
+                    "alt"
+                  ],
+                  "properties": {
+                    "src": {
+                      "type": "string"
+                    },
+                    "alt": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "action": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string"
+                    },
+                    "href": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "secondaryAction": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string"
+                    },
+                    "href": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string"
+                      },
+                      "body": {
+                        "type": "string",
+                        "x-mcp-hint": "markdown"
+                      },
+                      "icon": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "uniqueIndexes": [
+        [
+          "type"
+        ]
+      ],
+      "localized": false,
+      "lifecycle": "publishing"
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "View",
+    "metadata": {
+      "name": "home"
+    },
+    "spec": {
+      "from": "page",
+      "fields": [
+        "id",
+        "type",
+        "title",
+        "summary",
+        "sections",
+        "updatedAt"
+      ],
+      "filter": {
+        "eq": {
+          "field": "status",
+          "value": "published"
+        }
+      },
+      "limit": 1
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Schema",
+    "metadata": {
       "name": "community-updates"
     },
     "spec": {
@@ -199,14 +356,31 @@ export interface MantleViewOptions {
 export function bindMantleSite(runtime: CmsRuntime) {
   return {
     views: {
-      "public-community-updates": (request: MantleViewOptions = {}) =>
-        runtime.executeView.execute<MantleGenerated.MantleSite.ViewRow_public_community_updates>({
-          view: manifest[2],
+      "home": (request: MantleViewOptions = {}) =>
+        runtime.executeView.execute<MantleGenerated.MantleSite.ViewRow_home>({
+          view: manifest[1],
           ctx: request.ctx,
           options: {
             page: request.page,
             show: request.show,
           },
+        }),
+      "public-community-updates": (request: MantleViewOptions = {}) =>
+        runtime.executeView.execute<MantleGenerated.MantleSite.ViewRow_public_community_updates>({
+          view: manifest[4],
+          ctx: request.ctx,
+          options: {
+            page: request.page,
+            show: request.show,
+          },
+        }),
+    },
+    procedures: {
+      "submit-community-signup": (input: MantleGenerated.MantleSite.ProcInput_submit_community_signup, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_submit_community_signup>({
+          procedure: manifest[5],
+          input,
+          ctx,
         }),
     },
   } as const;

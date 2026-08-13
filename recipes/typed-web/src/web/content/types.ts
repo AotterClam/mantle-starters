@@ -1,6 +1,7 @@
 export type SiteAction = {
   readonly label: string;
   readonly href: string;
+  readonly icon?: "cart";
 };
 
 export type SiteContent = {
@@ -15,6 +16,7 @@ export type SiteContent = {
     readonly toggleTheme: string;
     readonly lightMode: string;
     readonly darkMode: string;
+    readonly language?: string;
   };
   readonly footer: {
     readonly tagline?: string;

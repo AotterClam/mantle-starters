@@ -8,16 +8,313 @@ export const manifest = [
     "apiVersion": "cms.mantle.aotter.net/v1",
     "kind": "Schema",
     "metadata": {
-      "name": "products"
+      "name": "page"
     },
     "spec": {
-      "title": "Products",
-      "description": "Minimal product catalog for a first transaction-shaped site.",
+      "title": "Pages",
+      "description": "Stable page identities shared by every language version.",
       "schema": {
         "type": "object",
         "required": [
           "slug",
+          "type"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "home",
+              "page"
+            ]
+          }
+        }
+      },
+      "uniqueIndexes": [
+        [
+          "slug"
+        ]
+      ],
+      "localized": false,
+      "lifecycle": "publishing"
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Schema",
+    "metadata": {
+      "name": "page-translations"
+    },
+    "spec": {
+      "title": "Page translations",
+      "description": "Localized page copy and sections.",
+      "localized": true,
+      "translates": {
+        "parent": "page",
+        "on": "slug"
+      },
+      "schema": {
+        "type": "object",
+        "required": [
+          "slug",
+          "locale",
           "title",
+          "sections"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "sections": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "title"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "hero",
+                    "features",
+                    "content",
+                    "faq",
+                    "cta"
+                  ]
+                },
+                "id": {
+                  "type": "string"
+                },
+                "eyebrow": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "body": {
+                  "type": "string",
+                  "x-mcp-hint": "markdown"
+                },
+                "showImage": {
+                  "type": "boolean"
+                },
+                "image": {
+                  "type": "object",
+                  "required": [
+                    "src",
+                    "alt"
+                  ],
+                  "properties": {
+                    "src": {
+                      "type": "string"
+                    },
+                    "alt": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "action": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string"
+                    },
+                    "href": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "secondaryAction": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string"
+                    },
+                    "href": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string"
+                      },
+                      "body": {
+                        "type": "string",
+                        "x-mcp-hint": "markdown"
+                      },
+                      "icon": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "uniqueIndexes": [
+        [
+          "slug",
+          "locale"
+        ]
+      ],
+      "indexes": [
+        [
+          "locale",
+          "slug"
+        ]
+      ],
+      "lifecycle": "publishing"
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "View",
+    "metadata": {
+      "name": "home"
+    },
+    "spec": {
+      "from": "page-translations",
+      "params": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "locale"
+        ],
+        "properties": {
+          "locale": {
+            "type": "string"
+          }
+        }
+      },
+      "fields": [
+        "id",
+        "slug",
+        "locale",
+        "title",
+        "summary",
+        "sections",
+        "updatedAt"
+      ],
+      "filter": {
+        "and": [
+          {
+            "eq": {
+              "field": "status",
+              "value": "published"
+            }
+          },
+          {
+            "eq": {
+              "field": "slug",
+              "value": "home"
+            }
+          },
+          {
+            "eq": {
+              "field": "locale",
+              "value": {
+                "$param": "locale"
+              }
+            }
+          }
+        ]
+      },
+      "limit": 1
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "View",
+    "metadata": {
+      "name": "public-pages"
+    },
+    "spec": {
+      "surface": "public",
+      "from": "page-translations",
+      "params": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "locale"
+        ],
+        "properties": {
+          "locale": {
+            "type": "string"
+          }
+        }
+      },
+      "fields": [
+        "id",
+        "slug",
+        "locale",
+        "title",
+        "summary",
+        "sections",
+        "updatedAt"
+      ],
+      "filter": {
+        "and": [
+          {
+            "eq": {
+              "field": "status",
+              "value": "published"
+            }
+          },
+          {
+            "eq": {
+              "field": "locale",
+              "value": {
+                "$param": "locale"
+              }
+            }
+          }
+        ]
+      },
+      "orderBy": [
+        {
+          "field": "slug",
+          "direction": "asc"
+        }
+      ],
+      "limit": 100
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Schema",
+    "metadata": {
+      "name": "products"
+    },
+    "spec": {
+      "title": "Products",
+      "description": "Stable product identity, price, and media shared by every language version.",
+      "schema": {
+        "type": "object",
+        "required": [
+          "slug",
           "priceMinor",
           "currency"
         ],
@@ -25,12 +322,6 @@ export const manifest = [
           "slug": {
             "type": "string",
             "pattern": "^[a-z0-9-]+$"
-          },
-          "title": {
-            "type": "string"
-          },
-          "summary": {
-            "type": "string"
           },
           "priceMinor": {
             "type": "integer",
@@ -59,27 +350,182 @@ export const manifest = [
     "apiVersion": "cms.mantle.aotter.net/v1",
     "kind": "Schema",
     "metadata": {
-      "name": "product-inquiries"
+      "name": "product-translations"
     },
     "spec": {
-      "title": "Product inquiries",
-      "description": "First-pass purchase intent capture. Replace with checkout later.",
+      "title": "Product translations",
+      "description": "Localized product titles and summaries.",
+      "localized": true,
+      "translates": {
+        "parent": "products",
+        "on": "slug"
+      },
       "schema": {
         "type": "object",
         "required": [
-          "productId",
-          "email"
+          "slug",
+          "locale",
+          "title"
         ],
         "properties": {
-          "productId": {
+          "slug": {
             "type": "string",
-            "x-mantle-ref": "products"
+            "pattern": "^[a-z0-9-]+$"
           },
-          "email": {
+          "locale": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          }
+        }
+      },
+      "uniqueIndexes": [
+        [
+          "slug",
+          "locale"
+        ]
+      ],
+      "indexes": [
+        [
+          "locale",
+          "slug"
+        ]
+      ],
+      "lifecycle": "publishing"
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Schema",
+    "metadata": {
+      "name": "orders"
+    },
+    "spec": {
+      "title": "Orders",
+      "description": "Guest orders created by checkout and managed by staff operations.",
+      "schema": {
+        "type": "object",
+        "required": [
+          "orderToken",
+          "orderNumber",
+          "orderStatus",
+          "orderLocale",
+          "currency",
+          "subtotalMinor",
+          "totalMinor",
+          "customerName",
+          "customerEmail",
+          "shippingAddress",
+          "items",
+          "expiresAt",
+          "createdAt"
+        ],
+        "properties": {
+          "orderToken": {
+            "type": "string",
+            "pattern": "^[0-9a-f-]{36}$"
+          },
+          "orderNumber": {
+            "type": "string"
+          },
+          "orderStatus": {
+            "type": "string",
+            "enum": [
+              "pending_payment",
+              "paid",
+              "fulfilled",
+              "cancelled"
+            ]
+          },
+          "orderLocale": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$"
+          },
+          "subtotalMinor": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "totalMinor": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "customerName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "customerEmail": {
             "type": "string",
             "format": "email"
           },
-          "note": {
+          "shippingAddress": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "required": [
+                "productSlug",
+                "title",
+                "quantity",
+                "unitPriceMinor",
+                "lineTotalMinor"
+              ],
+              "properties": {
+                "productSlug": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 99
+                },
+                "unitPriceMinor": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "lineTotalMinor": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            }
+          },
+          "expiresAt": {
+            "type": "number",
+            "x-mcp-hint": "timestamp-ms"
+          },
+          "paidAt": {
+            "type": "number",
+            "x-mcp-hint": "timestamp-ms"
+          },
+          "fulfilledAt": {
+            "type": "number",
+            "x-mcp-hint": "timestamp-ms"
+          },
+          "cancelledAt": {
+            "type": "number",
+            "x-mcp-hint": "timestamp-ms"
+          },
+          "trackingNumber": {
+            "type": "string"
+          },
+          "cancelReason": {
             "type": "string"
           },
           "createdAt": {
@@ -90,9 +536,143 @@ export const manifest = [
         }
       },
       "lifecycle": "operational",
+      "uniqueIndexes": [
+        [
+          "orderToken"
+        ],
+        [
+          "orderNumber"
+        ]
+      ],
       "indexes": [
         [
-          "productId"
+          "orderStatus"
+        ]
+      ],
+      "uiSchema": {
+        "list": {
+          "filterField": "orderStatus"
+        }
+      }
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Schema",
+    "metadata": {
+      "name": "inventory"
+    },
+    "spec": {
+      "title": "Inventory",
+      "description": "Query mirror of the InventoryCoordinator Durable Object, which is the stock authority.",
+      "schema": {
+        "type": "object",
+        "required": [
+          "productSlug",
+          "available",
+          "reserved",
+          "updatedAt"
+        ],
+        "properties": {
+          "productSlug": {
+            "type": "string"
+          },
+          "available": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "reserved": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "updatedAt": {
+            "type": "number",
+            "x-mcp-hint": "timestamp-ms"
+          }
+        }
+      },
+      "lifecycle": "operational",
+      "uniqueIndexes": [
+        [
+          "productSlug"
+        ]
+      ],
+      "indexes": [
+        [
+          "available",
+          "productSlug"
+        ]
+      ]
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Schema",
+    "metadata": {
+      "name": "inventory-movements"
+    },
+    "spec": {
+      "title": "Inventory movements",
+      "description": "Append-only audit trail for stock changes caused by checkout and staff operations.",
+      "schema": {
+        "type": "object",
+        "required": [
+          "movementKey",
+          "productSlug",
+          "kind",
+          "availableDelta",
+          "reservedDelta",
+          "occurredAt"
+        ],
+        "properties": {
+          "movementKey": {
+            "type": "string"
+          },
+          "productSlug": {
+            "type": "string"
+          },
+          "orderToken": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "restock",
+              "adjust",
+              "reserve",
+              "sale",
+              "release",
+              "cancellation"
+            ]
+          },
+          "availableDelta": {
+            "type": "integer"
+          },
+          "reservedDelta": {
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "number",
+            "x-mcp-hint": "timestamp-ms"
+          }
+        }
+      },
+      "lifecycle": "operational",
+      "uniqueIndexes": [
+        [
+          "movementKey"
+        ]
+      ],
+      "indexes": [
+        [
+          "productSlug",
+          "occurredAt"
+        ],
+        [
+          "orderToken"
         ]
       ]
     }
@@ -104,27 +684,82 @@ export const manifest = [
       "name": "public-products"
     },
     "spec": {
-      "from": "products",
+      "surface": "public",
+      "from": "product-translations",
+      "params": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "locale"
+        ],
+        "properties": {
+          "locale": {
+            "type": "string"
+          }
+        }
+      },
       "fields": [
         "id",
         "slug",
+        "locale",
         "title",
         "summary",
-        "priceMinor",
-        "currency",
-        "coverAssetId",
         "updatedAt"
       ],
       "filter": {
-        "eq": {
-          "field": "status",
-          "value": "published"
+        "and": [
+          {
+            "eq": {
+              "field": "status",
+              "value": "published"
+            }
+          },
+          {
+            "eq": {
+              "field": "locale",
+              "value": {
+                "$param": "locale"
+              }
+            }
+          }
+        ]
+      },
+      "orderBy": [
+        {
+          "field": "slug",
+          "direction": "asc"
+        }
+      ],
+      "limit": 100
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "View",
+    "metadata": {
+      "name": "low-stock"
+    },
+    "spec": {
+      "title": "Low stock",
+      "surface": "staff",
+      "from": "inventory",
+      "fields": [
+        "id",
+        "productSlug",
+        "available",
+        "reserved",
+        "updatedAt"
+      ],
+      "filter": {
+        "lte": {
+          "field": "available",
+          "value": 5
         }
       },
       "orderBy": [
         {
-          "field": "updatedAt",
-          "direction": "desc"
+          "field": "available",
+          "direction": "asc"
         }
       ],
       "limit": 100
@@ -134,37 +769,101 @@ export const manifest = [
     "apiVersion": "cms.mantle.aotter.net/v1",
     "kind": "Procedure",
     "metadata": {
-      "name": "submit-product-inquiry"
+      "name": "place-order"
     },
     "spec": {
       "input": {
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "productId",
-          "email"
+          "locale",
+          "customerName",
+          "customerEmail",
+          "shippingAddress",
+          "items"
         ],
         "properties": {
-          "productId": {
-            "type": "string",
-            "x-mantle-ref": "products"
+          "locale": {
+            "type": "string"
           },
-          "email": {
+          "customerName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "customerEmail": {
             "type": "string",
             "format": "email"
           },
-          "note": {
-            "type": "string"
+          "shippingAddress": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "productSlug",
+                "quantity"
+              ],
+              "properties": {
+                "productSlug": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9-]+$"
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 99
+                }
+              }
+            }
           }
         }
       },
       "output": {
-        "type": "object"
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "outcome",
+          "orderToken",
+          "orderNumber",
+          "expiresAt",
+          "totalMinor",
+          "currency"
+        ],
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "pending_payment"
+            ]
+          },
+          "orderToken": {
+            "type": "string"
+          },
+          "orderNumber": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "number"
+          },
+          "totalMinor": {
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          }
+        }
       },
       "handler": {
-        "kind": "builtin",
-        "op": "create",
-        "schema": "product-inquiries"
+        "kind": "ref",
+        "ref": "placeOrder"
       }
     }
   },
@@ -172,16 +871,646 @@ export const manifest = [
     "apiVersion": "cms.mantle.aotter.net/v1",
     "kind": "Trigger",
     "metadata": {
-      "name": "submit-product-inquiry-http"
+      "name": "place-order-http"
     },
     "spec": {
       "source": {
         "kind": "http",
         "method": "POST",
-        "path": "/api/product-inquiries"
+        "path": "/api/commerce/orders"
       },
       "target": {
-        "procedure": "submit-product-inquiry"
+        "procedure": "place-order"
+      }
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Procedure",
+    "metadata": {
+      "name": "pay-order"
+    },
+    "spec": {
+      "input": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "orderToken"
+        ],
+        "properties": {
+          "orderToken": {
+            "type": "string",
+            "pattern": "^[0-9a-f-]{36}$"
+          }
+        }
+      },
+      "output": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "outcome",
+          "orderToken"
+        ],
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "paid",
+              "already_paid",
+              "expired",
+              "closed",
+              "missing"
+            ]
+          },
+          "orderToken": {
+            "type": "string"
+          }
+        }
+      },
+      "handler": {
+        "kind": "ref",
+        "ref": "payOrder"
+      }
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Trigger",
+    "metadata": {
+      "name": "pay-order-http"
+    },
+    "spec": {
+      "source": {
+        "kind": "http",
+        "method": "POST",
+        "path": "/api/commerce/orders/pay"
+      },
+      "target": {
+        "procedure": "pay-order"
+      }
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Procedure",
+    "metadata": {
+      "name": "cancel-guest-order"
+    },
+    "spec": {
+      "input": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "orderToken"
+        ],
+        "properties": {
+          "orderToken": {
+            "type": "string",
+            "pattern": "^[0-9a-f-]{36}$"
+          }
+        }
+      },
+      "output": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "outcome",
+          "orderToken"
+        ],
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "cancelled",
+              "already_cancelled",
+              "closed",
+              "missing"
+            ]
+          },
+          "orderToken": {
+            "type": "string"
+          }
+        }
+      },
+      "handler": {
+        "kind": "ref",
+        "ref": "cancelGuestOrder"
+      }
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Trigger",
+    "metadata": {
+      "name": "cancel-guest-order-http"
+    },
+    "spec": {
+      "source": {
+        "kind": "http",
+        "method": "POST",
+        "path": "/api/commerce/orders/cancel"
+      },
+      "target": {
+        "procedure": "cancel-guest-order"
+      }
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Procedure",
+    "metadata": {
+      "name": "inspect-inventory"
+    },
+    "spec": {
+      "title": "Inspect inventory",
+      "input": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "productSlug"
+        ],
+        "properties": {
+          "productSlug": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          }
+        }
+      },
+      "output": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "productSlug",
+          "available",
+          "reserved"
+        ],
+        "properties": {
+          "productSlug": {
+            "type": "string"
+          },
+          "available": {
+            "type": "integer"
+          },
+          "reserved": {
+            "type": "integer"
+          }
+        }
+      },
+      "handler": {
+        "kind": "ref",
+        "ref": "inspectInventory"
+      },
+      "requires": {
+        "auth": {
+          "all": [
+            {
+              "ctx.staff": [
+                "owner"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Procedure",
+    "metadata": {
+      "name": "restock-product"
+    },
+    "spec": {
+      "title": "Restock product",
+      "input": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "productSlug",
+          "quantity"
+        ],
+        "properties": {
+          "productSlug": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 500
+          }
+        }
+      },
+      "output": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "productSlug",
+          "available",
+          "reserved"
+        ],
+        "properties": {
+          "productSlug": {
+            "type": "string"
+          },
+          "available": {
+            "type": "integer"
+          },
+          "reserved": {
+            "type": "integer"
+          }
+        }
+      },
+      "handler": {
+        "kind": "ref",
+        "ref": "restockProduct"
+      },
+      "requires": {
+        "auth": {
+          "all": [
+            {
+              "ctx.staff": [
+                "owner"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Procedure",
+    "metadata": {
+      "name": "adjust-inventory"
+    },
+    "spec": {
+      "title": "Adjust inventory",
+      "input": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "productSlug",
+          "delta",
+          "reason"
+        ],
+        "properties": {
+          "productSlug": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "delta": {
+            "type": "integer",
+            "minimum": -100000,
+            "maximum": 100000
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        }
+      },
+      "output": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "productSlug",
+          "available",
+          "reserved"
+        ],
+        "properties": {
+          "productSlug": {
+            "type": "string"
+          },
+          "available": {
+            "type": "integer"
+          },
+          "reserved": {
+            "type": "integer"
+          }
+        }
+      },
+      "handler": {
+        "kind": "ref",
+        "ref": "adjustInventory"
+      },
+      "requires": {
+        "auth": {
+          "all": [
+            {
+              "ctx.staff": [
+                "owner"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Procedure",
+    "metadata": {
+      "name": "fulfill-order"
+    },
+    "spec": {
+      "title": "Fulfill order",
+      "input": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "orderToken"
+        ],
+        "properties": {
+          "orderToken": {
+            "type": "string",
+            "pattern": "^[0-9a-f-]{36}$"
+          },
+          "trackingNumber": {
+            "type": "string",
+            "maxLength": 120
+          }
+        }
+      },
+      "output": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "outcome",
+          "orderToken"
+        ],
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "fulfilled",
+              "already_fulfilled",
+              "closed",
+              "missing"
+            ]
+          },
+          "orderToken": {
+            "type": "string"
+          }
+        }
+      },
+      "handler": {
+        "kind": "ref",
+        "ref": "fulfillOrder"
+      },
+      "requires": {
+        "auth": {
+          "all": [
+            {
+              "ctx.staff": [
+                "owner"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Procedure",
+    "metadata": {
+      "name": "cancel-order"
+    },
+    "spec": {
+      "title": "Cancel order",
+      "input": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "orderToken",
+          "reason"
+        ],
+        "properties": {
+          "orderToken": {
+            "type": "string",
+            "pattern": "^[0-9a-f-]{36}$"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          }
+        }
+      },
+      "output": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "outcome",
+          "orderToken"
+        ],
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "cancelled",
+              "already_cancelled",
+              "closed",
+              "missing"
+            ]
+          },
+          "orderToken": {
+            "type": "string"
+          }
+        }
+      },
+      "handler": {
+        "kind": "ref",
+        "ref": "cancelOrder"
+      },
+      "requires": {
+        "auth": {
+          "all": [
+            {
+              "ctx.staff": [
+                "owner"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Procedure",
+    "metadata": {
+      "name": "expire-order"
+    },
+    "spec": {
+      "input": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "orderToken",
+          "now"
+        ],
+        "properties": {
+          "orderToken": {
+            "type": "string",
+            "pattern": "^[0-9a-f-]{36}$"
+          },
+          "now": {
+            "type": "number"
+          }
+        }
+      },
+      "output": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "outcome",
+          "orderToken"
+        ],
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "expired",
+              "too_early",
+              "closed",
+              "missing"
+            ]
+          },
+          "orderToken": {
+            "type": "string"
+          }
+        }
+      },
+      "handler": {
+        "kind": "ref",
+        "ref": "expireOrder"
+      }
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Procedure",
+    "metadata": {
+      "name": "sweep-expired-orders"
+    },
+    "spec": {
+      "input": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "now"
+        ],
+        "properties": {
+          "now": {
+            "type": "number"
+          }
+        }
+      },
+      "output": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "checked",
+          "expired"
+        ],
+        "properties": {
+          "checked": {
+            "type": "integer"
+          },
+          "expired": {
+            "type": "integer"
+          }
+        }
+      },
+      "handler": {
+        "kind": "ref",
+        "ref": "sweepExpiredOrders"
+      }
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Trigger",
+    "metadata": {
+      "name": "inspect-inventory-mcp"
+    },
+    "spec": {
+      "source": {
+        "kind": "mcp",
+        "surface": "staff"
+      },
+      "target": {
+        "procedure": "inspect-inventory"
+      }
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Trigger",
+    "metadata": {
+      "name": "restock-product-mcp"
+    },
+    "spec": {
+      "source": {
+        "kind": "mcp",
+        "surface": "staff"
+      },
+      "target": {
+        "procedure": "restock-product"
+      }
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Trigger",
+    "metadata": {
+      "name": "adjust-inventory-mcp"
+    },
+    "spec": {
+      "source": {
+        "kind": "mcp",
+        "surface": "staff"
+      },
+      "target": {
+        "procedure": "adjust-inventory"
+      }
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Trigger",
+    "metadata": {
+      "name": "fulfill-order-mcp"
+    },
+    "spec": {
+      "source": {
+        "kind": "mcp",
+        "surface": "staff"
+      },
+      "target": {
+        "procedure": "fulfill-order"
+      }
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Trigger",
+    "metadata": {
+      "name": "cancel-order-mcp"
+    },
+    "spec": {
+      "source": {
+        "kind": "mcp",
+        "surface": "staff"
+      },
+      "target": {
+        "procedure": "cancel-order"
       }
     }
   }
@@ -196,14 +1525,106 @@ export interface MantleViewOptions {
 export function bindMantleSite(runtime: CmsRuntime) {
   return {
     views: {
-      "public-products": (request: MantleViewOptions = {}) =>
-        runtime.executeView.execute<MantleGenerated.MantleSite.ViewRow_public_products>({
+      "home": (request: MantleViewOptions & { readonly params: MantleGenerated.MantleSite.ViewParams_home }) =>
+        runtime.executeView.execute<MantleGenerated.MantleSite.ViewRow_home>({
           view: manifest[2],
+          ctx: request.ctx,
+          options: {
+            params: request.params,
+            page: request.page,
+            show: request.show,
+          },
+        }),
+      "public-pages": (request: MantleViewOptions & { readonly params: MantleGenerated.MantleSite.ViewParams_public_pages }) =>
+        runtime.executeView.execute<MantleGenerated.MantleSite.ViewRow_public_pages>({
+          view: manifest[3],
+          ctx: request.ctx,
+          options: {
+            params: request.params,
+            page: request.page,
+            show: request.show,
+          },
+        }),
+      "public-products": (request: MantleViewOptions & { readonly params: MantleGenerated.MantleSite.ViewParams_public_products }) =>
+        runtime.executeView.execute<MantleGenerated.MantleSite.ViewRow_public_products>({
+          view: manifest[9],
+          ctx: request.ctx,
+          options: {
+            params: request.params,
+            page: request.page,
+            show: request.show,
+          },
+        }),
+      "low-stock": (request: MantleViewOptions = {}) =>
+        runtime.executeView.execute<MantleGenerated.MantleSite.ViewRow_low_stock>({
+          view: manifest[10],
           ctx: request.ctx,
           options: {
             page: request.page,
             show: request.show,
           },
+        }),
+    },
+    procedures: {
+      "place-order": (input: MantleGenerated.MantleSite.ProcInput_place_order, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_place_order>({
+          procedure: manifest[11],
+          input,
+          ctx,
+        }),
+      "pay-order": (input: MantleGenerated.MantleSite.ProcInput_pay_order, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_pay_order>({
+          procedure: manifest[13],
+          input,
+          ctx,
+        }),
+      "cancel-guest-order": (input: MantleGenerated.MantleSite.ProcInput_cancel_guest_order, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_cancel_guest_order>({
+          procedure: manifest[15],
+          input,
+          ctx,
+        }),
+      "inspect-inventory": (input: MantleGenerated.MantleSite.ProcInput_inspect_inventory, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_inspect_inventory>({
+          procedure: manifest[17],
+          input,
+          ctx,
+        }),
+      "restock-product": (input: MantleGenerated.MantleSite.ProcInput_restock_product, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_restock_product>({
+          procedure: manifest[18],
+          input,
+          ctx,
+        }),
+      "adjust-inventory": (input: MantleGenerated.MantleSite.ProcInput_adjust_inventory, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_adjust_inventory>({
+          procedure: manifest[19],
+          input,
+          ctx,
+        }),
+      "fulfill-order": (input: MantleGenerated.MantleSite.ProcInput_fulfill_order, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_fulfill_order>({
+          procedure: manifest[20],
+          input,
+          ctx,
+        }),
+      "cancel-order": (input: MantleGenerated.MantleSite.ProcInput_cancel_order, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_cancel_order>({
+          procedure: manifest[21],
+          input,
+          ctx,
+        }),
+      "expire-order": (input: MantleGenerated.MantleSite.ProcInput_expire_order, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_expire_order>({
+          procedure: manifest[22],
+          input,
+          ctx,
+        }),
+      "sweep-expired-orders": (input: MantleGenerated.MantleSite.ProcInput_sweep_expired_orders, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_sweep_expired_orders>({
+          procedure: manifest[23],
+          input,
+          ctx,
         }),
     },
   } as const;

@@ -2,6 +2,7 @@ import type { MantleExtensionApp } from "@aotter/mantle/cloudflare";
 import stylesCss from "../../../styles/generated.css";
 import { homeClientJs } from "../../web/client/homeClient.js";
 import { kiwaEnhanceAssets } from "../../web/client/kiwaEnhanceAssets.js";
+import { mantleOceanHeroDarkSvg, mantleOceanHeroLightSvg } from "../../web/mantleOceanHero.js";
 import type { Env } from "../../mantle/config.js";
 
 const ASSET_CACHE_CONTROL = "public, max-age=31536000, immutable";
@@ -23,6 +24,8 @@ export function mountAssetRoutes(app: MantleExtensionApp<Env>): void {
       },
     }),
   );
+  app.get("/assets/mantle-ocean-hero-light.svg", () => svgResponse(mantleOceanHeroLightSvg));
+  app.get("/assets/mantle-ocean-hero-dark.svg", () => svgResponse(mantleOceanHeroDarkSvg));
   app.get("/enhance/:file", (c) => {
     const file = c.req.param("file");
     if (!/^[A-Za-z0-9._-]+\.js$/.test(file)) return c.notFound();
@@ -34,5 +37,14 @@ export function mountAssetRoutes(app: MantleExtensionApp<Env>): void {
         "content-type": "text/javascript; charset=utf-8",
       },
     });
+  });
+}
+
+function svgResponse(svg: string): Response {
+  return new Response(svg, {
+    headers: {
+      "cache-control": ASSET_CACHE_CONTROL,
+      "content-type": "image/svg+xml; charset=utf-8",
+    },
   });
 }

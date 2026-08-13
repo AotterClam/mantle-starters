@@ -58,6 +58,10 @@
             "type": "hero",
             "title": "{{BRAND}} is ready to collect the first real answers",
             "body": "{{DESCRIPTION}}",
+            "image": {
+              "src": "/assets/mantle-ocean-hero-light.svg",
+              "alt": ""
+            },
             "action": { "label": "Start RSVP", "href": "#intake" },
             "secondaryAction": { "label": "See the flow", "href": "#flow" }
           },
@@ -258,18 +262,6 @@
             "secondaryAction": { "label": "Review FAQ", "href": "#faq" }
           }
         ]
-      }
-    ],
-    "intake-submissions": [
-      {
-        "name": "Sample Responder",
-        "email": "hello@example.com",
-        "attendance": "maybe",
-        "role": "Example operator",
-        "session": "either",
-        "note": "I would like details before confirming.",
-        "resultKey": "follow-up",
-        "replyLocale": "{{CANONICAL_LOCALE}}"
       }
     ]
   }

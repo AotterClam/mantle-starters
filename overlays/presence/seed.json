@@ -59,6 +59,10 @@
             "type": "hero",
             "title": "{{BRAND}} starts here",
             "body": "{{DESCRIPTION}}",
+            "image": {
+              "src": "/assets/mantle-ocean-hero-light.svg",
+              "alt": ""
+            },
             "action": { "label": "Start a conversation", "href": "#contact" },
             "secondaryAction": { "label": "See the work", "href": "#work" }
           },
@@ -294,13 +298,6 @@
             "secondaryAction": { "label": "Review sections", "href": "#about" }
           }
         ]
-      }
-    ],
-    "contact": [
-      {
-        "name": "Sample Visitor",
-        "email": "hello@example.com",
-        "message": "I would like to learn more about {{BRAND}}."
       }
     ]
   }

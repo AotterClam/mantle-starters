@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readdirSync,
@@ -24,11 +25,13 @@ ensureTypedStyles();
 
 for (const archetype of archetypes) {
   const files = buildBundleFiles(archetype);
+  const localizedFiles = findLocalizedFiles(files, archetype);
   const outPath = join(root, "provision-bundles", `${archetype}.json`);
   const bundleText = JSON.stringify({
     version,
     kind: "mantle-provision-bundle",
     archetype,
+    ...(localizedFiles.length > 0 ? { localizedFiles } : {}),
     files: Object.fromEntries(Object.entries(files).sort(([a], [b]) => a.localeCompare(b))),
   }, null, 2) + "\n";
 
@@ -62,7 +65,6 @@ function buildBundleFiles(archetype) {
     applyOverlay(files, archetype);
     selectTypedSurface(files, archetype);
     pruneRuntimeSource(files);
-    delete files["manifests/example.yaml"];
     // This UI revision keeps its licensed snapshot as an offline agent palette.
     walk(files, "kiwa", "kiwa");
     compileBundleStyles(files, archetype);
@@ -142,6 +144,27 @@ function buildBundleFiles(archetype) {
   return files;
 }
 
+function findLocalizedFiles(files, archetype) {
+  const prefix = `.mantle/overlays/${archetype}/`;
+  return Object.keys(files).filter((path) => {
+    if (!path.startsWith(prefix) || !path.endsWith(".json")) return false;
+    const locales = JSON.parse(files[path])?.locales;
+    if (!locales || typeof locales !== "object" || Array.isArray(locales)) return false;
+    const entries = Object.entries(locales);
+    if (entries.length === 0) throw new Error(`${path} must define at least one locale`);
+    const keys = JSON.stringify(Object.keys(entries[0][1] ?? {}).sort());
+    for (const [locale, value] of entries) {
+      if (!value || typeof value !== "object" || Array.isArray(value)) {
+        throw new Error(`${path} locale ${locale} must be an object`);
+      }
+      if (JSON.stringify(Object.keys(value).sort()) !== keys) {
+        throw new Error(`${path} locale ${locale} has a different key set`);
+      }
+    }
+    return true;
+  }).sort();
+}
+
 function compileBundleStyles(files, archetype) {
   const tempRoot = mkdtempSync(join(tmpdir(), `mantle-${archetype}-styles-`));
   try {
@@ -201,11 +224,15 @@ function assertBundle(bundle, archetype) {
   if (bundle.files["wrangler.toml"]?.includes("MANTLE_PLATFORM_AUTH")) {
     throw new Error(`${archetype} bundle still contains preview Hosted Auth variables`);
   }
-  if (archetype !== "blank" && !bundle.files[`manifests/${archetype}.yaml`]) {
+  if (!bundle.files["manifests/site.yaml"]) {
     throw new Error(`${archetype} bundle missing applied manifest`);
   }
-  if (archetype !== "blank" && bundle.files["manifests/example.yaml"]) {
-    throw new Error(`${archetype} bundle should not include blank example manifest`);
+  for (const path of bundle.localizedFiles ?? []) {
+    if (!bundle.files[path]) throw new Error(`${archetype} localized file is absent from bundle: ${path}`);
+    const locales = JSON.parse(bundle.files[path])?.locales;
+    if (!locales || typeof locales !== "object" || Array.isArray(locales)) {
+      throw new Error(`${archetype} localized file must expose an object at locales: ${path}`);
+    }
   }
   if (archetype === "blank") {
     assertHeadlessBlank(bundle);
@@ -230,9 +257,9 @@ function assertBundle(bundle, archetype) {
     if (!bundle.files["src/worker/routes/assets.ts"]?.includes("max-age=31536000, immutable")) {
       throw new Error(`${archetype} versioned homepage assets must be immutable`);
     }
-    const seedImport = `../../../.mantle/overlays/${archetype}/seed.json`;
-    if (!bundle.files["src/web/content/homeContent.ts"]?.includes(seedImport)) {
-      throw new Error(`${archetype} homeContent must read the overlay seed`);
+    const seedImport = `../../.mantle/overlays/${archetype}/seed.json`;
+    if (!bundle.files["src/mantle/seed.ts"]?.includes(seedImport)) {
+      throw new Error(`${archetype} initial seed must read the overlay seed`);
     }
     if (!bundle.files["src/index.ts"]?.includes("createMantleWorker") ||
         !bundle.files["src/index.ts"]?.includes(".mantle/generated/site.js")) {
@@ -292,7 +319,7 @@ function applyProvisionedReadme(files, archetype) {
   if (archetype === "blank") return;
   const reusableStart = base.indexOf("## Kiwa UI Credit");
   const reusableBody = reusableStart === -1 ? base : base.slice(reusableStart);
-  const manifestPath = `manifests/${archetype}.yaml`;
+  const manifestPath = "manifests/site.yaml";
   const overview = [
     "# {{BRAND}}",
     "",
@@ -350,7 +377,7 @@ function assertProvisionedReadme(bundle, archetype) {
   if (readme.includes("aotter/mantle-starters/blank")) {
     throw new Error(`${archetype} README still reads like the source starter README`);
   }
-  const manifestPath = `manifests/${archetype}.yaml`;
+  const manifestPath = "manifests/site.yaml";
   if (!readme.includes(manifestPath)) throw new Error(`${archetype} README missing manifest path`);
   if (archetype !== "blank") {
     for (const required of [
@@ -391,8 +418,12 @@ function walk(files, from, to) {
 
 function applyOverlay(files, archetype) {
   walk(files, `overlays/${archetype}/manifests`, "manifests");
+  const wranglerAppend = join(root, "overlays", archetype, "wrangler.append.toml");
+  if (existsSync(wranglerAppend)) {
+    files["wrangler.toml"] = `${files["wrangler.toml"].trimEnd()}\n${readFileSync(wranglerAppend, "utf8")}`;
+  }
   let seedText = null;
-  for (const name of ["handoff.md", "layout.md", "seed-prompt.md", "seed.json"]) {
+  for (const name of ["handoff.md", "layout.md", "seed-prompt.md", "seed.json", "messages.json"]) {
     const path = join(root, "overlays", archetype, name);
     try {
       if (statSync(path).isFile()) {
@@ -411,37 +442,47 @@ function applyOverlay(files, archetype) {
 
 function applyOverlaySeedContent(files, archetype, seedText) {
   const seed = JSON.parse(seedText);
-  const seedImport = `../../../.mantle/overlays/${archetype}/seed.json`;
+  const seedRuntimeImport = `../../.mantle/overlays/${archetype}/seed.json`;
+  files["src/mantle/seed.ts"] = [
+    `import seed from "${seedRuntimeImport}";`,
+    'import type { CmsRuntime } from "@aotter/mantle/runtime";',
+    'import { createInitialSeedRuntime } from "./initialSeed.js";',
+    "",
+    "export function createSeededRuntime<Env>(",
+    "  getRuntime: (env: Env) => Promise<CmsRuntime>,",
+    "): (env: Env) => Promise<CmsRuntime> {",
+    "  return createInitialSeedRuntime(seed, getRuntime);",
+    "}",
+    "",
+  ].join("\n");
+  if (seed?.locales) return;
   if (!seed?.site) throw new Error(`${archetype} seed must define site chrome`);
   assertLocalizedChrome(seed, archetype);
+  const seedContentImport = `../../../.mantle/overlays/${archetype}/seed.json`;
   files["src/web/content/siteContent.ts"] = [
-    `import seed from "${seedImport}";`,
+    `import seed from "${seedContentImport}";`,
     'import type { SiteContent } from "./types.js";',
     "",
     "type Seed = { readonly site: SiteContent };",
     "const seedData = seed as Seed;",
     "export const siteContent: SiteContent = seedData.site;",
+    "export function siteContentForLocale(_locale: string): SiteContent { return siteContent; }",
     "",
   ].join("\n");
   if (!Array.isArray(seed?.collections?.page)) {
     throw new Error(`${archetype} seed must define collections.page`);
   }
   files["src/web/content/homeContent.ts"] = [
-    `import seed from "${seedImport}";`,
+    'import { DiagnosticError } from "@aotter/mantle/spec";',
     'import type { CmsRuntime } from "@aotter/mantle/runtime";',
+    'import { bindMantleSite } from "../../../.mantle/generated/site.js";',
     'import type { HomeContent, HomeSection } from "./types.js";',
     "",
-    "type SeedPage = { readonly type?: string; readonly sections?: readonly HomeSection[] };",
-    "type Seed = {",
-    "  readonly locale?: string;",
-    "  readonly collections?: { readonly page?: readonly SeedPage[] };",
-    "};",
-    "const seedData = seed as Seed;",
-    'const homePage = (seedData.collections?.page ?? []).find((page) => page.type === "home");',
-    "export const homeContent: HomeContent = { sections: homePage?.sections ?? [] };",
-    "export const homeLocale = seedData.locale;",
-    "export async function resolveHomeContent(_getRuntime: () => Promise<CmsRuntime>): Promise<HomeContent> {",
-    "  return homeContent;",
+    "export async function resolveHomeContent(getRuntime: () => Promise<CmsRuntime>): Promise<HomeContent> {",
+    '  const result = await bindMantleSite(await getRuntime()).views["home"]();',
+    "  if (!result.ok) throw new DiagnosticError(result.diagnostic);",
+    "  const sections = result.result.rows[0]?.sections as readonly HomeSection[] | undefined;",
+    "  return { sections: sections ?? [] };",
     "}",
     "",
   ].join("\n");
@@ -493,6 +534,7 @@ function selectTypedSurface(files, archetype) {
     "nav",
     ...(selected.includes("intake") ? ["intake"] : []),
     ...(selected.includes("form") || selected.includes("intake") ? ["form"] : []),
+    ...(archetype === "transaction" ? ["commerce"] : []),
   ];
   files["src/web/client/homeClient.ts"] = [
     ...clients.map((name) => `import { ${name}ClientJs } from "./${name}Client.js";`),
@@ -510,6 +552,7 @@ function selectTypedSurface(files, archetype) {
     'import stylesCss from "../../../styles/generated.css";',
     'import { homeClientJs } from "../../web/client/homeClient.js";',
     ...(enhance ? ['import { kiwaEnhanceAssets } from "../../web/client/kiwaEnhanceAssets.js";'] : []),
+    'import { mantleOceanHeroDarkSvg, mantleOceanHeroLightSvg } from "../../web/mantleOceanHero.js";',
     'import type { Env } from "../../mantle/config.js";',
     "",
     'const ASSET_CACHE_CONTROL = "public, max-age=31536000, immutable";',
@@ -521,6 +564,8 @@ function selectTypedSurface(files, archetype) {
     '  app.get("/assets/kiwa-home.js", () => new Response(homeClientJs, {',
     '    headers: { "cache-control": ASSET_CACHE_CONTROL, "content-type": "text/javascript; charset=utf-8" },',
     "  }));",
+    '  app.get("/assets/mantle-ocean-hero-light.svg", () => svgResponse(mantleOceanHeroLightSvg));',
+    '  app.get("/assets/mantle-ocean-hero-dark.svg", () => svgResponse(mantleOceanHeroDarkSvg));',
     ...(enhance ? [
       '  app.get("/enhance/:file", (c) => {',
       '    const file = c.req.param("file");',
@@ -534,18 +579,28 @@ function selectTypedSurface(files, archetype) {
     ] : []),
     "}",
     "",
+    "function svgResponse(svg: string): Response {",
+    '  return new Response(svg, { headers: { "cache-control": ASSET_CACHE_CONTROL, "content-type": "image/svg+xml; charset=utf-8" } });',
+    "}",
+    "",
   ].join("\n");
 }
 
 function selectedSectionNames(files, archetype) {
   const seed = JSON.parse(files[`.mantle/overlays/${archetype}/seed.json`] ?? "{}");
-  const seeded = [...new Set((seed.collections?.page ?? [])
+  const pageCollection = seed.locales
+    ? Object.values(seed.locales).flatMap((pack) => pack?.["page-translations"] ?? [])
+    : seed.collections?.["page-translations"] ?? seed.collections?.page ?? [];
+  const seeded = [...new Set(pageCollection
     .flatMap((page) => page.sections ?? [])
     .map((section) => section.type)
     .filter(Boolean))];
-  const pageSchema = parseAllDocuments(files[`manifests/${archetype}.yaml`] ?? "")
+  const schemas = parseAllDocuments(files["manifests/site.yaml"] ?? "")
     .map((document) => document.toJSON())
-    .find((atom) => atom?.kind === "Schema" && atom?.metadata?.name === "page");
+    .filter((atom) => atom?.kind === "Schema");
+  const pageSchema = schemas.find((atom) => atom?.metadata?.name === "page-translations")
+    ?? schemas.find((atom) => atom?.metadata?.name === "page");
+  if (!pageSchema) throw new Error(`${archetype} manifest must declare the seeded page Schema`);
   const declared = pageSchema?.spec?.schema?.properties?.sections?.items?.properties?.type?.enum;
   if (!Array.isArray(declared)) return seeded;
   for (const type of seeded) {

@@ -480,5 +480,25 @@ export function bindMantleSite(runtime: CmsRuntime) {
           },
         }),
     },
+    procedures: {
+      "send-contact-message": (input: MantleGenerated.MantleSite.ProcInput_send_contact_message, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_send_contact_message>({
+          procedure: manifest[3],
+          input,
+          ctx,
+        }),
+      "verify-contact-turnstile": (input: MantleGenerated.MantleSite.ProcInput_verify_contact_turnstile, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_verify_contact_turnstile>({
+          procedure: manifest[5],
+          input,
+          ctx,
+        }),
+      "notify-contact": (input: MantleGenerated.MantleSite.ProcInput_notify_contact, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_notify_contact>({
+          procedure: manifest[7],
+          input,
+          ctx,
+        }),
+    },
   } as const;
 }

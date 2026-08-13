@@ -58,6 +58,10 @@
             "type": "hero",
             "title": "{{BRAND}} is ready to publish its first useful notes",
             "body": "{{DESCRIPTION}}",
+            "image": {
+              "src": "/assets/mantle-ocean-hero-light.svg",
+              "alt": ""
+            },
             "action": { "label": "Read latest", "href": "#dispatches" },
             "secondaryAction": { "label": "See the system", "href": "#system" }
           },
@@ -109,7 +113,7 @@
             "items": [
               {
                 "title": "Posts are the core",
-                "body": "The `posts` schema starts with slug, title, excerpt, body, and publishedAt."
+                "body": "The `posts` schema owns stable slugs; `post-translations` owns each locale's title and body."
               },
               {
                 "title": "A public view is ready",
@@ -138,7 +142,7 @@
               },
               {
                 "title": "Where should the agent work next?",
-                "body": "Read `.mantle/launch-state.json`, inspect `manifests/publication.yaml`, then replace this seed with real editorial content."
+                "body": "Read `.mantle/launch-state.json`, inspect `manifests/site.yaml`, then replace this seed with real editorial content."
               }
             ]
           },
@@ -157,6 +161,21 @@
     "posts": [
       {
         "slug": "welcome",
+        "status": "published"
+      },
+      {
+        "slug": "how-this-publication-will-grow",
+        "status": "published"
+      },
+      {
+        "slug": "next-dispatch-draft",
+        "status": "draft"
+      }
+    ],
+    "post-translations": [
+      {
+        "slug": "welcome",
+        "locale": "{{CANONICAL_LOCALE}}",
         "title": "Welcome to {{BRAND}}",
         "excerpt": "{{DESCRIPTION}}",
         "body": "{{DESCRIPTION}}\n\nThis first note is intentionally short. Replace it with the first useful article, update, or field note for the audience.",
@@ -165,6 +184,7 @@
       },
       {
         "slug": "how-this-publication-will-grow",
+        "locale": "{{CANONICAL_LOCALE}}",
         "title": "How this publication will grow",
         "excerpt": "A starter update that shows the publication model before the archive gets complex.",
         "body": "Mantle starts with a small posts schema and a public published-posts view. Add authors, tags, subscriptions, or gated posts only after the first real publishing workflow needs them.",
@@ -173,6 +193,7 @@
       },
       {
         "slug": "next-dispatch-draft",
+        "locale": "{{CANONICAL_LOCALE}}",
         "title": "Next dispatch draft",
         "excerpt": "A draft placeholder for the first real editorial update.",
         "body": "Use this draft to outline the next article before changing the homepage layout.",

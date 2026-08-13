@@ -1,33 +1,65 @@
+import { DiagnosticError } from "@aotter/mantle/spec";
 import type { CmsRuntime } from "@aotter/mantle/runtime";
 import { bindMantleSite } from "../../../.mantle/generated/site.js";
-import type { MantleSite } from "../../../.mantle/generated/types.js";
-import seed from "../../../.mantle/overlays/transaction/seed.json";
+import { messagesForLocale } from "../messages.js";
 import type { HomeContent, HomeItem, HomeSection } from "./types.js";
 
-type SeedPage = { readonly type?: string; readonly sections?: readonly HomeSection[] };
-type Product = (typeof seed.collections.products)[number] | MantleSite.ViewRow_public_products;
+type Product = {
+  readonly slug: string;
+  readonly title: string;
+  readonly summary?: string;
+  readonly priceMinor?: number;
+  readonly currency?: string;
+};
 
-const seedPages = seed.collections.page as unknown as readonly SeedPage[];
-const homePage = seedPages.find((page) => page.type === "home");
-export const homeContent: HomeContent = { sections: homePage?.sections ?? [] };
-export const homeLocale = seed.locale;
+export async function resolveHomeContent(
+  getRuntime: () => Promise<CmsRuntime>,
+  locale: string,
+): Promise<HomeContent> {
+  const runtime = await getRuntime();
+  const site = bindMantleSite(runtime);
+  const [pageResult, productResult] = await Promise.all([
+    site.views["home"]({ params: { locale } }),
+    site.views["public-products"]({ params: { locale } }),
+  ]);
+  if (!pageResult.ok) throw new DiagnosticError(pageResult.diagnostic);
+  if (!productResult.ok) throw new DiagnosticError(productResult.diagnostic);
 
-export async function resolveHomeContent(getRuntime: () => Promise<CmsRuntime>): Promise<HomeContent> {
-  const result = await bindMantleSite(await getRuntime()).views["public-products"]();
-  if (!result.ok) console.warn("Mantle public-products View failed; showing seed catalog", result.diagnostic);
-  const products = result.ok && result.result.rows.length > 0
-    ? result.result.rows
-    : seed.collections.products;
+  const sections = pageResult.result.rows[0]?.sections as readonly HomeSection[] | undefined;
+  const translations = productResult.result.rows;
+  const parents = translations.length > 0
+    ? await runtime.entryReader.readByDataFieldIn({
+        collection: "products",
+        field: "slug",
+        values: translations
+          .map((product) => product.slug)
+          .filter((slug): slug is string => typeof slug === "string"),
+        status: "published",
+      })
+    : [];
+  const parentBySlug = new Map(parents.map((entry) => [entry.data["slug"], entry.data]));
+  const products: readonly Product[] = translations.map((translation) => ({
+    ...parentBySlug.get(translation.slug ?? ""),
+    ...translation,
+  } as Product));
+  const productSection: HomeSection = {
+    type: "features",
+    id: "products",
+    title: messagesForLocale(locale)["nav.products"],
+    items: products.map((product) => productItem(product, locale)),
+  };
+  const pageSections = sections ?? [];
+
   return {
-    sections: homeContent.sections.map((section) => section.id === "products"
-      ? { ...section, items: products.map(productItem) }
-      : section),
+    sections: pageSections.some((section) => section.id === "products")
+      ? pageSections.map((section) => section.id === "products" ? { ...section, ...productSection } : section)
+      : [...pageSections, productSection],
   };
 }
 
-function productItem(product: Product): HomeItem {
+function productItem(product: Product, locale: string): HomeItem {
   const price = product.currency && product.priceMinor !== undefined
-    ? new Intl.NumberFormat(homeLocale, {
+    ? new Intl.NumberFormat(locale, {
         style: "currency",
         currency: product.currency,
       }).format(product.priceMinor / 100)
@@ -36,5 +68,6 @@ function productItem(product: Product): HomeItem {
     icon: "sparkles",
     title: product.title,
     body: [product.summary, price].filter(Boolean).join(" · "),
+    href: `/${locale.toLowerCase()}/products/${product.slug}`,
   };
 }

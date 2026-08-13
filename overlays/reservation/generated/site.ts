@@ -8,6 +8,215 @@ export const manifest = [
     "apiVersion": "cms.mantle.aotter.net/v1",
     "kind": "Schema",
     "metadata": {
+      "name": "page"
+    },
+    "spec": {
+      "title": "Pages",
+      "description": "Public page content for a reservation site.",
+      "schema": {
+        "type": "object",
+        "required": [
+          "type",
+          "title",
+          "sections"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "home"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "sections": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "title"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "hero",
+                    "features",
+                    "form"
+                  ]
+                },
+                "id": {
+                  "type": "string"
+                },
+                "eyebrow": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "body": {
+                  "type": "string",
+                  "x-mcp-hint": "markdown"
+                },
+                "showImage": {
+                  "type": "boolean"
+                },
+                "image": {
+                  "type": "object",
+                  "required": [
+                    "src",
+                    "alt"
+                  ],
+                  "properties": {
+                    "src": {
+                      "type": "string"
+                    },
+                    "alt": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "action": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string"
+                    },
+                    "href": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "secondaryAction": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string"
+                    },
+                    "href": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "formMessages": {
+                  "type": "object",
+                  "required": [
+                    "pending",
+                    "success",
+                    "error"
+                  ],
+                  "properties": {
+                    "pending": {
+                      "type": "string"
+                    },
+                    "success": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string"
+                      },
+                      "body": {
+                        "type": "string",
+                        "x-mcp-hint": "markdown"
+                      },
+                      "icon": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "fields": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "name",
+                      "label"
+                    ],
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "label": {
+                        "type": "string"
+                      },
+                      "type": {
+                        "type": "string"
+                      },
+                      "placeholder": {
+                        "type": "string"
+                      },
+                      "autocomplete": {
+                        "type": "string"
+                      },
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "multiline": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "uniqueIndexes": [
+        [
+          "type"
+        ]
+      ],
+      "localized": false,
+      "lifecycle": "publishing"
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "View",
+    "metadata": {
+      "name": "home"
+    },
+    "spec": {
+      "from": "page",
+      "fields": [
+        "id",
+        "type",
+        "title",
+        "summary",
+        "sections",
+        "updatedAt"
+      ],
+      "filter": {
+        "eq": {
+          "field": "status",
+          "value": "published"
+        }
+      },
+      "limit": 1
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Schema",
+    "metadata": {
       "name": "reservation-requests"
     },
     "spec": {
@@ -149,14 +358,31 @@ export interface MantleViewOptions {
 export function bindMantleSite(runtime: CmsRuntime) {
   return {
     views: {
-      "recent-reservation-requests": (request: MantleViewOptions = {}) =>
-        runtime.executeView.execute<MantleGenerated.MantleSite.ViewRow_recent_reservation_requests>({
+      "home": (request: MantleViewOptions = {}) =>
+        runtime.executeView.execute<MantleGenerated.MantleSite.ViewRow_home>({
           view: manifest[1],
           ctx: request.ctx,
           options: {
             page: request.page,
             show: request.show,
           },
+        }),
+      "recent-reservation-requests": (request: MantleViewOptions = {}) =>
+        runtime.executeView.execute<MantleGenerated.MantleSite.ViewRow_recent_reservation_requests>({
+          view: manifest[3],
+          ctx: request.ctx,
+          options: {
+            page: request.page,
+            show: request.show,
+          },
+        }),
+    },
+    procedures: {
+      "submit-reservation-request": (input: MantleGenerated.MantleSite.ProcInput_submit_reservation_request, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_submit_reservation_request>({
+          procedure: manifest[4],
+          input,
+          ctx,
         }),
     },
   } as const;

@@ -2,6 +2,52 @@
 
 export namespace MantleSite {
 
+  /** Entry data for Schema 'page' */
+  export interface Entry_page {
+    type: "home";
+    title: string;
+    summary?: string;
+    sections: {
+  type: "hero" | "features" | "form";
+  id?: string;
+  eyebrow?: string;
+  title: string;
+  body?: string;
+  showImage?: boolean;
+  image?: {
+  src: string;
+  alt: string;
+};
+  action?: {
+  label?: string;
+  href?: string;
+};
+  secondaryAction?: {
+  label?: string;
+  href?: string;
+};
+  formMessages?: {
+  pending: string;
+  success: string;
+  error: string;
+};
+  items?: {
+  title?: string;
+  body?: string;
+  icon?: string;
+}[];
+  fields?: {
+  name: string;
+  label: string;
+  type?: string;
+  placeholder?: string;
+  autocomplete?: string;
+  required?: boolean;
+  multiline?: boolean;
+}[];
+}[];
+  }
+
   /** Entry data for Schema 'reservation-requests' */
   export interface Entry_reservation_requests {
     name: string;
@@ -23,6 +69,54 @@ export namespace MantleSite {
 
   /** Procedure 'submit-reservation-request' output */
   export interface ProcOutput_submit_reservation_request {
+  }
+
+  /** Row shape returned by GET /api/views/home */
+  export interface ViewRow_home {
+    id: string;
+    type?: "home";
+    title?: string;
+    summary?: string;
+    sections?: {
+  type: "hero" | "features" | "form";
+  id?: string;
+  eyebrow?: string;
+  title: string;
+  body?: string;
+  showImage?: boolean;
+  image?: {
+  src: string;
+  alt: string;
+};
+  action?: {
+  label?: string;
+  href?: string;
+};
+  secondaryAction?: {
+  label?: string;
+  href?: string;
+};
+  formMessages?: {
+  pending: string;
+  success: string;
+  error: string;
+};
+  items?: {
+  title?: string;
+  body?: string;
+  icon?: string;
+}[];
+  fields?: {
+  name: string;
+  label: string;
+  type?: string;
+  placeholder?: string;
+  autocomplete?: string;
+  required?: boolean;
+  multiline?: boolean;
+}[];
+}[];
+    updatedAt: number;
   }
 
   /** Row shape returned by GET /api/views/recent-reservation-requests */

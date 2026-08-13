@@ -1,0 +1,137 @@
+{
+  "canonicalLocale": "{{CANONICAL_LOCALE}}",
+  "locales": {
+    "en": {
+      "nav.home": "Home", "nav.products": "Products", "nav.about": "About", "nav.cart": "Cart",
+      "chrome.openNavigation": "Open navigation", "chrome.closeNavigation": "Close navigation", "chrome.navigation": "Navigation", "chrome.toggleTheme": "Toggle color theme", "chrome.lightMode": "Light mode", "chrome.darkMode": "Dark mode", "chrome.language": "Language",
+      "footer.builtWith": "Built with Mantle",
+      "shop.label": "Shop", "shop.products": "Products", "shop.product": "Product", "shop.back": "Back to products", "shop.add": "Add to cart", "shop.added": "Added", "shop.noProducts": "No published products in this language yet.",
+      "cart.empty": "Your cart is empty.", "cart.quantity": "quantity", "cart.remove": "Remove", "cart.total": "Total", "cart.checkout": "Checkout",
+      "checkout.name": "Name", "checkout.email": "Email", "checkout.address": "Shipping address", "checkout.submit": "Place order", "checkout.failed": "Checkout failed.",
+      "payment.title": "Demo payment", "payment.notice": "This is a simulated payment. No real charge will be made.", "payment.submit": "Simulate successful payment",
+      "order.cancel": "Cancel order", "order.title": "Order", "order.pending": "Awaiting payment", "order.paid": "Paid", "order.fulfilled": "Fulfilled", "order.cancelled": "Cancelled", "order.updateFailed": "Order update failed.",
+      "pages.label": "Information", "pages.title": "Pages", "pages.noPages": "No published pages in this language yet.", "pages.untitled": "Untitled page", "product.untitled": "Untitled product", "notFound.title": "Page not found"
+    },
+    "zh-TW": {
+      "nav.home": "首頁", "nav.products": "商品", "nav.about": "關於", "nav.cart": "購物車",
+      "chrome.openNavigation": "開啟導覽", "chrome.closeNavigation": "關閉導覽", "chrome.navigation": "導覽", "chrome.toggleTheme": "切換色彩主題", "chrome.lightMode": "淺色模式", "chrome.darkMode": "深色模式", "chrome.language": "語言",
+      "footer.builtWith": "使用 Mantle 建立",
+      "shop.label": "商店", "shop.products": "商品", "shop.product": "商品", "shop.back": "返回商品", "shop.add": "加入購物車", "shop.added": "已加入", "shop.noProducts": "這個語言目前沒有已發布的商品。",
+      "cart.empty": "購物車目前是空的。", "cart.quantity": "數量", "cart.remove": "移除", "cart.total": "總計", "cart.checkout": "前往結帳",
+      "checkout.name": "收件人姓名", "checkout.email": "電子郵件", "checkout.address": "配送地址", "checkout.submit": "建立訂單", "checkout.failed": "結帳失敗。",
+      "payment.title": "示意付款", "payment.notice": "這是模擬付款，不會產生真實扣款。", "payment.submit": "模擬付款成功",
+      "order.cancel": "取消訂單", "order.title": "訂單", "order.pending": "等待付款", "order.paid": "已付款", "order.fulfilled": "已出貨", "order.cancelled": "已取消", "order.updateFailed": "更新訂單失敗。",
+      "pages.label": "資訊", "pages.title": "頁面", "pages.noPages": "這個語言目前沒有已發布的頁面。", "pages.untitled": "未命名頁面", "product.untitled": "未命名商品", "notFound.title": "找不到頁面"
+    },
+    "zh-CN": {
+      "nav.home": "首页", "nav.products": "商品", "nav.about": "关于", "nav.cart": "购物车",
+      "chrome.openNavigation": "打开导航", "chrome.closeNavigation": "关闭导航", "chrome.navigation": "导航", "chrome.toggleTheme": "切换颜色主题", "chrome.lightMode": "浅色模式", "chrome.darkMode": "深色模式", "chrome.language": "语言",
+      "footer.builtWith": "使用 Mantle 构建",
+      "shop.label": "商店", "shop.products": "商品", "shop.product": "商品", "shop.back": "返回商品", "shop.add": "加入购物车", "shop.added": "已加入", "shop.noProducts": "此语言暂无已发布的商品。",
+      "cart.empty": "购物车是空的。", "cart.quantity": "数量", "cart.remove": "移除", "cart.total": "总计", "cart.checkout": "去结账",
+      "checkout.name": "收件人姓名", "checkout.email": "电子邮箱", "checkout.address": "配送地址", "checkout.submit": "创建订单", "checkout.failed": "结账失败。",
+      "payment.title": "模拟付款", "payment.notice": "这是模拟付款，不会产生真实扣款。", "payment.submit": "模拟付款成功",
+      "order.cancel": "取消订单", "order.title": "订单", "order.pending": "等待付款", "order.paid": "已付款", "order.fulfilled": "已发货", "order.cancelled": "已取消", "order.updateFailed": "订单更新失败。",
+      "pages.label": "信息", "pages.title": "页面", "pages.noPages": "此语言暂无已发布的页面。", "pages.untitled": "未命名页面", "product.untitled": "未命名商品", "notFound.title": "找不到页面"
+    },
+    "ja": {
+      "nav.home": "ホーム", "nav.products": "商品", "nav.about": "概要", "nav.cart": "カート",
+      "chrome.openNavigation": "ナビゲーションを開く", "chrome.closeNavigation": "ナビゲーションを閉じる", "chrome.navigation": "ナビゲーション", "chrome.toggleTheme": "カラーテーマを切り替える", "chrome.lightMode": "ライトモード", "chrome.darkMode": "ダークモード", "chrome.language": "言語",
+      "footer.builtWith": "Mantleで構築",
+      "shop.label": "ショップ", "shop.products": "商品", "shop.product": "商品", "shop.back": "商品一覧へ", "shop.add": "カートに追加", "shop.added": "追加しました", "shop.noProducts": "この言語で公開中の商品はありません。",
+      "cart.empty": "カートは空です。", "cart.quantity": "数量", "cart.remove": "削除", "cart.total": "合計", "cart.checkout": "購入手続きへ",
+      "checkout.name": "お名前", "checkout.email": "メール", "checkout.address": "配送先住所", "checkout.submit": "注文を作成", "checkout.failed": "購入手続きに失敗しました。",
+      "payment.title": "デモ決済", "payment.notice": "これは模擬決済です。実際の請求は行われません。", "payment.submit": "支払い成功をシミュレート",
+      "order.cancel": "注文をキャンセル", "order.title": "注文", "order.pending": "支払い待ち", "order.paid": "支払い済み", "order.fulfilled": "発送済み", "order.cancelled": "キャンセル済み", "order.updateFailed": "注文を更新できませんでした。",
+      "pages.label": "情報", "pages.title": "ページ", "pages.noPages": "この言語で公開中のページはありません。", "pages.untitled": "無題のページ", "product.untitled": "無題の商品", "notFound.title": "ページが見つかりません"
+    },
+    "ko": {
+      "nav.home": "홈", "nav.products": "상품", "nav.about": "소개", "nav.cart": "장바구니",
+      "chrome.openNavigation": "탐색 열기", "chrome.closeNavigation": "탐색 닫기", "chrome.navigation": "탐색", "chrome.toggleTheme": "색상 테마 전환", "chrome.lightMode": "라이트 모드", "chrome.darkMode": "다크 모드", "chrome.language": "언어",
+      "footer.builtWith": "Mantle로 제작",
+      "shop.label": "스토어", "shop.products": "상품", "shop.product": "상품", "shop.back": "상품으로 돌아가기", "shop.add": "장바구니 담기", "shop.added": "담았습니다", "shop.noProducts": "이 언어로 게시된 상품이 없습니다.",
+      "cart.empty": "장바구니가 비어 있습니다.", "cart.quantity": "수량", "cart.remove": "삭제", "cart.total": "합계", "cart.checkout": "결제하기",
+      "checkout.name": "받는 분", "checkout.email": "이메일", "checkout.address": "배송 주소", "checkout.submit": "주문 만들기", "checkout.failed": "결제에 실패했습니다.",
+      "payment.title": "데모 결제", "payment.notice": "모의 결제이며 실제 청구되지 않습니다.", "payment.submit": "결제 성공 시뮬레이션",
+      "order.cancel": "주문 취소", "order.title": "주문", "order.pending": "결제 대기", "order.paid": "결제 완료", "order.fulfilled": "배송 완료", "order.cancelled": "취소됨", "order.updateFailed": "주문을 업데이트하지 못했습니다.",
+      "pages.label": "정보", "pages.title": "페이지", "pages.noPages": "이 언어로 게시된 페이지가 없습니다.", "pages.untitled": "제목 없는 페이지", "product.untitled": "제목 없는 상품", "notFound.title": "페이지를 찾을 수 없습니다"
+    },
+    "es": {
+      "nav.home": "Inicio", "nav.products": "Productos", "nav.about": "Nosotros", "nav.cart": "Carrito",
+      "chrome.openNavigation": "Abrir navegación", "chrome.closeNavigation": "Cerrar navegación", "chrome.navigation": "Navegación", "chrome.toggleTheme": "Cambiar tema de color", "chrome.lightMode": "Modo claro", "chrome.darkMode": "Modo oscuro", "chrome.language": "Idioma",
+      "footer.builtWith": "Creado con Mantle",
+      "shop.label": "Tienda", "shop.products": "Productos", "shop.product": "Producto", "shop.back": "Volver a productos", "shop.add": "Añadir al carrito", "shop.added": "Añadido", "shop.noProducts": "Aún no hay productos publicados en este idioma.",
+      "cart.empty": "Tu carrito está vacío.", "cart.quantity": "cantidad", "cart.remove": "Quitar", "cart.total": "Total", "cart.checkout": "Finalizar compra",
+      "checkout.name": "Nombre", "checkout.email": "Correo electrónico", "checkout.address": "Dirección de envío", "checkout.submit": "Crear pedido", "checkout.failed": "No se pudo finalizar la compra.",
+      "payment.title": "Pago de demostración", "payment.notice": "Este pago es simulado. No se realizará ningún cargo real.", "payment.submit": "Simular pago exitoso",
+      "order.cancel": "Cancelar pedido", "order.title": "Pedido", "order.pending": "Pendiente de pago", "order.paid": "Pagado", "order.fulfilled": "Enviado", "order.cancelled": "Cancelado", "order.updateFailed": "No se pudo actualizar el pedido.",
+      "pages.label": "Información", "pages.title": "Páginas", "pages.noPages": "Aún no hay páginas publicadas en este idioma.", "pages.untitled": "Página sin título", "product.untitled": "Producto sin título", "notFound.title": "Página no encontrada"
+    },
+    "fr": {
+      "nav.home": "Accueil", "nav.products": "Produits", "nav.about": "À propos", "nav.cart": "Panier",
+      "chrome.openNavigation": "Ouvrir la navigation", "chrome.closeNavigation": "Fermer la navigation", "chrome.navigation": "Navigation", "chrome.toggleTheme": "Changer le thème", "chrome.lightMode": "Mode clair", "chrome.darkMode": "Mode sombre", "chrome.language": "Langue",
+      "footer.builtWith": "Créé avec Mantle",
+      "shop.label": "Boutique", "shop.products": "Produits", "shop.product": "Produit", "shop.back": "Retour aux produits", "shop.add": "Ajouter au panier", "shop.added": "Ajouté", "shop.noProducts": "Aucun produit publié dans cette langue.",
+      "cart.empty": "Votre panier est vide.", "cart.quantity": "quantité", "cart.remove": "Retirer", "cart.total": "Total", "cart.checkout": "Passer la commande",
+      "checkout.name": "Nom", "checkout.email": "E-mail", "checkout.address": "Adresse de livraison", "checkout.submit": "Créer la commande", "checkout.failed": "Échec de la commande.",
+      "payment.title": "Paiement fictif", "payment.notice": "Ce paiement est simulé. Aucun débit réel ne sera effectué.", "payment.submit": "Simuler le paiement",
+      "order.cancel": "Annuler la commande", "order.title": "Commande", "order.pending": "En attente de paiement", "order.paid": "Payée", "order.fulfilled": "Expédiée", "order.cancelled": "Annulée", "order.updateFailed": "Échec de la mise à jour de la commande.",
+      "pages.label": "Informations", "pages.title": "Pages", "pages.noPages": "Aucune page publiée dans cette langue.", "pages.untitled": "Page sans titre", "product.untitled": "Produit sans titre", "notFound.title": "Page introuvable"
+    },
+    "de": {
+      "nav.home": "Start", "nav.products": "Produkte", "nav.about": "Über uns", "nav.cart": "Warenkorb",
+      "chrome.openNavigation": "Navigation öffnen", "chrome.closeNavigation": "Navigation schließen", "chrome.navigation": "Navigation", "chrome.toggleTheme": "Farbschema wechseln", "chrome.lightMode": "Heller Modus", "chrome.darkMode": "Dunkler Modus", "chrome.language": "Sprache",
+      "footer.builtWith": "Erstellt mit Mantle",
+      "shop.label": "Shop", "shop.products": "Produkte", "shop.product": "Produkt", "shop.back": "Zurück zu den Produkten", "shop.add": "In den Warenkorb", "shop.added": "Hinzugefügt", "shop.noProducts": "In dieser Sprache sind noch keine Produkte veröffentlicht.",
+      "cart.empty": "Ihr Warenkorb ist leer.", "cart.quantity": "Menge", "cart.remove": "Entfernen", "cart.total": "Gesamt", "cart.checkout": "Zur Kasse",
+      "checkout.name": "Name", "checkout.email": "E-Mail", "checkout.address": "Lieferadresse", "checkout.submit": "Bestellung erstellen", "checkout.failed": "Bestellung fehlgeschlagen.",
+      "payment.title": "Demo-Zahlung", "payment.notice": "Diese Zahlung wird simuliert. Es erfolgt keine echte Abbuchung.", "payment.submit": "Erfolgreiche Zahlung simulieren",
+      "order.cancel": "Bestellung stornieren", "order.title": "Bestellung", "order.pending": "Zahlung ausstehend", "order.paid": "Bezahlt", "order.fulfilled": "Versandt", "order.cancelled": "Storniert", "order.updateFailed": "Bestellung konnte nicht aktualisiert werden.",
+      "pages.label": "Information", "pages.title": "Seiten", "pages.noPages": "In dieser Sprache sind noch keine Seiten veröffentlicht.", "pages.untitled": "Unbenannte Seite", "product.untitled": "Unbenanntes Produkt", "notFound.title": "Seite nicht gefunden"
+    },
+    "it": {
+      "nav.home": "Home", "nav.products": "Prodotti", "nav.about": "Chi siamo", "nav.cart": "Carrello",
+      "chrome.openNavigation": "Apri navigazione", "chrome.closeNavigation": "Chiudi navigazione", "chrome.navigation": "Navigazione", "chrome.toggleTheme": "Cambia tema colore", "chrome.lightMode": "Modalità chiara", "chrome.darkMode": "Modalità scura", "chrome.language": "Lingua",
+      "footer.builtWith": "Creato con Mantle",
+      "shop.label": "Negozio", "shop.products": "Prodotti", "shop.product": "Prodotto", "shop.back": "Torna ai prodotti", "shop.add": "Aggiungi al carrello", "shop.added": "Aggiunto", "shop.noProducts": "Nessun prodotto pubblicato in questa lingua.",
+      "cart.empty": "Il carrello è vuoto.", "cart.quantity": "quantità", "cart.remove": "Rimuovi", "cart.total": "Totale", "cart.checkout": "Vai alla cassa",
+      "checkout.name": "Nome", "checkout.email": "E-mail", "checkout.address": "Indirizzo di spedizione", "checkout.submit": "Crea ordine", "checkout.failed": "Checkout non riuscito.",
+      "payment.title": "Pagamento demo", "payment.notice": "Questo pagamento è simulato. Non verrà effettuato alcun addebito reale.", "payment.submit": "Simula pagamento riuscito",
+      "order.cancel": "Annulla ordine", "order.title": "Ordine", "order.pending": "In attesa di pagamento", "order.paid": "Pagato", "order.fulfilled": "Spedito", "order.cancelled": "Annullato", "order.updateFailed": "Impossibile aggiornare l’ordine.",
+      "pages.label": "Informazioni", "pages.title": "Pagine", "pages.noPages": "Nessuna pagina pubblicata in questa lingua.", "pages.untitled": "Pagina senza titolo", "product.untitled": "Prodotto senza titolo", "notFound.title": "Pagina non trovata"
+    },
+    "ru": {
+      "nav.home": "Главная", "nav.products": "Товары", "nav.about": "О нас", "nav.cart": "Корзина",
+      "chrome.openNavigation": "Открыть навигацию", "chrome.closeNavigation": "Закрыть навигацию", "chrome.navigation": "Навигация", "chrome.toggleTheme": "Переключить цветовую тему", "chrome.lightMode": "Светлая тема", "chrome.darkMode": "Тёмная тема", "chrome.language": "Язык",
+      "footer.builtWith": "Создано с Mantle",
+      "shop.label": "Магазин", "shop.products": "Товары", "shop.product": "Товар", "shop.back": "Назад к товарам", "shop.add": "В корзину", "shop.added": "Добавлено", "shop.noProducts": "На этом языке пока нет опубликованных товаров.",
+      "cart.empty": "Корзина пуста.", "cart.quantity": "количество", "cart.remove": "Удалить", "cart.total": "Итого", "cart.checkout": "Оформить заказ",
+      "checkout.name": "Имя", "checkout.email": "Эл. почта", "checkout.address": "Адрес доставки", "checkout.submit": "Создать заказ", "checkout.failed": "Не удалось оформить заказ.",
+      "payment.title": "Демо-оплата", "payment.notice": "Это имитация оплаты. Настоящее списание не производится.", "payment.submit": "Имитировать успешную оплату",
+      "order.cancel": "Отменить заказ", "order.title": "Заказ", "order.pending": "Ожидает оплаты", "order.paid": "Оплачен", "order.fulfilled": "Отправлен", "order.cancelled": "Отменён", "order.updateFailed": "Не удалось обновить заказ.",
+      "pages.label": "Информация", "pages.title": "Страницы", "pages.noPages": "На этом языке пока нет опубликованных страниц.", "pages.untitled": "Страница без названия", "product.untitled": "Товар без названия", "notFound.title": "Страница не найдена"
+    },
+    "id": {
+      "nav.home": "Beranda", "nav.products": "Produk", "nav.about": "Tentang", "nav.cart": "Keranjang",
+      "chrome.openNavigation": "Buka navigasi", "chrome.closeNavigation": "Tutup navigasi", "chrome.navigation": "Navigasi", "chrome.toggleTheme": "Ubah tema warna", "chrome.lightMode": "Mode terang", "chrome.darkMode": "Mode gelap", "chrome.language": "Bahasa",
+      "footer.builtWith": "Dibuat dengan Mantle",
+      "shop.label": "Toko", "shop.products": "Produk", "shop.product": "Produk", "shop.back": "Kembali ke produk", "shop.add": "Tambah ke keranjang", "shop.added": "Ditambahkan", "shop.noProducts": "Belum ada produk yang diterbitkan dalam bahasa ini.",
+      "cart.empty": "Keranjang Anda kosong.", "cart.quantity": "jumlah", "cart.remove": "Hapus", "cart.total": "Total", "cart.checkout": "Checkout",
+      "checkout.name": "Nama", "checkout.email": "Email", "checkout.address": "Alamat pengiriman", "checkout.submit": "Buat pesanan", "checkout.failed": "Checkout gagal.",
+      "payment.title": "Pembayaran demo", "payment.notice": "Pembayaran ini hanya simulasi. Tidak ada tagihan nyata.", "payment.submit": "Simulasikan pembayaran berhasil",
+      "order.cancel": "Batalkan pesanan", "order.title": "Pesanan", "order.pending": "Menunggu pembayaran", "order.paid": "Dibayar", "order.fulfilled": "Dikirim", "order.cancelled": "Dibatalkan", "order.updateFailed": "Pesanan gagal diperbarui.",
+      "pages.label": "Informasi", "pages.title": "Halaman", "pages.noPages": "Belum ada halaman yang diterbitkan dalam bahasa ini.", "pages.untitled": "Halaman tanpa judul", "product.untitled": "Produk tanpa judul", "notFound.title": "Halaman tidak ditemukan"
+    },
+    "pt-BR": {
+      "nav.home": "Início", "nav.products": "Produtos", "nav.about": "Sobre", "nav.cart": "Carrinho",
+      "chrome.openNavigation": "Abrir navegação", "chrome.closeNavigation": "Fechar navegação", "chrome.navigation": "Navegação", "chrome.toggleTheme": "Alternar tema de cores", "chrome.lightMode": "Modo claro", "chrome.darkMode": "Modo escuro", "chrome.language": "Idioma",
+      "footer.builtWith": "Criado com Mantle",
+      "shop.label": "Loja", "shop.products": "Produtos", "shop.product": "Produto", "shop.back": "Voltar aos produtos", "shop.add": "Adicionar ao carrinho", "shop.added": "Adicionado", "shop.noProducts": "Ainda não há produtos publicados neste idioma.",
+      "cart.empty": "Seu carrinho está vazio.", "cart.quantity": "quantidade", "cart.remove": "Remover", "cart.total": "Total", "cart.checkout": "Finalizar compra",
+      "checkout.name": "Nome", "checkout.email": "E-mail", "checkout.address": "Endereço de entrega", "checkout.submit": "Criar pedido", "checkout.failed": "Não foi possível finalizar a compra.",
+      "payment.title": "Pagamento de demonstração", "payment.notice": "Este pagamento é simulado. Nenhuma cobrança real será feita.", "payment.submit": "Simular pagamento aprovado",
+      "order.cancel": "Cancelar pedido", "order.title": "Pedido", "order.pending": "Aguardando pagamento", "order.paid": "Pago", "order.fulfilled": "Enviado", "order.cancelled": "Cancelado", "order.updateFailed": "Não foi possível atualizar o pedido.",
+      "pages.label": "Informações", "pages.title": "Páginas", "pages.noPages": "Ainda não há páginas publicadas neste idioma.", "pages.untitled": "Página sem título", "product.untitled": "Produto sem título", "notFound.title": "Página não encontrada"
+    }
+  }
+}

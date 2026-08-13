@@ -1,155 +1,402 @@
 {
-  "locale": "{{CANONICAL_LOCALE}}",
+  "canonicalLocale": "{{CANONICAL_LOCALE}}",
   "site": {
     "brand": "{{BRAND}}",
-    "description": "{{DESCRIPTION}}",
-    "chromeLabels": {
-      "openNavigation": "Open navigation",
-      "closeNavigation": "Close navigation",
-      "navigation": "Navigation",
-      "toggleTheme": "Toggle color theme",
-      "lightMode": "Light mode",
-      "darkMode": "Dark mode"
-    },
-    "navLinks": [
-      { "label": "Products", "href": "#products" },
-      { "label": "How it works", "href": "#how-it-works" },
-      { "label": "Questions", "href": "#questions" }
-    ],
-    "navAction": { "label": "Browse products", "href": "#products" },
-    "footer": {
-      "tagline": "A small catalog ready for real products.",
-      "copyright": "Copyright {{BRAND}}.",
-      "columns": [
-        {
-          "title": "Shop",
-          "links": [
-            { "label": "Products", "href": "#products" },
-            { "label": "How it works", "href": "#how-it-works" }
-          ]
-        }
-      ],
-      "socialLinks": [],
-      "bottomLinks": [
-        { "label": "Questions", "href": "#questions" }
-      ]
-    }
+    "description": "{{DESCRIPTION}}"
   },
   "collections": {
     "page": [
-      {
-        "type": "home",
-        "title": "{{BRAND}}",
-        "summary": "{{DESCRIPTION}}",
-        "status": "published",
-        "sections": [
-          {
-            "type": "hero",
-            "eyebrow": "New catalog",
-            "title": "A focused first storefront for {{BRAND}}",
-            "body": "{{DESCRIPTION}}",
-            "action": { "label": "Browse products", "href": "#products" },
-            "secondaryAction": { "label": "See how it works", "href": "#how-it-works" }
-          },
-          {
-            "type": "features",
-            "id": "products",
-            "eyebrow": "Products",
-            "title": "Three offers to replace with the real catalog",
-            "body": "Edit this seed locally before setting up auth or a production checkout.",
-            "items": [
-              {
-                "icon": "sparkles",
-                "title": "{{BRAND}} Starter",
-                "body": "A simple entry offer. USD 29.00; replace this copy and price with a real product."
-              },
-              {
-                "icon": "layout",
-                "title": "{{BRAND}} Plus",
-                "body": "A broader option for customers who need more. USD 59.00; no checkout is implied."
-              },
-              {
-                "icon": "check",
-                "title": "{{BRAND}} Complete",
-                "body": "The highest starter tier for comparing demand. USD 99.00; connect payment only when requested."
-              }
-            ]
-          },
-          {
-            "type": "content",
-            "id": "how-it-works",
-            "eyebrow": "How it works",
-            "title": "Start with a catalog and one clear intent path",
-            "body": "This transaction shape deliberately stops before cart, payment, inventory, and accounts.",
-            "items": [
-              {
-                "title": "Shape the offer",
-                "body": "Replace the seed products and homepage cards with the first real catalog."
-              },
-              {
-                "title": "Validate demand",
-                "body": "Add a lightweight inquiry flow only when the owner wants to collect purchase intent."
-              },
-              {
-                "title": "Choose checkout later",
-                "body": "Select a payment provider after the public product surface is useful."
-              }
-            ]
-          },
-          {
-            "type": "faq",
-            "id": "questions",
-            "eyebrow": "Questions",
-            "title": "Decisions before adding commerce code",
-            "items": [
-              {
-                "title": "Can I edit this without GitHub OAuth?",
-                "body": "Yes. Edit this seed for the local first page; Staff MCP becomes the authoring path after auth is configured."
-              },
-              {
-                "title": "Is checkout already enabled?",
-                "body": "No. The starter avoids fake payment claims and keeps checkout as an explicit next decision."
-              },
-              {
-                "title": "Where does the product model live?",
-                "body": "The products Schema and public-products View live in manifests/transaction.yaml."
-              }
-            ]
-          },
-          {
-            "type": "cta",
-            "title": "Turn this seed into the real {{BRAND}} catalog",
-            "body": "Replace the three products, refine the visual direction, then decide whether inquiry or checkout is the next useful workflow.",
-            "action": { "label": "Browse products", "href": "#products" }
-          }
-        ]
-      }
+      { "slug": "home", "type": "home", "status": "published" },
+      { "slug": "about", "type": "page", "status": "published" }
     ],
     "products": [
-      {
-        "slug": "starter",
-        "title": "{{BRAND}} Starter",
-        "summary": "A simple entry offer for the first catalog.",
-        "priceMinor": 2900,
-        "currency": "USD",
-        "status": "published"
-      },
-      {
-        "slug": "plus",
-        "title": "{{BRAND}} Plus",
-        "summary": "A broader option for customers who need more.",
-        "priceMinor": 5900,
-        "currency": "USD",
-        "status": "published"
-      },
-      {
-        "slug": "complete",
-        "title": "{{BRAND}} Complete",
-        "summary": "The highest starter tier for comparing demand.",
-        "priceMinor": 9900,
-        "currency": "USD",
-        "status": "published"
-      }
+      { "slug": "sample-product", "priceMinor": 2900, "currency": "USD", "status": "published" }
     ]
+  },
+  "locales": {
+    "en": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "en",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "A simple shop that is ready to run",
+              "body": "{{DESCRIPTION}}",
+              "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
+              "action": { "label": "View products", "href": "/products" },
+              "secondaryAction": { "label": "About us", "href": "/pages/about" }
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "en",
+          "title": "About",
+          "summary": "About {{BRAND}}.",
+          "status": "published",
+          "sections": [{ "type": "content", "title": "About {{BRAND}}", "body": "This is a small storefront built with Mantle." }]
+        }
+      ],
+      "product-translations": [
+        { "slug": "sample-product", "locale": "en", "title": "Sample product", "summary": "A generic product ready to replace with your own.", "status": "published" }
+      ]
+    },
+    "zh-TW": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "zh-TW",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "一間可以開始營運的簡單商店",
+              "body": "{{DESCRIPTION}}",
+              "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
+              "action": { "label": "查看商品", "href": "/products" },
+              "secondaryAction": { "label": "關於我們", "href": "/pages/about" }
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "zh-TW",
+          "title": "關於",
+          "summary": "關於 {{BRAND}}。",
+          "status": "published",
+          "sections": [{ "type": "content", "title": "關於 {{BRAND}}", "body": "這是一間使用 Mantle 建立的小型商店。" }]
+        }
+      ],
+      "product-translations": [
+        { "slug": "sample-product", "locale": "zh-TW", "title": "範例商品", "summary": "可直接替換成自家商品的通用範例。", "status": "published" }
+      ]
+    },
+    "zh-CN": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "zh-CN",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "一家可以开始运营的简单商店",
+              "body": "{{DESCRIPTION}}",
+              "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
+              "action": { "label": "查看商品", "href": "/products" },
+              "secondaryAction": { "label": "关于我们", "href": "/pages/about" }
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "zh-CN",
+          "title": "关于",
+          "summary": "关于 {{BRAND}}。",
+          "status": "published",
+          "sections": [{ "type": "content", "title": "关于 {{BRAND}}", "body": "这是一家使用 Mantle 构建的小型商店。" }]
+        }
+      ],
+      "product-translations": [
+        { "slug": "sample-product", "locale": "zh-CN", "title": "示例商品", "summary": "可直接替换为自家商品的通用示例。", "status": "published" }
+      ]
+    },
+    "ja": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "ja",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "すぐに運営できるシンプルなショップ",
+              "body": "{{DESCRIPTION}}",
+              "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
+              "action": { "label": "商品を見る", "href": "/products" },
+              "secondaryAction": { "label": "私たちについて", "href": "/pages/about" }
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "ja",
+          "title": "私たちについて",
+          "summary": "{{BRAND}}について。",
+          "status": "published",
+          "sections": [{ "type": "content", "title": "{{BRAND}}について", "body": "Mantleで構築された小さなオンラインショップです。" }]
+        }
+      ],
+      "product-translations": [
+        { "slug": "sample-product", "locale": "ja", "title": "サンプル商品", "summary": "実際の商品に置き換えられる汎用サンプルです。", "status": "published" }
+      ]
+    },
+    "ko": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "ko",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "바로 운영할 수 있는 간단한 상점",
+              "body": "{{DESCRIPTION}}",
+              "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
+              "action": { "label": "상품 보기", "href": "/products" },
+              "secondaryAction": { "label": "소개", "href": "/pages/about" }
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "ko",
+          "title": "소개",
+          "summary": "{{BRAND}} 소개.",
+          "status": "published",
+          "sections": [{ "type": "content", "title": "{{BRAND}} 소개", "body": "Mantle로 만든 작은 온라인 상점입니다." }]
+        }
+      ],
+      "product-translations": [
+        { "slug": "sample-product", "locale": "ko", "title": "샘플 상품", "summary": "실제 상품으로 교체할 수 있는 범용 샘플입니다.", "status": "published" }
+      ]
+    },
+    "es": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "es",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Una tienda sencilla lista para funcionar",
+              "body": "{{DESCRIPTION}}",
+              "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
+              "action": { "label": "Ver productos", "href": "/products" },
+              "secondaryAction": { "label": "Sobre nosotros", "href": "/pages/about" }
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "es",
+          "title": "Nosotros",
+          "summary": "Acerca de {{BRAND}}.",
+          "status": "published",
+          "sections": [{ "type": "content", "title": "Acerca de {{BRAND}}", "body": "Esta es una pequeña tienda creada con Mantle." }]
+        }
+      ],
+      "product-translations": [
+        { "slug": "sample-product", "locale": "es", "title": "Producto de muestra", "summary": "Un producto genérico listo para sustituir por el tuyo.", "status": "published" }
+      ]
+    },
+    "fr": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "fr",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Une boutique simple prête à fonctionner",
+              "body": "{{DESCRIPTION}}",
+              "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
+              "action": { "label": "Voir les produits", "href": "/products" },
+              "secondaryAction": { "label": "À propos", "href": "/pages/about" }
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "fr",
+          "title": "À propos",
+          "summary": "À propos de {{BRAND}}.",
+          "status": "published",
+          "sections": [{ "type": "content", "title": "À propos de {{BRAND}}", "body": "Voici une petite boutique créée avec Mantle." }]
+        }
+      ],
+      "product-translations": [
+        { "slug": "sample-product", "locale": "fr", "title": "Produit d’exemple", "summary": "Un produit générique prêt à être remplacé par le vôtre.", "status": "published" }
+      ]
+    },
+    "de": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "de",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Ein einfacher Shop, der startklar ist",
+              "body": "{{DESCRIPTION}}",
+              "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
+              "action": { "label": "Produkte ansehen", "href": "/products" },
+              "secondaryAction": { "label": "Über uns", "href": "/pages/about" }
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "de",
+          "title": "Über uns",
+          "summary": "Über {{BRAND}}.",
+          "status": "published",
+          "sections": [{ "type": "content", "title": "Über {{BRAND}}", "body": "Dies ist ein kleiner, mit Mantle erstellter Shop." }]
+        }
+      ],
+      "product-translations": [
+        { "slug": "sample-product", "locale": "de", "title": "Beispielprodukt", "summary": "Ein allgemeines Produkt, das Sie durch Ihr eigenes ersetzen können.", "status": "published" }
+      ]
+    },
+    "it": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "it",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Un negozio semplice pronto a partire",
+              "body": "{{DESCRIPTION}}",
+              "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
+              "action": { "label": "Vedi i prodotti", "href": "/products" },
+              "secondaryAction": { "label": "Chi siamo", "href": "/pages/about" }
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "it",
+          "title": "Chi siamo",
+          "summary": "Informazioni su {{BRAND}}.",
+          "status": "published",
+          "sections": [{ "type": "content", "title": "Informazioni su {{BRAND}}", "body": "Questo è un piccolo negozio creato con Mantle." }]
+        }
+      ],
+      "product-translations": [
+        { "slug": "sample-product", "locale": "it", "title": "Prodotto di esempio", "summary": "Un prodotto generico pronto per essere sostituito con il tuo.", "status": "published" }
+      ]
+    },
+    "ru": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "ru",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Простой магазин, готовый к работе",
+              "body": "{{DESCRIPTION}}",
+              "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
+              "action": { "label": "Посмотреть товары", "href": "/products" },
+              "secondaryAction": { "label": "О нас", "href": "/pages/about" }
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "ru",
+          "title": "О нас",
+          "summary": "О {{BRAND}}.",
+          "status": "published",
+          "sections": [{ "type": "content", "title": "О {{BRAND}}", "body": "Это небольшой магазин, созданный с помощью Mantle." }]
+        }
+      ],
+      "product-translations": [
+        { "slug": "sample-product", "locale": "ru", "title": "Пример товара", "summary": "Универсальный пример, который можно заменить своим товаром.", "status": "published" }
+      ]
+    },
+    "id": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "id",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Toko sederhana yang siap beroperasi",
+              "body": "{{DESCRIPTION}}",
+              "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
+              "action": { "label": "Lihat produk", "href": "/products" },
+              "secondaryAction": { "label": "Tentang kami", "href": "/pages/about" }
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "id",
+          "title": "Tentang kami",
+          "summary": "Tentang {{BRAND}}.",
+          "status": "published",
+          "sections": [{ "type": "content", "title": "Tentang {{BRAND}}", "body": "Ini adalah toko kecil yang dibuat dengan Mantle." }]
+        }
+      ],
+      "product-translations": [
+        { "slug": "sample-product", "locale": "id", "title": "Produk contoh", "summary": "Produk umum yang siap diganti dengan produk Anda.", "status": "published" }
+      ]
+    },
+    "pt-BR": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "pt-BR",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Uma loja simples pronta para funcionar",
+              "body": "{{DESCRIPTION}}",
+              "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
+              "action": { "label": "Ver produtos", "href": "/products" },
+              "secondaryAction": { "label": "Sobre nós", "href": "/pages/about" }
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "pt-BR",
+          "title": "Sobre nós",
+          "summary": "Sobre a {{BRAND}}.",
+          "status": "published",
+          "sections": [{ "type": "content", "title": "Sobre a {{BRAND}}", "body": "Esta é uma pequena loja criada com Mantle." }]
+        }
+      ],
+      "product-translations": [
+        { "slug": "sample-product", "locale": "pt-BR", "title": "Produto de exemplo", "summary": "Um produto genérico pronto para ser substituído pelo seu.", "status": "published" }
+      ]
+    }
   }
 }

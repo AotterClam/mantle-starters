@@ -95,5 +95,7 @@ export function bindMantleSite(runtime: CmsRuntime) {
           },
         }),
     },
+    procedures: {
+    },
   } as const;
 }

@@ -63,7 +63,7 @@ directory.
 
 An overlay should contain only what the user's coding agent needs next:
 
-- `manifests/*.yaml` with the smallest useful 4-atoms model.
+- `manifests/site.yaml` with the smallest useful 4-atoms model.
 - `handoff.md` for the agent.
 - `seed-prompt.md` when example data helps.
 - `layout.md` when route/layout guidance helps.

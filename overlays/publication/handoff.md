@@ -4,11 +4,11 @@ Use this when the launch type intent is `publication`.
 
 First useful shape:
 
-- keep the public homepage driven by
+- initialize the public homepage in D1 from
   `.mantle/overlays/publication/seed.json`;
 - use `site` for nav/footer/brand metadata and
   `collections.page[0].sections` for every visible homepage block;
-- keep `posts` as the core Schema;
+- keep `posts` as the stable parent and `post-translations` as its localized child;
 - expose `published-posts` at `/api/views/published-posts`;
 - replace the seeded publication cards and posts before adding custom
   archive/detail routes.

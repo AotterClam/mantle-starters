@@ -39,20 +39,20 @@ src/
     features/                 # type overlays add server behavior here
   web/
     pages/HomePage.tsx        # public page body
-    content/                  # seed-driven site/home content modules
+    content/                  # runtime-backed site/home content modules
     client/                   # browser behavior served as /assets/kiwa-home.js
   mantle/
     config.ts                 # environment and site defaults
     handlers/index.ts         # Procedure handler registry
 
-manifests/                    # 4 atoms: Schema, View, Procedure, Trigger
+manifests/site.yaml           # 4 atoms: Schema, View, Procedure, Trigger
 components/, lib/, styles/     # selected runtime-facing UI surface
 kiwa/                         # current revision's optional offline UI palette
 .mantle/generated/            # generated manifest/types consumed by Worker
 .mantle/                      # launch state, overlay notes, handoff
 ```
 
-`manifests/` is the authoritative Mantle model. `mantle generate` compiles it
+`manifests/site.yaml` is the authoritative Mantle model. `mantle generate` compiles it
 to `.mantle/generated/`; `src/index.ts` passes that output to
 `createMantleWorker`. In this revision, runtime components stay at root
 because `kiwa-ui.json` uses Kiwa's `@/components` and `@/lib/utils`
@@ -93,7 +93,7 @@ cp .dev.vars.example .dev.vars
 > published since the lockfile was committed; the drift only surfaces
 > when CI rejects it.
 
-The seeded `/` preview and public HTTP Procedures work without auth. Set
+The initial `/` preview and public HTTP Procedures work without auth. Set
 `MANTLE_AUTH_MODE=hosted` with `MANTLE_HOSTED_AUTH_ISSUER`,
 `MANTLE_HOSTED_AUTH_CLIENT_ID`, and `ADMIN_GITHUB_LOGIN`. Hosted clients are
 public PKCE clients and have no client secret.
@@ -106,9 +106,10 @@ pnpm dev      # safe wrangler dev — http://localhost:8787
 ```
 
 Open `http://localhost:8787/`, then inspect
-`manifests/{{ARCHETYPE}}.yaml` for the selected View and Procedure names.
-The homepage starts from `.mantle/overlays/{{ARCHETYPE}}/seed.json`; content
-created later through Staff MCP lives in D1.
+`manifests/site.yaml` for the selected View and Procedure names.
+On the first request, the starter writes missing entries from
+`.mantle/overlays/{{ARCHETYPE}}/seed.json` to D1 through Core authoring use
+cases. The homepage then reads only the published `page` through the `home` View.
 
 For production, push the generated repo and configure Cloudflare, or use
 Mantle landing to automate the GitHub and Cloudflare steps.
@@ -118,8 +119,9 @@ auth or self-hosted GitHub OAuth. The public homepage does not.
 
 ## Editing the launch
 
-1. Edit `.mantle/overlays/{{ARCHETYPE}}/seed.json` for auth-free local copy.
-2. Edit `manifests/{{ARCHETYPE}}.yaml` when the Schema, View, Procedure, or
+1. Edit `.mantle/overlays/{{ARCHETYPE}}/seed.json` before the first request.
+   After initialization, edit and publish entries through Admin or Staff MCP.
+2. Edit `manifests/site.yaml` when the Schema, View, Procedure, or
    Trigger contract changes, then run `pnpm generate`.
 3. Register only ref Procedure handlers in `src/mantle/handlers/index.ts`;
    builtin handlers come from Core.

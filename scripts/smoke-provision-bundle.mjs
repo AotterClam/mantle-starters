@@ -12,7 +12,7 @@ const operationalCollections = {
   presence: "contact",
   intake: "intake-submissions",
   publication: "post-suggestions",
-  transaction: "product-inquiries",
+  transaction: "orders",
   reservation: "reservation-requests",
   community: "community-signups",
 };
@@ -54,6 +54,7 @@ for (const archetype of archetypes) {
       assertStylesheetMounted(tempRoot, archetype);
       assertEdgeCacheContract(tempRoot, archetype);
       assertSectionImageContract(tempRoot, archetype);
+      assertLocaleNavigation(tempRoot, archetype);
       assertRuntimeHasNoKiwaDemoCopy(tempRoot, archetype);
     }
     const launchState = JSON.parse(readFileSync(join(tempRoot, ".mantle", "launch-state.json"), "utf8"));
@@ -75,7 +76,6 @@ for (const archetype of archetypes) {
       assertPublicMutationInputsStrict(tempRoot, archetype);
       assertServerOwnedFields(tempRoot, archetype);
       assertOperationalCollection(tempRoot, archetype);
-      assertNoBlankExampleManifest(tempRoot, archetype);
       assertSeedDrivenHome(tempRoot, archetype);
       readFileSync(join(tempRoot, ".mantle", "overlays", archetype, "seed.json"), "utf8");
       if (archetype === "presence") {
@@ -90,9 +90,11 @@ for (const archetype of archetypes) {
       }
       if (archetype === "publication") {
         assertPublicationSeed(tempRoot);
+        assertTranslationPair(tempRoot);
       }
       if (archetype === "transaction") {
         assertTransactionSeed(tempRoot);
+        assertTransactionPublicSurface(tempRoot);
       }
     }
   } finally {
@@ -117,6 +119,7 @@ function assertProjectScripts(root, archetype) {
 function smokeLocalMaterializer() {
   const tempRoot = mkdtempSync(join(tmpdir(), "mantle-materialize-"));
   const output = join(tempRoot, "northstar");
+  const shopOutput = join(tempRoot, "five-language-shop");
   try {
     const result = spawnSync(process.execPath, [
       "scripts/dev-provision-bundle.mjs",
@@ -145,6 +148,36 @@ function smokeLocalMaterializer() {
     if (!wrangler.includes('database_name = "northstar-db"')) throw new Error("local D1 name mismatch");
     if (!wrangler.includes('PUBLIC_ORIGIN = "http://localhost:8787"')) throw new Error("local origin missing");
     assertGeneratedStylesMatchStarterLock(output);
+    const shop = spawnSync(process.execPath, [
+      "scripts/dev-provision-bundle.mjs",
+      "transaction",
+      "--out",
+      shopOutput,
+      "--brand",
+      "Five Language Shop",
+      "--description",
+      "A localized transaction starter.",
+      "--locales",
+      "en,zh-TW,ja,ko,fr",
+    ], { cwd: root, encoding: "utf8" });
+    if (shop.status !== 0) throw new Error(`five-language materializer failed: ${shop.stderr || shop.stdout}`);
+    for (const path of ["seed.json", "messages.json"]) {
+      const catalog = JSON.parse(readFileSync(join(shopOutput, ".mantle", "overlays", "transaction", path), "utf8"));
+      if (JSON.stringify(Object.keys(catalog.locales)) !== '["en","zh-TW","ja","ko","fr"]') {
+        throw new Error(`transaction ${path} was not reduced to the selected locales`);
+      }
+    }
+    const unsupported = spawnSync(process.execPath, [
+      "scripts/dev-provision-bundle.mjs",
+      "transaction",
+      "--out",
+      join(tempRoot, "unsupported-shop"),
+      "--locales",
+      "en,nl",
+    ], { cwd: root, encoding: "utf8" });
+    if (unsupported.status === 0 || !`${unsupported.stderr}${unsupported.stdout}`.includes("does not support locales: nl")) {
+      throw new Error("transaction materializer accepted an unsupported locale");
+    }
     const overwrite = spawnSync(process.execPath, [
       "scripts/dev-provision-bundle.mjs",
       "blank",
@@ -286,24 +319,31 @@ function isWorkersCacheEnabled(wrangler) {
 
 function assertSectionImageContract(root, archetype) {
   const renderer = readFileSync(join(root, "src", "web", "sections", "renderers", "hero.tsx"), "utf8");
-  if (!renderer.includes("image={section.image}")) {
+  if (!renderer.includes("asset(section.image.src)")) {
     throw new Error(`${archetype} hero does not render its declared image`);
   }
-  const manifestPath = join(root, "manifests", `${archetype}.yaml`);
-  if (!existsSync(manifestPath)) return;
-  const page = parseAllDocuments(readFileSync(manifestPath, "utf8"))
-    .map((document) => document.toJSON())
-    .find((atom) => atom?.kind === "Schema" && atom?.metadata?.name === "page");
-  if (
-    page
-    && page.spec?.schema?.properties?.sections?.items?.properties?.showImage?.type !== "boolean"
-  ) {
+  const contentRendererPath = join(root, "src", "web", "sections", "renderers", "content.tsx");
+  if (existsSync(contentRendererPath)
+      && !readFileSync(contentRendererPath, "utf8").includes("asset(section.image.src)")) {
+    throw new Error(`${archetype} content does not render its declared image`);
+  }
+  const manifestPath = join(root, "manifests", "site.yaml");
+  const atoms = parseAllDocuments(readFileSync(manifestPath, "utf8"))
+    .map((document) => document.toJSON());
+  const page = atoms
+    .find((atom) => atom?.kind === "Schema" && atom?.metadata?.name === "page-translations")
+    ?? atoms.find((atom) => atom?.kind === "Schema" && atom?.metadata?.name === "page");
+  if (!page) throw new Error(`${archetype} seed homepage has no page Schema`);
+  const home = atoms.find((atom) => atom?.kind === "View" && atom?.metadata?.name === "home");
+  if (!["page", "page-translations"].includes(home?.spec?.from)) {
+    throw new Error(`${archetype} page lifecycle has no published home View`);
+  }
+  if (page.spec?.schema?.properties?.sections?.items?.properties?.showImage?.type !== "boolean") {
     throw new Error(`${archetype} page Schema does not expose showImage`);
   }
   const image = page?.spec?.schema?.properties?.sections?.items?.properties?.image;
   if (
-    page
-    && (
+    (
       image?.type !== "object"
       || image.properties?.src?.type !== "string"
       || image.properties?.alt?.type !== "string"
@@ -313,12 +353,44 @@ function assertSectionImageContract(root, archetype) {
   ) {
     throw new Error(`${archetype} page Schema does not expose an accessible hero image`);
   }
+  const seed = JSON.parse(
+    readFileSync(join(root, ".mantle", "overlays", archetype, "seed.json"), "utf8"),
+  );
+  const pageSeed = seed.locales
+    ? Object.values(seed.locales).flatMap((pack) => pack?.["page-translations"] ?? [])
+    : seed.collections?.["page-translations"] ?? seed.collections?.page;
+  const hero = pageSeed?.[0]?.sections?.find((section) => section.type === "hero");
+  if (hero?.image?.src !== "/assets/mantle-ocean-hero-light.svg" || hero.image.alt !== "") {
+    throw new Error(`${archetype} seed does not reference the shared ocean hero`);
+  }
+  const homeContent = readFileSync(join(root, "src", "web", "content", "homeContent.ts"), "utf8");
+  if (!homeContent.includes('views["home"](')) {
+    throw new Error(`${archetype} homepage never reads its home View`);
+  }
+  const assets = readFileSync(join(root, "src", "worker", "routes", "assets.ts"), "utf8");
+  const theme = readFileSync(join(root, "src", "web", "client", "themeClient.ts"), "utf8");
+  const svg = readFileSync(join(root, "src", "web", "mantleOceanHero.ts"), "utf8");
+  for (const path of ["mantle-ocean-hero-light.svg", "mantle-ocean-hero-dark.svg"]) {
+    if (!assets.includes(path) || !theme.includes(path)) {
+      throw new Error(`${archetype} ocean hero ${path} is not wired through assets and theme`);
+    }
+  }
+  if (!svg.includes("mantleOceanHeroLightSvg") || !svg.includes("mantleOceanHeroDarkSvg")) {
+    throw new Error(`${archetype} bundle does not contain the shared ocean hero`);
+  }
+}
+
+function assertLocaleNavigation(root, archetype) {
+  const nav = readFileSync(join(root, "components", "blocks", "marketing", "nav-02.tsx"), "utf8");
+  if (!nav.includes("data-locale-switch") || !nav.includes("locales.length > 1")) {
+    throw new Error(`${archetype} does not expose the shared locale switch`);
+  }
 }
 
 function assertOperationalCollection(root, archetype) {
   const collection = operationalCollections[archetype];
   if (!collection) return;
-  const manifestPath = join(root, "manifests", `${archetype}.yaml`);
+  const manifestPath = join(root, "manifests", "site.yaml");
   const schema = parseAllDocuments(readFileSync(manifestPath, "utf8"))
     .map((document) => document.toJSON())
     .find((atom) => atom?.kind === "Schema" && atom?.metadata?.name === collection);
@@ -328,8 +400,8 @@ function assertOperationalCollection(root, archetype) {
   const seed = JSON.parse(
     readFileSync(join(root, ".mantle", "overlays", archetype, "seed.json"), "utf8"),
   );
-  if ((seed.collections?.[collection] ?? []).some((entry) => entry.status === "draft")) {
-    throw new Error(`${archetype} operational seed ${collection} still declares a draft`);
+  if ((seed.collections?.[collection] ?? []).length > 0) {
+    throw new Error(`${archetype} seed contains fake operational data for ${collection}`);
   }
 }
 
@@ -382,7 +454,7 @@ function assertRuntimeHasNoKiwaDemoCopy(root, archetype) {
 }
 
 function assertFourAtoms(root, archetype) {
-  const text = readFileSync(join(root, "manifests", `${archetype}.yaml`), "utf8");
+  const text = readFileSync(join(root, "manifests", "site.yaml"), "utf8");
   for (const atom of ["Schema", "View", "Procedure", "Trigger"]) {
     if (!new RegExp(`kind:\\s*${atom}\\b`).test(text)) {
       throw new Error(`${archetype} manifest missing ${atom}`);
@@ -391,14 +463,13 @@ function assertFourAtoms(root, archetype) {
 }
 
 function assertPublicMutationInputsStrict(root, archetype) {
-  const text = readFileSync(join(root, "manifests", `${archetype}.yaml`), "utf8");
-  const publicMutations = parseAllDocuments(text)
-    .map((document) => document.toJSON())
-    .filter((atom) =>
-      atom?.kind === "Procedure"
-      && atom?.spec?.handler?.kind === "builtin"
-      && atom?.spec?.handler?.op === "create"
-    );
+  const text = readFileSync(join(root, "manifests", "site.yaml"), "utf8");
+  const atoms = parseAllDocuments(text).map((document) => document.toJSON());
+  const publicNames = new Set(atoms
+    .filter((atom) => atom?.kind === "Trigger" && atom?.spec?.source?.kind === "http")
+    .map((atom) => atom?.spec?.target?.procedure)
+    .filter(Boolean));
+  const publicMutations = atoms.filter((atom) => atom?.kind === "Procedure" && publicNames.has(atom?.metadata?.name));
   if (!publicMutations.length) throw new Error(`${archetype} missing public mutation`);
   for (const procedure of publicMutations) {
     if (procedure.spec.input?.additionalProperties !== false) {
@@ -408,7 +479,7 @@ function assertPublicMutationInputsStrict(root, archetype) {
 }
 
 function assertServerOwnedFields(root, archetype) {
-  const atoms = parseAllDocuments(readFileSync(join(root, "manifests", `${archetype}.yaml`), "utf8"))
+  const atoms = parseAllDocuments(readFileSync(join(root, "manifests", "site.yaml"), "utf8"))
     .map((document) => document.toJSON());
   const schemas = new Map(
     atoms.filter((atom) => atom?.kind === "Schema").map((atom) => [atom.metadata?.name, atom]),
@@ -479,7 +550,7 @@ function assertIntakeForm(root) {
     "utf8",
   );
   const seed = readFileSync(join(root, ".mantle", "overlays", "intake", "seed.json"), "utf8");
-  const manifest = readFileSync(join(root, "manifests", "intake.yaml"), "utf8");
+  const manifest = readFileSync(join(root, "manifests", "site.yaml"), "utf8");
   const notify = readFileSync(
     join(root, "src", "worker", "features", "intake", "notifyIntake.ts"),
     "utf8",
@@ -511,7 +582,6 @@ function assertIntakeForm(root) {
   if (
     !seed.includes('"locale": "en"')
     || !seed.includes('"intakeLabels"')
-    || !seed.includes('"replyLocale"')
   ) {
     throw new Error("intake seed does not define localized chrome and reply language");
   }
@@ -559,34 +629,116 @@ function assertPublicationSeed(root) {
   if (!seed.includes('"site"') || !seed.includes('"type": "home"')) {
     throw new Error("publication seed does not drive site/page content");
   }
-  if (!seed.includes('"posts"') || !seed.includes('"slug": "welcome"')) {
+  if (!seed.includes('"posts"') || !seed.includes('"post-translations"') || !seed.includes('"slug": "welcome"')) {
     throw new Error("publication seed does not include starter posts");
+  }
+}
+
+function assertTranslationPair(root) {
+  const schemas = parseAllDocuments(readFileSync(join(root, "manifests", "site.yaml"), "utf8"))
+    .map((document) => document.toJSON())
+    .filter((atom) => atom?.kind === "Schema");
+  const parent = schemas.find((schema) => schema.metadata?.name === "posts");
+  const child = schemas.find((schema) => schema.metadata?.name === "post-translations");
+  if (parent?.spec?.localized || child?.spec?.localized !== true) {
+    throw new Error("publication translation pair must have a non-localized parent and localized child");
+  }
+  if (child?.spec?.translates?.parent !== "posts" || child.spec.translates.on !== "slug") {
+    throw new Error("publication translation pair must join post-translations to posts by slug");
   }
 }
 
 function assertSeedDrivenHome(root, archetype) {
   const homeContent = readFileSync(join(root, "src", "web", "content", "homeContent.ts"), "utf8");
-  const seedImport = `../../../.mantle/overlays/${archetype}/seed.json`;
-  if (!homeContent.includes(seedImport)) {
-    throw new Error(`${archetype} homepage content is not driven by the overlay seed`);
+  const seedRuntime = readFileSync(join(root, "src", "mantle", "seed.ts"), "utf8");
+  const worker = readFileSync(join(root, "src", "index.ts"), "utf8");
+  const seedImport = `../../.mantle/overlays/${archetype}/seed.json`;
+  if (!seedRuntime.includes(seedImport) || !worker.includes("createSeededRuntime")) {
+    throw new Error(`${archetype} does not initialize D1 from the overlay seed`);
+  }
+  if (homeContent.includes(seedImport) || homeContent.includes("fallback")) {
+    throw new Error(`${archetype} homepage still has a seed fallback`);
   }
 }
 
 function assertTransactionSeed(root) {
   const seed = readFileSync(join(root, ".mantle", "overlays", "transaction", "seed.json"), "utf8");
   const parsed = JSON.parse(seed);
-  if (!seed.includes('"type": "home"') || parsed.collections?.products?.length !== 3) {
-    throw new Error("transaction seed does not include a visible home and three products");
+  const locales = Object.keys(parsed.locales ?? {});
+  if (
+    !seed.includes('"type": "home"')
+    || parsed.collections?.products?.length !== 1
+    || parsed.collections.products[0]?.slug !== "sample-product"
+    || locales.length !== 1
+    || parsed.locales[locales[0]]?.["product-translations"]?.length !== 1
+    || parsed.locales[locales[0]]?.["page-translations"]?.length !== 2
+  ) {
+    throw new Error("transaction seed does not include localized home/about and one sample product");
+  }
+  const messages = JSON.parse(readFileSync(join(root, ".mantle", "overlays", "transaction", "messages.json"), "utf8"));
+  if (JSON.stringify(Object.keys(messages.locales)) !== JSON.stringify(locales)) {
+    throw new Error("transaction entry and message locale catalogs differ");
+  }
+  const schemas = parseAllDocuments(readFileSync(join(root, "manifests", "site.yaml"), "utf8"))
+    .map((document) => document.toJSON())
+    .filter((atom) => atom?.kind === "Schema");
+  for (const [childName, parentName] of [["page-translations", "page"], ["product-translations", "products"]]) {
+    const child = schemas.find((schema) => schema.metadata?.name === childName);
+    if (child?.spec?.localized !== true || child.spec?.translates?.parent !== parentName || child.spec.translates.on !== "slug") {
+      throw new Error(`transaction ${childName} must translate ${parentName} by slug`);
+    }
+  }
+  const orders = schemas.find((schema) => schema.metadata?.name === "orders");
+  if (!orders?.spec?.schema?.properties?.orderLocale || orders.spec.schema.properties.locale) {
+    throw new Error("transaction orders must store orderLocale without using the reserved entry locale field");
   }
 }
 
-function assertNoBlankExampleManifest(root, archetype) {
-  try {
-    readFileSync(join(root, "manifests", "example.yaml"), "utf8");
-  } catch {
-    return;
+function assertTransactionPublicSurface(root) {
+  const worker = readFileSync(join(root, "src", "index.ts"), "utf8");
+  const surface = readFileSync(join(root, "src", "web", "publicSite.tsx"), "utf8");
+  const client = readFileSync(join(root, "src", "web", "client", "homeClient.ts"), "utf8");
+  const nav = readFileSync(join(root, "components", "blocks", "marketing", "nav-02.tsx"), "utf8");
+  const wrangler = readFileSync(join(root, "wrangler.toml"), "utf8");
+  if (!worker.includes("mountPublicRoutes") || !worker.includes("publicPathResolver")) {
+    throw new Error("transaction Worker does not mount the Core public route surface");
   }
-  throw new Error(`${archetype} bundle still includes blank example manifest`);
+  for (const required of [
+    'registerEntryTemplate("product-translations"',
+    'registerListTemplate("product-translations"',
+    'registerEntryTemplate("page-translations"',
+    'registerListTemplate("page-translations"',
+    'segment: "products"',
+    'segment: "pages"',
+  ]) {
+    if (!surface.includes(required)) throw new Error(`transaction public surface missing ${required}`);
+  }
+  for (const required of [
+    'name = "INVENTORY_COORDINATOR"',
+    'binding = "ORDER_EXPIRY_QUEUE"',
+    'max_concurrency = 1',
+    'crons = ["*/5 * * * *"]',
+  ]) {
+    if (!wrangler.includes(required)) throw new Error(`transaction Worker binding missing ${required}`);
+  }
+  for (const required of [
+    'procedures["expire-order"]',
+    'procedures["sweep-expired-orders"]',
+    "for (const message of batch.messages)",
+    "async scheduled(",
+    'result.diagnostic.code === "CONFLICT"',
+  ]) {
+    if (!worker.includes(required)) throw new Error(`transaction lifecycle worker missing ${required}`);
+  }
+  if (worker.includes("batch.messages[0]")) throw new Error("transaction queue processes only the first batch message");
+  const scheduled = worker.slice(worker.indexOf("async scheduled("));
+  if (scheduled.includes("ORDER_EXPIRY_QUEUE") || scheduled.includes(".send(")) {
+    throw new Error("transaction scheduled handler fans work into the expiry queue");
+  }
+  if (!client.includes("commerceClientJs")) throw new Error("transaction client bundle is missing cart behavior");
+  if (!nav.includes("ShoppingCartIcon") || !nav.includes("data-cart-count")) {
+    throw new Error("transaction navigation is missing the cart icon/count surface");
+  }
 }
 
 function readSource(root) {

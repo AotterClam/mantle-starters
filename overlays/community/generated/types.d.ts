@@ -2,6 +2,38 @@
 
 export namespace MantleSite {
 
+  /** Entry data for Schema 'page' */
+  export interface Entry_page {
+    type: "home";
+    title: string;
+    summary?: string;
+    sections: {
+  type: "hero" | "features" | "cta";
+  id?: string;
+  eyebrow?: string;
+  title: string;
+  body?: string;
+  showImage?: boolean;
+  image?: {
+  src: string;
+  alt: string;
+};
+  action?: {
+  label?: string;
+  href?: string;
+};
+  secondaryAction?: {
+  label?: string;
+  href?: string;
+};
+  items?: {
+  title?: string;
+  body?: string;
+  icon?: string;
+}[];
+}[];
+  }
+
   /** Entry data for Schema 'community-updates' */
   export interface Entry_community_updates {
     slug: string;
@@ -27,6 +59,40 @@ export namespace MantleSite {
 
   /** Procedure 'submit-community-signup' output */
   export interface ProcOutput_submit_community_signup {
+  }
+
+  /** Row shape returned by GET /api/views/home */
+  export interface ViewRow_home {
+    id: string;
+    type?: "home";
+    title?: string;
+    summary?: string;
+    sections?: {
+  type: "hero" | "features" | "cta";
+  id?: string;
+  eyebrow?: string;
+  title: string;
+  body?: string;
+  showImage?: boolean;
+  image?: {
+  src: string;
+  alt: string;
+};
+  action?: {
+  label?: string;
+  href?: string;
+};
+  secondaryAction?: {
+  label?: string;
+  href?: string;
+};
+  items?: {
+  title?: string;
+  body?: string;
+  icon?: string;
+}[];
+}[];
+    updatedAt: number;
   }
 
   /** Row shape returned by GET /api/views/public-community-updates */

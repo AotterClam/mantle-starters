@@ -41,13 +41,13 @@ src/renderer.tsx      Hono JSX document renderer
 src/worker/           typed UI routes and selected feature code
 src/web/              public JSX page, seed-driven content, browser client JS
 src/mantle/           site defaults and selected handler registry
-manifests/            4 atoms: Schema, View, Procedure, Trigger
+manifests/site.yaml   4 atoms: Schema, View, Procedure, Trigger
 components/ lib/      selected runtime-facing Kiwa surface
 kiwa/                  complete offline reference palette; not runtime source
 styles/               Kiwa/Tailwind source and generated CSS
 ```
 
-The 4 atoms stay in root `manifests/` because they are project config,
+The 4 atoms stay in root `manifests/site.yaml` because they are project config,
 not Worker route code. Type overlays may add server behavior under
 `src/worker/features/<feature>` and register Mantle Procedure handlers
 from `src/mantle/handlers/index.ts`.
