@@ -33,7 +33,7 @@ try {
   await smokeTyped("transaction", async (origin) => {
     const home = await fetch(`${origin}/`);
     const html = await home.text();
-    if (home.status !== 200 || !["Runtime Smoke Starter", "Runtime Smoke Plus", "Runtime Smoke Complete"].every((text) => html.includes(text))) {
+    if (home.status !== 200 || !html.includes("Sample product")) {
       throw new Error(`transaction homepage did not render its auth-free seed catalog (${home.status})`);
     }
     const view = await fetch(`${origin}/api/views/public-products?locale=en`);

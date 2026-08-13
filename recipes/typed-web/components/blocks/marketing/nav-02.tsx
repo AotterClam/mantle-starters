@@ -1,8 +1,9 @@
 import type { FC } from 'hono/jsx'
 import { Languages } from 'lucide'
 import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
 import { getButtonClasses } from '@/components/ui/button'
-import { ChevronDownIcon, Icon, MenuIcon, XIcon } from '@/components/ui/icon'
+import { ChevronDownIcon, Icon, MenuIcon, ShoppingCartIcon, XIcon } from '@/components/ui/icon'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 type NavLink = {
@@ -18,6 +19,7 @@ type Nav02Props = {
   loginHref?: string
   ctaText?: string
   ctaHref?: string
+  ctaIcon?: 'cart'
   locale?: string
   locales?: readonly string[]
   localePath?: string
@@ -28,6 +30,7 @@ type Nav02Props = {
     toggleTheme: string
     lightMode: string
     darkMode: string
+    language?: string
   }
   class?: string
 }
@@ -40,6 +43,7 @@ export const Nav02: FC<Nav02Props> = ({
   loginHref = '#',
   ctaText,
   ctaHref = '#',
+  ctaIcon,
   locale,
   locales = [],
   localePath = '/:locale',
@@ -72,11 +76,18 @@ export const Nav02: FC<Nav02Props> = ({
             </a>
           )}
           {ctaText && (
-            <a href={ctaHref} class={getButtonClasses('default', 'sm')}>
+            <a
+              href={ctaHref}
+              class={getButtonClasses('default', 'sm')}
+              data-cart-link={ctaIcon === 'cart' ? '' : undefined}
+              data-cart-label={ctaText}
+            >
+              {ctaIcon === 'cart' && <ShoppingCartIcon class="size-4" />}
               {ctaText}
+              {ctaIcon === 'cart' && <Badge data-cart-count hidden class="min-w-5 px-1.5">0</Badge>}
             </a>
           )}
-          <LocaleSwitch locale={locale} locales={locales} path={localePath} />
+          <LocaleSwitch locale={locale} locales={locales} path={localePath} languageLabel={labels.language} />
           <ThemeToggle labels={labels} />
         </div>
 
@@ -141,7 +152,7 @@ export const Nav02: FC<Nav02Props> = ({
         </div>
 
         <div class="mt-auto flex flex-col gap-2 pt-8">
-          <LocaleSwitch locale={locale} locales={locales} path={localePath} showLabel />
+          <LocaleSwitch locale={locale} locales={locales} path={localePath} languageLabel={labels.language} showLabel />
           <ThemeToggle labels={labels} showLabel class="w-full" />
           {loginText && (
             <a href={loginHref} data-mobile-nav-close="true" class={cn(getButtonClasses('ghost', 'sm'), 'w-full')}>
@@ -149,8 +160,16 @@ export const Nav02: FC<Nav02Props> = ({
             </a>
           )}
           {ctaText && (
-            <a href={ctaHref} data-mobile-nav-close="true" class={cn(getButtonClasses('default', 'sm'), 'w-full')}>
+            <a
+              href={ctaHref}
+              data-mobile-nav-close="true"
+              class={cn(getButtonClasses('default', 'sm'), 'w-full')}
+              data-cart-link={ctaIcon === 'cart' ? '' : undefined}
+              data-cart-label={ctaText}
+            >
+              {ctaIcon === 'cart' && <ShoppingCartIcon class="size-4" />}
               {ctaText}
+              {ctaIcon === 'cart' && <Badge data-cart-count hidden class="ml-auto min-w-5 px-1.5">0</Badge>}
             </a>
           )}
         </div>
@@ -163,14 +182,15 @@ const LocaleSwitch: FC<{
   locale?: string
   locales: readonly string[]
   path: string
+  languageLabel?: string
   showLabel?: boolean
-}> = ({ locale, locales, path, showLabel = false }) => locales.length > 1 && locale ? (
+}> = ({ locale, locales, path, languageLabel = 'Language', showLabel = false }) => locales.length > 1 && locale ? (
   <details data-locale-switch class="group relative">
     <summary class={cn(getButtonClasses('ghost', showLabel ? 'sm' : 'iconSm'), showLabel && 'w-full justify-start')}>
       <Icon iconNode={Languages} class="size-4 shrink-0" />
       {showLabel && <span class="uppercase">{locale}</span>}
       {showLabel && <ChevronDownIcon class="ml-auto size-3.5 transition-transform group-open:rotate-180" />}
-      <span class="sr-only">Language: {locale}</span>
+      <span class="sr-only">{languageLabel}: {locale}</span>
     </summary>
     <div class={cn(
       'z-50 min-w-28 rounded-lg border border-border bg-popover p-1 shadow-md',

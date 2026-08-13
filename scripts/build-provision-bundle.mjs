@@ -25,11 +25,13 @@ ensureTypedStyles();
 
 for (const archetype of archetypes) {
   const files = buildBundleFiles(archetype);
+  const localizedFiles = findLocalizedFiles(files, archetype);
   const outPath = join(root, "provision-bundles", `${archetype}.json`);
   const bundleText = JSON.stringify({
     version,
     kind: "mantle-provision-bundle",
     archetype,
+    ...(localizedFiles.length > 0 ? { localizedFiles } : {}),
     files: Object.fromEntries(Object.entries(files).sort(([a], [b]) => a.localeCompare(b))),
   }, null, 2) + "\n";
 
@@ -142,6 +144,27 @@ function buildBundleFiles(archetype) {
   return files;
 }
 
+function findLocalizedFiles(files, archetype) {
+  const prefix = `.mantle/overlays/${archetype}/`;
+  return Object.keys(files).filter((path) => {
+    if (!path.startsWith(prefix) || !path.endsWith(".json")) return false;
+    const locales = JSON.parse(files[path])?.locales;
+    if (!locales || typeof locales !== "object" || Array.isArray(locales)) return false;
+    const entries = Object.entries(locales);
+    if (entries.length === 0) throw new Error(`${path} must define at least one locale`);
+    const keys = JSON.stringify(Object.keys(entries[0][1] ?? {}).sort());
+    for (const [locale, value] of entries) {
+      if (!value || typeof value !== "object" || Array.isArray(value)) {
+        throw new Error(`${path} locale ${locale} must be an object`);
+      }
+      if (JSON.stringify(Object.keys(value).sort()) !== keys) {
+        throw new Error(`${path} locale ${locale} has a different key set`);
+      }
+    }
+    return true;
+  }).sort();
+}
+
 function compileBundleStyles(files, archetype) {
   const tempRoot = mkdtempSync(join(tmpdir(), `mantle-${archetype}-styles-`));
   try {
@@ -203,6 +226,13 @@ function assertBundle(bundle, archetype) {
   }
   if (!bundle.files["manifests/site.yaml"]) {
     throw new Error(`${archetype} bundle missing applied manifest`);
+  }
+  for (const path of bundle.localizedFiles ?? []) {
+    if (!bundle.files[path]) throw new Error(`${archetype} localized file is absent from bundle: ${path}`);
+    const locales = JSON.parse(bundle.files[path])?.locales;
+    if (!locales || typeof locales !== "object" || Array.isArray(locales)) {
+      throw new Error(`${archetype} localized file must expose an object at locales: ${path}`);
+    }
   }
   if (archetype === "blank") {
     assertHeadlessBlank(bundle);
@@ -393,7 +423,7 @@ function applyOverlay(files, archetype) {
     files["wrangler.toml"] = `${files["wrangler.toml"].trimEnd()}\n${readFileSync(wranglerAppend, "utf8")}`;
   }
   let seedText = null;
-  for (const name of ["handoff.md", "layout.md", "seed-prompt.md", "seed.json"]) {
+  for (const name of ["handoff.md", "layout.md", "seed-prompt.md", "seed.json", "messages.json"]) {
     const path = join(root, "overlays", archetype, name);
     try {
       if (statSync(path).isFile()) {
@@ -412,6 +442,7 @@ function applyOverlay(files, archetype) {
 
 function applyOverlaySeedContent(files, archetype, seedText) {
   const seed = JSON.parse(seedText);
+  if (seed?.locales) return;
   const seedImport = `../../../.mantle/overlays/${archetype}/seed.json`;
   if (!seed?.site) throw new Error(`${archetype} seed must define site chrome`);
   assertLocalizedChrome(seed, archetype);
@@ -422,6 +453,7 @@ function applyOverlaySeedContent(files, archetype, seedText) {
     "type Seed = { readonly site: SiteContent };",
     "const seedData = seed as Seed;",
     "export const siteContent: SiteContent = seedData.site;",
+    "export function siteContentForLocale(_locale: string): SiteContent { return siteContent; }",
     "",
   ].join("\n");
   if (!Array.isArray(seed?.collections?.page)) {
@@ -552,7 +584,9 @@ function selectTypedSurface(files, archetype) {
 
 function selectedSectionNames(files, archetype) {
   const seed = JSON.parse(files[`.mantle/overlays/${archetype}/seed.json`] ?? "{}");
-  const pageCollection = seed.collections?.["page-translations"] ?? seed.collections?.page ?? [];
+  const pageCollection = seed.locales
+    ? Object.values(seed.locales).flatMap((pack) => pack?.["page-translations"] ?? [])
+    : seed.collections?.["page-translations"] ?? seed.collections?.page ?? [];
   const seeded = [...new Set(pageCollection
     .flatMap((page) => page.sections ?? [])
     .map((section) => section.type)

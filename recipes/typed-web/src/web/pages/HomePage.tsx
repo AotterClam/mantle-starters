@@ -2,7 +2,7 @@ import type { Child } from "hono/jsx";
 import { Footer02 } from "@/components/blocks/marketing/footer-02";
 import { Nav02 } from "@/components/blocks/marketing/nav-02";
 import { homeContent, homeLocale } from "../content/homeContent.js";
-import { siteContent } from "../content/siteContent.js";
+import { siteContent, siteContentForLocale } from "../content/siteContent.js";
 import type { HomeContent } from "../content/types.js";
 import { renderSection } from "../sections/renderSection.js";
 
@@ -60,6 +60,7 @@ export function SitePage({
   readonly brand?: string;
   readonly before?: Child;
 }) {
+  const copy = siteContentForLocale(locale);
   const homeHref = `/${locale.toLowerCase()}`;
   const href = (value: string) => value.startsWith("/") &&
       !value.startsWith("//") &&
@@ -67,13 +68,13 @@ export function SitePage({
       !value.startsWith(`${homeHref}/`)
     ? `${homeHref}${value}`
     : value;
-  const hasNavigation = siteContent.navLinks.length > 0 || Boolean(siteContent.navAction) || locales.length > 1;
+  const hasNavigation = copy.navLinks.length > 0 || Boolean(copy.navAction) || locales.length > 1;
   const hasFooter = Boolean(
-    siteContent.footer.tagline ||
-      siteContent.footer.copyright ||
-      siteContent.footer.columns.length > 0 ||
-      siteContent.footer.socialLinks.length > 0 ||
-      siteContent.footer.bottomLinks.length > 0,
+    copy.footer.tagline ||
+      copy.footer.copyright ||
+      copy.footer.columns.length > 0 ||
+      copy.footer.socialLinks.length > 0 ||
+      copy.footer.bottomLinks.length > 0,
   );
   return (
     <>
@@ -82,27 +83,28 @@ export function SitePage({
         <Nav02
           logo={brand}
           logoHref={homeHref}
-          links={siteContent.navLinks.map((link) => ({ ...link, href: href(link.href) }))}
-          ctaText={siteContent.navAction?.label}
-          ctaHref={siteContent.navAction && href(siteContent.navAction.href)}
+          links={copy.navLinks.map((link) => ({ ...link, href: href(link.href) }))}
+          ctaText={copy.navAction?.label}
+          ctaHref={copy.navAction && href(copy.navAction.href)}
+          ctaIcon={copy.navAction?.icon}
           locale={locale}
           locales={locales}
           localePath={localePath}
-          labels={siteContent.chromeLabels}
+          labels={copy.chromeLabels}
         />
       )}
       <main>{children}</main>
       {hasFooter && (
         <Footer02
           logo={{ text: brand }}
-          tagline={siteContent.footer.tagline}
-          columns={siteContent.footer.columns.map((column) => ({
+          tagline={copy.footer.tagline}
+          columns={copy.footer.columns.map((column) => ({
             title: column.title,
             links: column.links.map((link) => ({ ...link, href: href(link.href) })),
           }))}
-          socialLinks={siteContent.footer.socialLinks.map((link) => ({ ...link }))}
-          copyright={siteContent.footer.copyright}
-          bottomLinks={siteContent.footer.bottomLinks.map((link) => ({ ...link, href: href(link.href) }))}
+          socialLinks={copy.footer.socialLinks.map((link) => ({ ...link }))}
+          copyright={copy.footer.copyright}
+          bottomLinks={copy.footer.bottomLinks.map((link) => ({ ...link, href: href(link.href) }))}
         />
       )}
     </>

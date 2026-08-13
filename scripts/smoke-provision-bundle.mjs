@@ -118,6 +118,7 @@ function assertProjectScripts(root, archetype) {
 function smokeLocalMaterializer() {
   const tempRoot = mkdtempSync(join(tmpdir(), "mantle-materialize-"));
   const output = join(tempRoot, "northstar");
+  const shopOutput = join(tempRoot, "five-language-shop");
   try {
     const result = spawnSync(process.execPath, [
       "scripts/dev-provision-bundle.mjs",
@@ -146,6 +147,36 @@ function smokeLocalMaterializer() {
     if (!wrangler.includes('database_name = "northstar-db"')) throw new Error("local D1 name mismatch");
     if (!wrangler.includes('PUBLIC_ORIGIN = "http://localhost:8787"')) throw new Error("local origin missing");
     assertGeneratedStylesMatchStarterLock(output);
+    const shop = spawnSync(process.execPath, [
+      "scripts/dev-provision-bundle.mjs",
+      "transaction",
+      "--out",
+      shopOutput,
+      "--brand",
+      "Five Language Shop",
+      "--description",
+      "A localized transaction starter.",
+      "--locales",
+      "en,zh-TW,ja,ko,fr",
+    ], { cwd: root, encoding: "utf8" });
+    if (shop.status !== 0) throw new Error(`five-language materializer failed: ${shop.stderr || shop.stdout}`);
+    for (const path of ["seed.json", "messages.json"]) {
+      const catalog = JSON.parse(readFileSync(join(shopOutput, ".mantle", "overlays", "transaction", path), "utf8"));
+      if (JSON.stringify(Object.keys(catalog.locales)) !== '["en","zh-TW","ja","ko","fr"]') {
+        throw new Error(`transaction ${path} was not reduced to the selected locales`);
+      }
+    }
+    const unsupported = spawnSync(process.execPath, [
+      "scripts/dev-provision-bundle.mjs",
+      "transaction",
+      "--out",
+      join(tempRoot, "unsupported-shop"),
+      "--locales",
+      "en,nl",
+    ], { cwd: root, encoding: "utf8" });
+    if (unsupported.status === 0 || !`${unsupported.stderr}${unsupported.stdout}`.includes("does not support locales: nl")) {
+      throw new Error("transaction materializer accepted an unsupported locale");
+    }
     const overwrite = spawnSync(process.execPath, [
       "scripts/dev-provision-bundle.mjs",
       "blank",
@@ -324,7 +355,9 @@ function assertSectionImageContract(root, archetype) {
   const seed = JSON.parse(
     readFileSync(join(root, ".mantle", "overlays", archetype, "seed.json"), "utf8"),
   );
-  const pageSeed = seed.collections?.["page-translations"] ?? seed.collections?.page;
+  const pageSeed = seed.locales
+    ? Object.values(seed.locales).flatMap((pack) => pack?.["page-translations"] ?? [])
+    : seed.collections?.["page-translations"] ?? seed.collections?.page;
   const hero = pageSeed?.[0]?.sections?.find((section) => section.type === "hero");
   if (hero?.image?.src !== "/assets/mantle-ocean-hero-light.svg" || hero.image.alt !== "") {
     throw new Error(`${archetype} seed does not reference the shared ocean hero`);
@@ -602,13 +635,20 @@ function assertSeedDrivenHome(root, archetype) {
 function assertTransactionSeed(root) {
   const seed = readFileSync(join(root, ".mantle", "overlays", "transaction", "seed.json"), "utf8");
   const parsed = JSON.parse(seed);
+  const locales = Object.keys(parsed.locales ?? {});
   if (
     !seed.includes('"type": "home"')
-    || parsed.collections?.products?.length !== 3
-    || parsed.collections?.["product-translations"]?.length !== 3
-    || parsed.collections?.["page-translations"]?.length < 1
+    || parsed.collections?.products?.length !== 1
+    || parsed.collections.products[0]?.slug !== "sample-product"
+    || locales.length !== 1
+    || parsed.locales[locales[0]]?.["product-translations"]?.length !== 1
+    || parsed.locales[locales[0]]?.["page-translations"]?.length !== 2
   ) {
-    throw new Error("transaction seed does not include a visible home and three products");
+    throw new Error("transaction seed does not include localized home/about and one sample product");
+  }
+  const messages = JSON.parse(readFileSync(join(root, ".mantle", "overlays", "transaction", "messages.json"), "utf8"));
+  if (JSON.stringify(Object.keys(messages.locales)) !== JSON.stringify(locales)) {
+    throw new Error("transaction entry and message locale catalogs differ");
   }
   const schemas = parseAllDocuments(readFileSync(join(root, "manifests", "site.yaml"), "utf8"))
     .map((document) => document.toJSON())
@@ -629,6 +669,7 @@ function assertTransactionPublicSurface(root) {
   const worker = readFileSync(join(root, "src", "index.ts"), "utf8");
   const surface = readFileSync(join(root, "src", "web", "publicSite.tsx"), "utf8");
   const client = readFileSync(join(root, "src", "web", "client", "homeClient.ts"), "utf8");
+  const nav = readFileSync(join(root, "components", "blocks", "marketing", "nav-02.tsx"), "utf8");
   const wrangler = readFileSync(join(root, "wrangler.toml"), "utf8");
   if (!worker.includes("mountPublicRoutes") || !worker.includes("publicPathResolver")) {
     throw new Error("transaction Worker does not mount the Core public route surface");
@@ -658,6 +699,9 @@ function assertTransactionPublicSurface(root) {
     if (!worker.includes(required)) throw new Error(`transaction lifecycle worker missing ${required}`);
   }
   if (!client.includes("commerceClientJs")) throw new Error("transaction client bundle is missing cart behavior");
+  if (!nav.includes("ShoppingCartIcon") || !nav.includes("data-cart-count")) {
+    throw new Error("transaction navigation is missing the cart icon/count surface");
+  }
 }
 
 function readSource(root) {

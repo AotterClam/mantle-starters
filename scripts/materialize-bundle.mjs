@@ -7,7 +7,31 @@ export function materializeBundle(root, bundle, values) {
     mkdirSync(dirname(target), { recursive: true });
     writeFileSync(target, substitute(String(raw), values), "utf8");
   }
+  selectLocalizedFiles(root, bundle.localizedFiles ?? [], values);
   applyProjectIdentity(root, values.PROJECT_NAME, values.SITE_URL);
+}
+
+function selectLocalizedFiles(root, paths, values) {
+  if (paths.length === 0) return;
+  const locales = JSON.parse(values.LOCALES);
+  if (!Array.isArray(locales) || locales.some((locale) => typeof locale !== "string")) {
+    throw new Error("LOCALES must be a JSON string array");
+  }
+  if (!locales.includes(values.CANONICAL_LOCALE)) {
+    throw new Error("CANONICAL_LOCALE must be included in LOCALES");
+  }
+  for (const path of paths) {
+    const target = join(root, path.replace(/\.template$/, ""));
+    const value = JSON.parse(readFileSync(target, "utf8"));
+    const available = value?.locales;
+    if (!available || typeof available !== "object" || Array.isArray(available)) {
+      throw new Error(`${path} must expose an object at locales`);
+    }
+    const missing = locales.filter((locale) => !(locale in available));
+    if (missing.length > 0) throw new Error(`${path} does not support locales: ${missing.join(", ")}`);
+    value.locales = Object.fromEntries(locales.map((locale) => [locale, available[locale]]));
+    writeFileSync(target, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+  }
 }
 
 function substitute(text, values) {

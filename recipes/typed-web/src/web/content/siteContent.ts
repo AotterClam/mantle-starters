@@ -18,3 +18,7 @@ export const siteContent: SiteContent = {
     bottomLinks: [],
   },
 };
+
+export function siteContentForLocale(_locale: string): SiteContent {
+  return siteContent;
+}

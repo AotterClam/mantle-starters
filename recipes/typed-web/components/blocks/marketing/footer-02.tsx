@@ -60,7 +60,26 @@ export const Footer02: FC<Footer02Props> = ({
   copyright,
   bottomLinks = [],
   class: className,
-}) => (
+}) => {
+  const compact = !tagline && columns.length === 0 && socialLinks.length === 0
+  if (compact) return (
+    <footer class={cn('border-t border-border-subtle bg-background', className)}>
+      <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-6 text-xs text-foreground-soft sm:px-6 lg:px-8">
+        <span>{copyright}</span>
+        {bottomLinks.map((link) => (
+          <a
+            href={link.href}
+            target={isExternal(link.href) ? '_blank' : undefined}
+            rel={isExternal(link.href) ? 'noopener noreferrer' : undefined}
+            class="transition-colors hover:text-foreground"
+          >
+            {link.label}
+          </a>
+        ))}
+      </div>
+    </footer>
+  )
+  return (
   <footer class={cn('border-t border-border-subtle bg-background', className)}>
     <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
       <div class="lg:grid lg:grid-cols-3 lg:gap-8">
@@ -137,6 +156,7 @@ export const Footer02: FC<Footer02Props> = ({
       </div>
     </div>
   </footer>
-)
+  )
+}
 
 export default Footer02

@@ -6,6 +6,7 @@ import { renderToString } from "hono/jsx/dom/server";
 import type { MantleSite } from "../../.mantle/generated/types.js";
 import type { Env } from "../mantle/config.js";
 import { PageDocument } from "../renderer.js";
+import { commerceCopy } from "./messages.js";
 import { SitePage } from "./pages/HomePage.js";
 
 const HTML_NO_STORE = {
@@ -72,7 +73,7 @@ export function mountCommerceRoutes(
           <h1 class="mt-3 text-4xl tracking-tight">{copy.checkout}</h1>
           <CatalogData items={page.catalog} />
           <div class="mt-10 rounded-xl border border-border bg-card p-5" data-cart-summary data-empty-label={copy.emptyCart}></div>
-          <form class="mt-8 grid gap-5" data-checkout-form data-locale={page.locale}>
+          <form class="mt-8 grid gap-5" data-checkout-form data-locale={page.locale} data-error-label={copy.checkoutFailed}>
             <label class="grid gap-2">
               <span class="text-sm font-medium">{copy.name}</span>
               <input name="customerName" required maxLength={120} autocomplete="name" class="rounded-lg border border-border bg-background px-3 py-2" />
@@ -147,10 +148,10 @@ async function renderOrderPage(
           <div class="mt-8 rounded-xl border border-primary/30 bg-primary/5 p-5">
             <p class="text-sm text-foreground-muted">{copy.fakePaymentNotice}</p>
             <div class="mt-5 flex flex-wrap gap-3">
-              <button type="button" class="rounded-lg bg-primary px-5 py-3 font-medium text-primary-foreground" data-order-action="pay" data-order-token={orderToken} data-locale={page.locale}>
+              <button type="button" class="rounded-lg bg-primary px-5 py-3 font-medium text-primary-foreground" data-order-action="pay" data-order-token={orderToken} data-locale={page.locale} data-error-label={copy.orderUpdateFailed}>
                 {copy.payNow}
               </button>
-              <button type="button" class="rounded-lg border border-border px-5 py-3 font-medium" data-order-action="cancel" data-order-token={orderToken} data-locale={page.locale}>
+              <button type="button" class="rounded-lg border border-border px-5 py-3 font-medium" data-order-action="cancel" data-order-token={orderToken} data-locale={page.locale} data-error-label={copy.orderUpdateFailed}>
                 {copy.cancelOrder}
               </button>
             </div>
@@ -233,38 +234,4 @@ function statusLabel(status: OrderData["orderStatus"], copy: Copy): string {
     fulfilled: copy.fulfilled,
     cancelled: copy.cancelled,
   })[status];
-}
-
-export function commerceCopy(locale: string) {
-  const language = locale.toLowerCase();
-  if (language.startsWith("zh")) return {
-    shop: "商店", products: "商品", product: "商品", back: "返回商品", add: "加入購物車", added: "已加入",
-    cart: "購物車", emptyCart: "購物車目前是空的。", quantity: "數量", remove: "移除", total: "總計", checkout: "前往結帳", name: "收件人姓名",
-    email: "電子郵件", address: "配送地址", placeOrder: "建立訂單", fakePayment: "示意付款", fakePaymentNotice: "這是 starter 的假金流頁，不會產生真實扣款。",
-    payNow: "模擬付款成功", cancelOrder: "取消訂單", order: "訂單", pendingPayment: "等待付款", paid: "已付款", fulfilled: "已出貨", cancelled: "已取消",
-  } as const;
-  if (language.startsWith("ja")) return {
-    shop: "ショップ", products: "商品", product: "商品", back: "商品一覧へ", add: "カートに追加", added: "追加しました",
-    cart: "カート", emptyCart: "カートは空です。", quantity: "数量", remove: "削除", total: "合計", checkout: "購入手続きへ", name: "お名前", email: "メール",
-    address: "配送先住所", placeOrder: "注文を作成", fakePayment: "デモ決済", fakePaymentNotice: "スターター用の模擬決済です。実際の請求は行われません。",
-    payNow: "支払い成功をシミュレート", cancelOrder: "注文をキャンセル", order: "注文", pendingPayment: "支払い待ち", paid: "支払い済み", fulfilled: "発送済み", cancelled: "キャンセル済み",
-  } as const;
-  if (language.startsWith("ko")) return {
-    shop: "스토어", products: "상품", product: "상품", back: "상품으로 돌아가기", add: "장바구니 담기", added: "담았습니다",
-    cart: "장바구니", emptyCart: "장바구니가 비어 있습니다.", quantity: "수량", remove: "삭제", total: "합계", checkout: "결제하기", name: "받는 분", email: "이메일",
-    address: "배송 주소", placeOrder: "주문 만들기", fakePayment: "데모 결제", fakePaymentNotice: "스타터용 가짜 결제 화면이며 실제 청구되지 않습니다.",
-    payNow: "결제 성공 시뮬레이션", cancelOrder: "주문 취소", order: "주문", pendingPayment: "결제 대기", paid: "결제 완료", fulfilled: "배송 완료", cancelled: "취소됨",
-  } as const;
-  if (language.startsWith("fr")) return {
-    shop: "Boutique", products: "Produits", product: "Produit", back: "Retour aux produits", add: "Ajouter au panier", added: "Ajouté",
-    cart: "Panier", emptyCart: "Votre panier est vide.", quantity: "quantité", remove: "Retirer", total: "Total", checkout: "Passer la commande", name: "Nom", email: "E-mail",
-    address: "Adresse de livraison", placeOrder: "Créer la commande", fakePayment: "Paiement fictif", fakePaymentNotice: "Cette page simule le paiement du starter. Aucun débit réel ne sera effectué.",
-    payNow: "Simuler le paiement", cancelOrder: "Annuler la commande", order: "Commande", pendingPayment: "En attente de paiement", paid: "Payée", fulfilled: "Expédiée", cancelled: "Annulée",
-  } as const;
-  return {
-    shop: "Shop", products: "Products", product: "Product", back: "Back to products", add: "Add to cart", added: "Added",
-    cart: "Cart", emptyCart: "Your cart is empty.", quantity: "quantity", remove: "Remove", total: "Total", checkout: "Checkout", name: "Name", email: "Email",
-    address: "Shipping address", placeOrder: "Place order", fakePayment: "Demo payment", fakePaymentNotice: "This starter payment page is simulated. No real charge will be made.",
-    payNow: "Simulate successful payment", cancelOrder: "Cancel order", order: "Order", pendingPayment: "Awaiting payment", paid: "Paid", fulfilled: "Fulfilled", cancelled: "Cancelled",
-  } as const;
 }

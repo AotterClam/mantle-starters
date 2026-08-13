@@ -14,15 +14,12 @@ const writeCart = (cart) => {
 };
 const updateCartCount = (cart = readCart()) => {
   const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-  document.querySelectorAll('a[href$="/cart"]').forEach((link) => {
-    let badge = link.querySelector('[data-cart-count]');
-    if (!badge) {
-      badge = document.createElement('span');
-      badge.dataset.cartCount = '';
-      badge.className = 'ml-1 text-xs';
-      link.append(badge);
-    }
-    badge.textContent = count ? '(' + count + ')' : '';
+  document.querySelectorAll('[data-cart-link]').forEach((link) => {
+    const badge = link.querySelector('[data-cart-count]');
+    if (!badge) return;
+    badge.textContent = String(count);
+    badge.hidden = count === 0;
+    link.setAttribute('aria-label', count ? (link.dataset.cartLabel + ': ' + count) : link.dataset.cartLabel);
   });
 };
 const catalog = () => new Map(Array.from(document.querySelectorAll('[data-commerce-product]'), (node) => [
@@ -131,11 +128,11 @@ document.querySelectorAll('[data-checkout-form]').forEach((form) => {
         body: JSON.stringify({ ...fields, locale: form.dataset.locale, items: readCart() }),
       });
       const payload = await response.json();
-      if (!response.ok || !payload.ok) throw new Error(payload.diagnostic?.message || 'Checkout failed.');
+      if (!response.ok || !payload.ok) throw new Error(payload.diagnostic?.message || form.dataset.errorLabel);
       localStorage.removeItem(CART_KEY); updateCartCount([]);
       location.href = '/' + form.dataset.locale.toLowerCase() + '/pay/' + payload.data.orderToken;
     } catch (error) {
-      status.textContent = error instanceof Error ? error.message : 'Checkout failed.';
+      status.textContent = error instanceof Error ? error.message : form.dataset.errorLabel;
       button.disabled = false;
     }
   });
@@ -152,10 +149,10 @@ document.querySelectorAll('[data-order-action]').forEach((button) => {
         body: JSON.stringify({ orderToken: button.dataset.orderToken }),
       });
       const payload = await response.json();
-      if (!response.ok || !payload.ok) throw new Error(payload.diagnostic?.message || 'Order update failed.');
+      if (!response.ok || !payload.ok) throw new Error(payload.diagnostic?.message || button.dataset.errorLabel);
       location.href = '/' + button.dataset.locale.toLowerCase() + '/orders/' + button.dataset.orderToken;
     } catch (error) {
-      if (status) status.textContent = error instanceof Error ? error.message : 'Order update failed.';
+      if (status) status.textContent = error instanceof Error ? error.message : button.dataset.errorLabel;
       document.querySelectorAll('[data-order-action]').forEach((control) => { control.disabled = false; });
     }
   });

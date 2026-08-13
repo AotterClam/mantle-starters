@@ -1,6 +1,7 @@
 import type { CmsRuntime } from "@aotter/mantle/runtime";
 import { bindMantleSite } from "../../../.mantle/generated/site.js";
 import seed from "../../../.mantle/overlays/transaction/seed.json";
+import { messagesForLocale } from "../messages.js";
 import type { HomeContent, HomeItem, HomeSection } from "./types.js";
 
 type Product = {
@@ -11,22 +12,49 @@ type Product = {
   readonly currency?: string;
 };
 
-const homePage = seed.collections["page-translations"].find((page) => page.slug === "home");
-const seedProducts: readonly Product[] = seed.collections["product-translations"].map((translation) => ({
-  ...seed.collections.products.find((product) => product.slug === translation.slug),
-  ...translation,
-}));
-
-export const homeContent: HomeContent = {
-  sections: (homePage?.sections ?? []) as unknown as readonly HomeSection[],
+type LocaleSeed = {
+  readonly "page-translations": readonly { readonly slug: string; readonly sections: readonly unknown[] }[];
+  readonly "product-translations": readonly Product[];
 };
-export const homeLocale = seed.locale;
+
+function localeSeed(locale: string): LocaleSeed {
+  const locales = seed.locales as unknown as Record<string, LocaleSeed>;
+  const key = Object.keys(locales).find((candidate) => candidate.toLowerCase() === locale.toLowerCase());
+  return locales[key ?? seed.canonicalLocale] ?? Object.values(locales)[0]!;
+}
+
+function fallback(locale: string): { readonly content: HomeContent; readonly products: readonly Product[] } {
+  const selected = localeSeed(locale);
+  const homePage = selected["page-translations"].find((page) => page.slug === "home");
+  const products = selected["product-translations"].map((translation) => ({
+    ...seed.collections.products.find((product) => product.slug === translation.slug),
+    ...translation,
+  }));
+  return {
+    content: {
+      sections: [
+        ...((homePage?.sections ?? []) as unknown as readonly HomeSection[]),
+        {
+          type: "features",
+          id: "products",
+          title: messagesForLocale(locale)["nav.products"],
+          items: products.map((product) => productItem(product, locale)),
+        },
+      ],
+    },
+    products,
+  };
+}
+
+export const homeLocale = seed.canonicalLocale;
+export const homeContent = fallback(homeLocale).content;
 
 export async function resolveHomeContent(
   getRuntime: () => Promise<CmsRuntime>,
   locale = homeLocale,
 ): Promise<HomeContent> {
   const runtime = await getRuntime();
+  const seeded = fallback(locale);
   const site = bindMantleSite(runtime);
   const [pageResult, productResult] = await Promise.all([
     site.views["home"]({ params: { locale } }),
@@ -55,10 +83,10 @@ export async function resolveHomeContent(
         ...parentBySlug.get(translation.slug ?? ""),
         ...translation,
       } as Product))
-    : seedProducts;
+    : seeded.products;
 
   return {
-    sections: (sections?.length ? sections : homeContent.sections).map((section) => section.id === "products"
+    sections: (sections?.length ? sections : seeded.content.sections).map((section) => section.id === "products"
       ? { ...section, items: products.map((product) => productItem(product, locale)) }
       : section),
   };
