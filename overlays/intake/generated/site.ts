@@ -415,7 +415,8 @@ export const manifest = [
             "type": "string"
           },
           "createdAt": {
-            "type": "number",
+            "type": "integer",
+            "x-mcp-hint": "timestamp-ms",
             "x-mantle-bind": "now"
           }
         }

@@ -117,6 +117,10 @@ spec:
         minimum: 1
       note:
         type: string
+      createdAt:
+        type: integer
+        x-mcp-hint: timestamp-ms
+        x-mantle-bind: now
   lifecycle: operational
 ---
 apiVersion: cms.mantle.aotter.net/v1

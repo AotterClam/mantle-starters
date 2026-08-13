@@ -133,6 +133,7 @@ spec:
         x-mcp-hint: markdown
       publishedAt:
         type: number
+        x-mcp-hint: timestamp-ms
   uniqueIndexes:
     - [slug, locale]
   indexes:
@@ -180,7 +181,8 @@ spec:
       note:
         type: string
       createdAt:
-        type: number
+        type: integer
+        x-mcp-hint: timestamp-ms
         x-mantle-bind: now
   lifecycle: operational
 ---

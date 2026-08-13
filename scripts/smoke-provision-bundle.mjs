@@ -74,6 +74,7 @@ for (const archetype of archetypes) {
       if (!features?.archetype?.appliedAt) throw new Error(`${archetype} overlay not marked applied`);
       assertFourAtoms(tempRoot, archetype);
       assertPublicMutationInputsStrict(tempRoot, archetype);
+      assertServerOwnedFields(tempRoot, archetype);
       assertOperationalCollection(tempRoot, archetype);
       assertSeedDrivenHome(tempRoot, archetype);
       readFileSync(join(tempRoot, ".mantle", "overlays", archetype, "seed.json"), "utf8");
@@ -473,6 +474,30 @@ function assertPublicMutationInputsStrict(root, archetype) {
   for (const procedure of publicMutations) {
     if (procedure.spec.input?.additionalProperties !== false) {
       throw new Error(`${procedure.metadata?.name} silently accepts undeclared fields`);
+    }
+  }
+}
+
+function assertServerOwnedFields(root, archetype) {
+  const atoms = parseAllDocuments(readFileSync(join(root, "manifests", "site.yaml"), "utf8"))
+    .map((document) => document.toJSON());
+  const schemas = new Map(
+    atoms.filter((atom) => atom?.kind === "Schema").map((atom) => [atom.metadata?.name, atom]),
+  );
+  for (const procedure of atoms.filter((atom) => atom?.kind === "Procedure" && atom?.spec?.handler?.op === "create")) {
+    const schema = schemas.get(procedure.spec.handler.schema);
+    for (const [field, property] of Object.entries(schema?.spec?.schema?.properties ?? {})) {
+      if (!property?.["x-mantle-bind"]) continue;
+      if (!["ctx.user", "ctx.staff", "now"].includes(property["x-mantle-bind"])) {
+        throw new Error(`${archetype} uses an unsupported server-owned bind for ${field}`);
+      }
+      const input = procedure.spec.input ?? {};
+      if (input.required?.includes(field) || Object.hasOwn(input.properties ?? {}, field)) {
+        throw new Error(`${archetype} create input exposes server-owned field ${field}`);
+      }
+      if (property["x-mantle-bind"] === "now" && (property.type !== "integer" || property["x-mcp-hint"] !== "timestamp-ms")) {
+        throw new Error(`${archetype} now-bound field ${field} must be an integer timestamp-ms`);
+      }
     }
   }
 }

@@ -55,6 +55,7 @@ export namespace MantleSite {
     requestedFor: string;
     partySize?: number;
     note?: string;
+    createdAt?: number;
   }
 
   /** Procedure 'submit-reservation-request' input */

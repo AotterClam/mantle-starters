@@ -247,6 +247,11 @@ export const manifest = [
           },
           "note": {
             "type": "string"
+          },
+          "createdAt": {
+            "type": "integer",
+            "x-mcp-hint": "timestamp-ms",
+            "x-mantle-bind": "now"
           }
         }
       },
