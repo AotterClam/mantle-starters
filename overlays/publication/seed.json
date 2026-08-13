@@ -58,6 +58,10 @@
             "type": "hero",
             "title": "{{BRAND}} is ready to publish its first useful notes",
             "body": "{{DESCRIPTION}}",
+            "image": {
+              "src": "/assets/mantle-ocean-hero-light.svg",
+              "alt": ""
+            },
             "action": { "label": "Read latest", "href": "#dispatches" },
             "secondaryAction": { "label": "See the system", "href": "#system" }
           },

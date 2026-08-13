@@ -13,13 +13,21 @@ export const homeContent: HomeContent = { sections: homePage?.sections ?? [] };
 export const homeLocale = seed.locale;
 
 export async function resolveHomeContent(getRuntime: () => Promise<CmsRuntime>): Promise<HomeContent> {
-  const result = await bindMantleSite(await getRuntime()).views["public-products"]();
+  const site = bindMantleSite(await getRuntime());
+  const [pageResult, result] = await Promise.all([
+    site.views["home"](),
+    site.views["public-products"](),
+  ]);
+  if (!pageResult.ok) console.warn("Mantle home View failed; showing seed homepage", pageResult.diagnostic);
   if (!result.ok) console.warn("Mantle public-products View failed; showing seed catalog", result.diagnostic);
+  const sections = pageResult.ok
+    ? pageResult.result.rows[0]?.sections as readonly HomeSection[] | undefined
+    : undefined;
   const products = result.ok && result.result.rows.length > 0
     ? result.result.rows
     : seed.collections.products;
   return {
-    sections: homeContent.sections.map((section) => section.id === "products"
+    sections: (sections?.length ? sections : homeContent.sections).map((section) => section.id === "products"
       ? { ...section, items: products.map(productItem) }
       : section),
   };

@@ -52,6 +52,7 @@ function generatedAssetVersion(css) {
   const hash = createHash("sha256");
   for (const content of [
     css,
+    readFileSync(join(root, "src", "web", "mantleOceanHero.ts"), "utf8"),
     ...readdirSync(join(root, "src", "web", "client"))
       .filter((name) => name.endsWith(".ts"))
       .sort()
@@ -65,7 +66,7 @@ function generatedAssetVersion(css) {
     `export const assetBuild = "${hash.digest("hex").slice(0, 16)}";`,
     "",
     "export function asset(path: string): string {",
-    "  return `${path}?v=${assetBuild}`;",
+    '  return path.startsWith("/") ? `${path}?v=${assetBuild}` : path;',
     "}",
     "",
   ].join("\n");
@@ -87,6 +88,7 @@ function collectCandidates(root) {
   const ignored = new Set([
     join(root, "src", "mantle", "config.ts"),
     join(root, "src", "web", "content", "siteContent.ts"),
+    join(root, "src", "web", "mantleOceanHero.ts"),
   ]);
   for (const dir of ["src", "components"]) {
     collectFromDir(join(root, dir), candidates, ignored);

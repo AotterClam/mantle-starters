@@ -29,12 +29,17 @@
       {
         "type": "home",
         "title": "{{BRAND}}",
+        "status": "published",
         "sections": [
           {
             "type": "hero",
             "eyebrow": "Reservation starter",
             "title": "{{BRAND}}",
-            "body": "{{DESCRIPTION}}"
+            "body": "{{DESCRIPTION}}",
+            "image": {
+              "src": "/assets/mantle-ocean-hero-light.svg",
+              "alt": ""
+            }
           },
           {
             "type": "features",

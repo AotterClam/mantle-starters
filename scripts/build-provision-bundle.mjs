@@ -424,6 +424,7 @@ function applyOverlaySeedContent(files, archetype, seedText) {
   }
   files["src/web/content/homeContent.ts"] = [
     `import seed from "${seedImport}";`,
+    'import { bindMantleSite } from "../../../.mantle/generated/site.js";',
     'import type { CmsRuntime } from "@aotter/mantle/runtime";',
     'import type { HomeContent, HomeSection } from "./types.js";',
     "",
@@ -436,8 +437,11 @@ function applyOverlaySeedContent(files, archetype, seedText) {
     'const homePage = (seedData.collections?.page ?? []).find((page) => page.type === "home");',
     "export const homeContent: HomeContent = { sections: homePage?.sections ?? [] };",
     "export const homeLocale = seedData.locale;",
-    "export async function resolveHomeContent(_getRuntime: () => Promise<CmsRuntime>): Promise<HomeContent> {",
-    "  return homeContent;",
+    "export async function resolveHomeContent(getRuntime: () => Promise<CmsRuntime>): Promise<HomeContent> {",
+    '  const result = await bindMantleSite(await getRuntime()).views["home"]();',
+    '  if (!result.ok) console.warn("Mantle home View failed; showing seed homepage", result.diagnostic);',
+    "  const sections = result.ok ? result.result.rows[0]?.sections as readonly HomeSection[] | undefined : undefined;",
+    "  return sections?.length ? { sections } : homeContent;",
     "}",
     "",
   ].join("\n");
@@ -506,6 +510,7 @@ function selectTypedSurface(files, archetype) {
     'import stylesCss from "../../../styles/generated.css";',
     'import { homeClientJs } from "../../web/client/homeClient.js";',
     ...(enhance ? ['import { kiwaEnhanceAssets } from "../../web/client/kiwaEnhanceAssets.js";'] : []),
+    'import { mantleOceanHeroDarkSvg, mantleOceanHeroLightSvg } from "../../web/mantleOceanHero.js";',
     'import type { Env } from "../../mantle/config.js";',
     "",
     'const ASSET_CACHE_CONTROL = "public, max-age=31536000, immutable";',
@@ -517,6 +522,8 @@ function selectTypedSurface(files, archetype) {
     '  app.get("/assets/kiwa-home.js", () => new Response(homeClientJs, {',
     '    headers: { "cache-control": ASSET_CACHE_CONTROL, "content-type": "text/javascript; charset=utf-8" },',
     "  }));",
+    '  app.get("/assets/mantle-ocean-hero-light.svg", () => svgResponse(mantleOceanHeroLightSvg));',
+    '  app.get("/assets/mantle-ocean-hero-dark.svg", () => svgResponse(mantleOceanHeroDarkSvg));',
     ...(enhance ? [
       '  app.get("/enhance/:file", (c) => {',
       '    const file = c.req.param("file");',
@@ -528,6 +535,10 @@ function selectTypedSurface(files, archetype) {
       "    });",
       "  });",
     ] : []),
+    "}",
+    "",
+    "function svgResponse(svg: string): Response {",
+    '  return new Response(svg, { headers: { "cache-control": ASSET_CACHE_CONTROL, "content-type": "image/svg+xml; charset=utf-8" } });',
     "}",
     "",
   ].join("\n");
@@ -542,6 +553,7 @@ function selectedSectionNames(files, archetype) {
   const pageSchema = parseAllDocuments(files["manifests/site.yaml"] ?? "")
     .map((document) => document.toJSON())
     .find((atom) => atom?.kind === "Schema" && atom?.metadata?.name === "page");
+  if (!pageSchema) throw new Error(`${archetype} manifest must declare the seeded page Schema`);
   const declared = pageSchema?.spec?.schema?.properties?.sections?.items?.properties?.type?.enum;
   if (!Array.isArray(declared)) return seeded;
   for (const type of seeded) {

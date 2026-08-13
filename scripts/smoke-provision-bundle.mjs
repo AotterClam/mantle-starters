@@ -285,24 +285,30 @@ function isWorkersCacheEnabled(wrangler) {
 
 function assertSectionImageContract(root, archetype) {
   const renderer = readFileSync(join(root, "src", "web", "sections", "renderers", "hero.tsx"), "utf8");
-  if (!renderer.includes("image={section.image}")) {
+  if (!renderer.includes("asset(section.image.src)")) {
     throw new Error(`${archetype} hero does not render its declared image`);
   }
+  const contentRendererPath = join(root, "src", "web", "sections", "renderers", "content.tsx");
+  if (existsSync(contentRendererPath)
+      && !readFileSync(contentRendererPath, "utf8").includes("asset(section.image.src)")) {
+    throw new Error(`${archetype} content does not render its declared image`);
+  }
   const manifestPath = join(root, "manifests", "site.yaml");
-  if (!existsSync(manifestPath)) return;
-  const page = parseAllDocuments(readFileSync(manifestPath, "utf8"))
-    .map((document) => document.toJSON())
+  const atoms = parseAllDocuments(readFileSync(manifestPath, "utf8"))
+    .map((document) => document.toJSON());
+  const page = atoms
     .find((atom) => atom?.kind === "Schema" && atom?.metadata?.name === "page");
-  if (
-    page
-    && page.spec?.schema?.properties?.sections?.items?.properties?.showImage?.type !== "boolean"
-  ) {
+  if (!page) throw new Error(`${archetype} seed homepage has no page Schema`);
+  const home = atoms.find((atom) => atom?.kind === "View" && atom?.metadata?.name === "home");
+  if (home?.spec?.from !== "page" || home.spec?.filter?.eq?.field !== "status") {
+    throw new Error(`${archetype} page lifecycle has no published home View`);
+  }
+  if (page.spec?.schema?.properties?.sections?.items?.properties?.showImage?.type !== "boolean") {
     throw new Error(`${archetype} page Schema does not expose showImage`);
   }
   const image = page?.spec?.schema?.properties?.sections?.items?.properties?.image;
   if (
-    page
-    && (
+    (
       image?.type !== "object"
       || image.properties?.src?.type !== "string"
       || image.properties?.alt?.type !== "string"
@@ -311,6 +317,28 @@ function assertSectionImageContract(root, archetype) {
     )
   ) {
     throw new Error(`${archetype} page Schema does not expose an accessible hero image`);
+  }
+  const seed = JSON.parse(
+    readFileSync(join(root, ".mantle", "overlays", archetype, "seed.json"), "utf8"),
+  );
+  const hero = seed.collections?.page?.[0]?.sections?.find((section) => section.type === "hero");
+  if (hero?.image?.src !== "/assets/mantle-ocean-hero-light.svg" || hero.image.alt !== "") {
+    throw new Error(`${archetype} seed does not reference the shared ocean hero`);
+  }
+  const homeContent = readFileSync(join(root, "src", "web", "content", "homeContent.ts"), "utf8");
+  if (!homeContent.includes('views["home"]()')) {
+    throw new Error(`${archetype} homepage never reads its home View`);
+  }
+  const assets = readFileSync(join(root, "src", "worker", "routes", "assets.ts"), "utf8");
+  const theme = readFileSync(join(root, "src", "web", "client", "themeClient.ts"), "utf8");
+  const svg = readFileSync(join(root, "src", "web", "mantleOceanHero.ts"), "utf8");
+  for (const path of ["mantle-ocean-hero-light.svg", "mantle-ocean-hero-dark.svg"]) {
+    if (!assets.includes(path) || !theme.includes(path)) {
+      throw new Error(`${archetype} ocean hero ${path} is not wired through assets and theme`);
+    }
+  }
+  if (!svg.includes("mantleOceanHeroLightSvg") || !svg.includes("mantleOceanHeroDarkSvg")) {
+    throw new Error(`${archetype} bundle does not contain the shared ocean hero`);
   }
 }
 

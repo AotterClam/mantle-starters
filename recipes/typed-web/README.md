@@ -107,8 +107,8 @@ pnpm dev      # safe wrangler dev — http://localhost:8787
 
 Open `http://localhost:8787/`, then inspect
 `manifests/site.yaml` for the selected View and Procedure names.
-The homepage starts from `.mantle/overlays/{{ARCHETYPE}}/seed.json`; content
-created later through Staff MCP lives in D1.
+The homepage reads the published `page` through the `home` View, then falls
+back to `.mantle/overlays/{{ARCHETYPE}}/seed.json` until one exists in D1.
 
 For production, push the generated repo and configure Cloudflare, or use
 Mantle landing to automate the GitHub and Cloudflare steps.
@@ -118,7 +118,8 @@ auth or self-hosted GitHub OAuth. The public homepage does not.
 
 ## Editing the launch
 
-1. Edit `.mantle/overlays/{{ARCHETYPE}}/seed.json` for auth-free local copy.
+1. Edit `.mantle/overlays/{{ARCHETYPE}}/seed.json` for the auth-free fallback.
+   Publishing a `page` through Admin or Staff MCP replaces it on `/`.
 2. Edit `manifests/site.yaml` when the Schema, View, Procedure, or
    Trigger contract changes, then run `pnpm generate`.
 3. Register only ref Procedure handlers in `src/mantle/handlers/index.ts`;

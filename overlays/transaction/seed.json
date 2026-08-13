@@ -48,6 +48,10 @@
             "eyebrow": "New catalog",
             "title": "A focused first storefront for {{BRAND}}",
             "body": "{{DESCRIPTION}}",
+            "image": {
+              "src": "/assets/mantle-ocean-hero-light.svg",
+              "alt": ""
+            },
             "action": { "label": "Browse products", "href": "#products" },
             "secondaryAction": { "label": "See how it works", "href": "#how-it-works" }
           },

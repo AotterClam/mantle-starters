@@ -8,6 +8,165 @@ export const manifest = [
     "apiVersion": "cms.mantle.aotter.net/v1",
     "kind": "Schema",
     "metadata": {
+      "name": "page"
+    },
+    "spec": {
+      "title": "Pages",
+      "description": "Public page content for a transaction site.",
+      "schema": {
+        "type": "object",
+        "required": [
+          "type",
+          "title",
+          "sections"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "home"
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "sections": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "title"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "hero",
+                    "features",
+                    "content",
+                    "faq",
+                    "cta"
+                  ]
+                },
+                "id": {
+                  "type": "string"
+                },
+                "eyebrow": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "body": {
+                  "type": "string",
+                  "x-mcp-hint": "markdown"
+                },
+                "showImage": {
+                  "type": "boolean"
+                },
+                "image": {
+                  "type": "object",
+                  "required": [
+                    "src",
+                    "alt"
+                  ],
+                  "properties": {
+                    "src": {
+                      "type": "string"
+                    },
+                    "alt": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "action": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string"
+                    },
+                    "href": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "secondaryAction": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string"
+                    },
+                    "href": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string"
+                      },
+                      "body": {
+                        "type": "string",
+                        "x-mcp-hint": "markdown"
+                      },
+                      "icon": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "uniqueIndexes": [
+        [
+          "type"
+        ]
+      ],
+      "localized": false,
+      "lifecycle": "publishing"
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "View",
+    "metadata": {
+      "name": "home"
+    },
+    "spec": {
+      "from": "page",
+      "fields": [
+        "id",
+        "type",
+        "title",
+        "summary",
+        "sections",
+        "updatedAt"
+      ],
+      "filter": {
+        "eq": {
+          "field": "status",
+          "value": "published"
+        }
+      },
+      "limit": 1
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Schema",
+    "metadata": {
       "name": "products"
     },
     "spec": {
@@ -195,9 +354,18 @@ export interface MantleViewOptions {
 export function bindMantleSite(runtime: CmsRuntime) {
   return {
     views: {
+      "home": (request: MantleViewOptions = {}) =>
+        runtime.executeView.execute<MantleGenerated.MantleSite.ViewRow_home>({
+          view: manifest[1],
+          ctx: request.ctx,
+          options: {
+            page: request.page,
+            show: request.show,
+          },
+        }),
       "public-products": (request: MantleViewOptions = {}) =>
         runtime.executeView.execute<MantleGenerated.MantleSite.ViewRow_public_products>({
-          view: manifest[2],
+          view: manifest[4],
           ctx: request.ctx,
           options: {
             page: request.page,

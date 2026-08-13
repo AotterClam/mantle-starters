@@ -2,6 +2,38 @@
 
 export namespace MantleSite {
 
+  /** Entry data for Schema 'page' */
+  export interface Entry_page {
+    type: "home";
+    title: string;
+    summary?: string;
+    sections: {
+  type: "hero" | "features" | "content" | "faq" | "cta";
+  id?: string;
+  eyebrow?: string;
+  title: string;
+  body?: string;
+  showImage?: boolean;
+  image?: {
+  src: string;
+  alt: string;
+};
+  action?: {
+  label?: string;
+  href?: string;
+};
+  secondaryAction?: {
+  label?: string;
+  href?: string;
+};
+  items?: {
+  title?: string;
+  body?: string;
+  icon?: string;
+}[];
+}[];
+  }
+
   /** Entry data for Schema 'products' */
   export interface Entry_products {
     slug: string;
@@ -29,6 +61,40 @@ export namespace MantleSite {
 
   /** Procedure 'submit-product-inquiry' output */
   export interface ProcOutput_submit_product_inquiry {
+  }
+
+  /** Row shape returned by GET /api/views/home */
+  export interface ViewRow_home {
+    id: string;
+    type?: "home";
+    title?: string;
+    summary?: string;
+    sections?: {
+  type: "hero" | "features" | "content" | "faq" | "cta";
+  id?: string;
+  eyebrow?: string;
+  title: string;
+  body?: string;
+  showImage?: boolean;
+  image?: {
+  src: string;
+  alt: string;
+};
+  action?: {
+  label?: string;
+  href?: string;
+};
+  secondaryAction?: {
+  label?: string;
+  href?: string;
+};
+  items?: {
+  title?: string;
+  body?: string;
+  icon?: string;
+}[];
+}[];
+    updatedAt: number;
   }
 
   /** Row shape returned by GET /api/views/public-products */
