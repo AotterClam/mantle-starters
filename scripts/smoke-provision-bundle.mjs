@@ -691,6 +691,7 @@ function assertTransactionPublicSurface(root) {
   for (const required of [
     'name = "INVENTORY_COORDINATOR"',
     'binding = "ORDER_EXPIRY_QUEUE"',
+    'max_concurrency = 1',
     'crons = ["*/5 * * * *"]',
   ]) {
     if (!wrangler.includes(required)) throw new Error(`transaction Worker binding missing ${required}`);
@@ -699,8 +700,15 @@ function assertTransactionPublicSurface(root) {
     'procedures["expire-order"]',
     'procedures["sweep-expired-orders"]',
     "for (const message of batch.messages)",
+    "async scheduled(",
+    'result.diagnostic.code === "CONFLICT"',
   ]) {
     if (!worker.includes(required)) throw new Error(`transaction lifecycle worker missing ${required}`);
+  }
+  if (worker.includes("batch.messages[0]")) throw new Error("transaction queue processes only the first batch message");
+  const scheduled = worker.slice(worker.indexOf("async scheduled("));
+  if (scheduled.includes("ORDER_EXPIRY_QUEUE") || scheduled.includes(".send(")) {
+    throw new Error("transaction scheduled handler fans work into the expiry queue");
   }
   if (!client.includes("commerceClientJs")) throw new Error("transaction client bundle is missing cart behavior");
   if (!nav.includes("ShoppingCartIcon") || !nav.includes("data-cart-count")) {

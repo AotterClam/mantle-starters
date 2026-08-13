@@ -67,7 +67,7 @@ export default {
         );
         if (!result.ok) {
           console.error("[transaction queue] procedure failure", message.id, result.diagnostic.code);
-          if (result.diagnostic.code === "INTERNAL_ERROR") message.retry();
+          if (result.diagnostic.code === "INTERNAL_ERROR" || result.diagnostic.code === "CONFLICT") message.retry();
           else message.ack();
         } else if (result.data.outcome === "too_early") {
           message.retry({ delaySeconds: 60 });
