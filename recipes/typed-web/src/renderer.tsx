@@ -1,7 +1,7 @@
 import type { Child } from "hono/jsx";
 import { raw } from "hono/html";
 import { renderSeoTagsHtml, type SeoMeta } from "@aotter/mantle/runtime";
-import { asset } from "./web/assets.js";
+import type { SiteIcon } from "@aotter/mantle/spec";
 import { siteContent } from "./web/content/siteContent.js";
 
 const archetype = "{{ARCHETYPE}}" as string;
@@ -19,12 +19,14 @@ export function PageDocument({
   title = siteContent.brand,
   description = siteContent.description,
   seo,
+  icons,
 }: {
   readonly children: Child;
   readonly locale?: string;
   readonly title?: string;
   readonly description?: string;
   readonly seo?: SeoMeta;
+  readonly icons: readonly SiteIcon[];
 }) {
   return (
     <html lang={locale ?? "en"}>
@@ -35,13 +37,22 @@ export function PageDocument({
         <meta name="mantle:archetype" content={archetype} />
         <title>{title}</title>
         <meta name="description" content={description} />
+        {icons.map((icon) => (
+          <link
+            rel="icon"
+            href={icon.src}
+            type={icon.mimeType}
+            sizes={icon.sizes?.join(" ")}
+            media={icon.theme ? `(prefers-color-scheme: ${icon.theme})` : undefined}
+          />
+        ))}
         {seo && raw(renderSeoTagsHtml(seo))}
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
-        <link rel="stylesheet" href={asset("/assets/styles.css")} />
+        <link rel="stylesheet" href="/assets/styles.css" />
       </head>
       <body class="min-h-screen bg-background text-foreground antialiased">
         {children}
-        <script type="module" src={asset("/assets/kiwa-home.js")} />
+        <script type="module" src="/assets/kiwa-home.js" />
       </body>
     </html>
   );

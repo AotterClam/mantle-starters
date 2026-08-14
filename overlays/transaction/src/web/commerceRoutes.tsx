@@ -170,7 +170,7 @@ function CommerceDocument({ page, localePath, title, children }: {
   readonly children: Child;
 }) {
   return (
-    <PageDocument locale={page.locale} title={`${title} · ${page.site.brand}`}>
+    <PageDocument locale={page.locale} title={`${title} · ${page.site.brand}`} icons={page.site.icons}>
       <SitePage locale={page.locale} locales={page.site.locales} localePath={localePath} brand={page.site.brand}>
         {children}
       </SitePage>

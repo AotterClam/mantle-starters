@@ -42,7 +42,7 @@ for (const collection of ["post-translations", "community-updates"]) {
 export async function renderPublicHome(ctx: PublicRouteContext): Promise<Response> {
   const content = await resolveHomeContent(async () => ctx.runtime, ctx.locale);
   return new Response(renderToString(
-    <PageDocument locale={ctx.locale} title={ctx.site.title} description={ctx.site.description} seo={ctx.seo}>
+    <PageDocument locale={ctx.locale} title={ctx.site.title} description={ctx.site.description} seo={ctx.seo} icons={ctx.site.icons}>
       <HomePage
         content={content}
         locale={ctx.locale}
@@ -66,7 +66,7 @@ export async function renderHomeMarkdown(ctx: PublicContentContext): Promise<str
 
 export async function renderNotFound(ctx: PublicRouteContext): Promise<Response> {
   return new Response(renderToString(
-    <PageDocument locale={ctx.locale} title={`Not found · ${ctx.site.brand}`}>
+    <PageDocument locale={ctx.locale} title={`Not found · ${ctx.site.brand}`} icons={ctx.site.icons}>
       <SitePage locale={ctx.locale} locales={ctx.site.locales} localePath="/:locale" brand={ctx.site.brand}>
         <section class="mx-auto max-w-3xl px-4 py-24 text-center sm:px-6 lg:px-8">
           <p class="text-sm font-medium text-primary">404</p>
@@ -84,7 +84,7 @@ function renderEntry({ entry, site, seo }: EntryContext): string {
   const slug = text(entry.data["slug"], entry.id);
   const body = getMarkdownBody(entry) ?? "";
   return renderToString(
-    <PageDocument locale={locale} title={`${title} · ${site.brand}`} description={getEntryDescription(entry) ?? undefined} seo={seo}>
+    <PageDocument locale={locale} title={`${title} · ${site.brand}`} description={getEntryDescription(entry) ?? undefined} seo={seo} icons={site.icons}>
       <SitePage locale={locale} locales={site.locales} localePath={`/:locale/${segment}/${slug}`} brand={site.brand}>
         <article class="mx-auto max-w-3xl px-4 py-16 sm:px-6 md:py-24 lg:px-8">
           <h1 class="text-4xl tracking-tight sm:text-5xl">{title}</h1>
@@ -102,7 +102,7 @@ function renderList({ collection, entries, locale, site, seo }: ListContext): st
   const segment = segmentFor(collection);
   const title = collection === "post-translations" ? "Posts" : "Updates";
   return renderToString(
-    <PageDocument locale={locale} title={`${title} · ${site.brand}`} description={site.description} seo={seo}>
+    <PageDocument locale={locale} title={`${title} · ${site.brand}`} description={site.description} seo={seo} icons={site.icons}>
       <SitePage locale={locale} locales={site.locales} localePath={`/:locale/${segment}`} brand={site.brand}>
         <section class="mx-auto max-w-4xl px-4 py-16 sm:px-6 md:py-24 lg:px-8">
           <h1 class="text-4xl tracking-tight sm:text-5xl">{title}</h1>

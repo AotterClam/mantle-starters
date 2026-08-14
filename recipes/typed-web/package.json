@@ -17,9 +17,9 @@
     "skills": "mantle skills",
     "introspect": "mantle introspect",
     "emit-openapi": "mantle emit-openapi",
-    "typecheck": "pnpm generate && tsc --noEmit -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "check:worker": "wrangler deploy --dry-run --outdir .wrangler/dry-run",
-    "check": "pnpm validate && pnpm validate:deploy && pnpm check:generated && pnpm typecheck && pnpm check:styles && pnpm check:indexes && pnpm check:worker",
+    "check": "pnpm generate && pnpm validate && pnpm validate:deploy && pnpm check:generated && pnpm typecheck && pnpm check:styles && pnpm check:indexes && pnpm check:worker",
     "deploy": "pnpm check && wrangler deploy"
   },
   "dependencies": {

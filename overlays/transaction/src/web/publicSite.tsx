@@ -35,7 +35,7 @@ templates.registerEntryTemplate("product-translations", ({ entry, site, seo }) =
   const summary = text(entry.data["summary"]);
   const productPrice = rawPrice(entry);
   return renderToString(
-    <PageDocument locale={locale} title={`${title} · ${site.brand}`} description={summary} seo={seo}>
+    <PageDocument locale={locale} title={`${title} · ${site.brand}`} description={summary} seo={seo} icons={site.icons}>
       <SitePage locale={locale} locales={site.locales} localePath={`/:locale/products/${slug}`} brand={site.brand}>
         <article class="mx-auto max-w-3xl px-4 py-16 sm:px-6 md:py-24 lg:px-8">
           <p class="text-xs font-medium uppercase tracking-wide text-primary">{copy.product}</p>
@@ -61,7 +61,7 @@ templates.registerEntryTemplate("product-translations", ({ entry, site, seo }) =
 });
 
 templates.registerListTemplate("product-translations", ({ entries, locale, site, seo }) => renderToString(
-  <PageDocument locale={locale} title={`${commerceCopy(locale).products} · ${site.brand}`} description={site.description} seo={seo}>
+  <PageDocument locale={locale} title={`${commerceCopy(locale).products} · ${site.brand}`} description={site.description} seo={seo} icons={site.icons}>
     <SitePage locale={locale} locales={site.locales} localePath="/:locale/products" brand={site.brand}>
       <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24 lg:px-8">
         <p class="text-xs font-medium uppercase tracking-wide text-primary">{commerceCopy(locale).shop}</p>
@@ -80,7 +80,7 @@ templates.registerEntryTemplate("page-translations", ({ entry, site, seo }) => {
   const slug = text(entry.data["slug"], entry.id);
   const title = text(entry.data["title"], site.brand);
   return renderToString(
-    <PageDocument locale={locale} title={`${title} · ${site.brand}`} description={text(entry.data["summary"])} seo={seo}>
+    <PageDocument locale={locale} title={`${title} · ${site.brand}`} description={text(entry.data["summary"])} seo={seo} icons={site.icons}>
       <HomePage
         content={{ sections: sections(entry) }}
         locale={locale}
@@ -96,7 +96,7 @@ templates.registerListTemplate("page-translations", ({ entries, locale, site, se
   const message = messagesForLocale(locale);
   const pages = entries.filter((entry) => entry.data["slug"] !== "home");
   return renderToString(
-  <PageDocument locale={locale} title={`${message["pages.title"]} · ${site.brand}`} description={site.description} seo={seo}>
+  <PageDocument locale={locale} title={`${message["pages.title"]} · ${site.brand}`} description={site.description} seo={seo} icons={site.icons}>
     <SitePage locale={locale} locales={site.locales} localePath="/:locale/pages" brand={site.brand}>
       <section class="mx-auto max-w-4xl px-4 py-16 sm:px-6 md:py-24 lg:px-8">
         <p class="text-xs font-medium uppercase tracking-wide text-primary">{message["pages.label"]}</p>
@@ -119,7 +119,7 @@ templates.registerListTemplate("page-translations", ({ entries, locale, site, se
 export async function renderPublicHome(ctx: PublicRouteContext): Promise<Response> {
   const content = await resolveHomeContent(async () => ctx.runtime, ctx.locale);
   return new Response(renderToString(
-    <PageDocument locale={ctx.locale} title={ctx.site.brand} description={ctx.site.description} seo={ctx.seo}>
+    <PageDocument locale={ctx.locale} title={ctx.site.brand} description={ctx.site.description} seo={ctx.seo} icons={ctx.site.icons}>
       <HomePage content={content} locale={ctx.locale} locales={ctx.site.locales} brand={ctx.site.brand} />
     </PageDocument>,
   ), {
@@ -140,7 +140,7 @@ export async function renderHomeMarkdown(ctx: PublicContentContext): Promise<str
 export async function renderNotFound(ctx: PublicRouteContext): Promise<Response> {
   const message = messagesForLocale(ctx.locale);
   return new Response(renderToString(
-    <PageDocument locale={ctx.locale} title={`${message["notFound.title"]} · ${ctx.site.brand}`}>
+    <PageDocument locale={ctx.locale} title={`${message["notFound.title"]} · ${ctx.site.brand}`} icons={ctx.site.icons}>
       <SitePage locale={ctx.locale} locales={ctx.site.locales} localePath="/:locale" brand={ctx.site.brand}>
         <section class="mx-auto max-w-3xl px-4 py-24 text-center sm:px-6 lg:px-8">
           <p class="text-sm font-medium text-primary">404</p>

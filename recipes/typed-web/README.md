@@ -33,9 +33,6 @@ src/
   index.ts                    # Worker fetch entrypoint
   renderer.tsx                # Hono JSX document renderer
   worker/
-    routes/
-      home.tsx                # public homepage extension route
-      assets.ts               # selected CSS and browser assets
     features/                 # type overlays add server behavior here
   web/
     pages/HomePage.tsx        # public page body
@@ -47,14 +44,17 @@ src/
 
 manifests/site.yaml           # 4 atoms: Schema, View, Procedure, Trigger
 components/, lib/, styles/     # selected runtime-facing UI surface
+public/                        # Cloudflare Static Assets: site icon, CSS, JS, SVG
 kiwa/                         # current revision's optional offline UI palette
 .mantle/generated/            # generated manifest/types consumed by Worker
+public/_mantle/admin/          # generated Admin SPA (gitignored)
 .mantle/                      # launch state, overlay notes, handoff
 ```
 
 `manifests/site.yaml` is the authoritative Mantle model. `mantle generate` compiles it
 to `.mantle/generated/`; `src/mantle/worker.ts` passes that output to
-`createMantleWorker`. In this revision, runtime components stay at root
+`createMantleWorker`; the same command copies the installed Admin bundle into
+Cloudflare's `public/` asset directory. In this revision, runtime components stay at root
 because `kiwa-ui.json` uses Kiwa's `@/components` and `@/lib/utils`
 convention.
 

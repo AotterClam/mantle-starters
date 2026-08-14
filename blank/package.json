@@ -18,7 +18,7 @@
     "dev": "pnpm generate && wrangler dev --ip localhost --port 8787 --inspector-port 0 --persist-to .wrangler",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "check:worker": "wrangler deploy --dry-run --outdir .wrangler/dry-run",
-    "check": "pnpm validate && pnpm validate:deploy && pnpm check:generated && pnpm typecheck && pnpm check:indexes && pnpm check:worker",
+    "check": "pnpm generate && pnpm validate && pnpm validate:deploy && pnpm check:generated && pnpm typecheck && pnpm check:indexes && pnpm check:worker",
     "deploy": "pnpm check && wrangler deploy"
   },
   "dependencies": {

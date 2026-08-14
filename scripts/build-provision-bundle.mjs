@@ -21,7 +21,7 @@ const checkOnly = process.argv.includes("--check");
 const archetypes = ["blank", "presence", "intake", "publication", "transaction", "reservation", "community"];
 const dependencySectionKeys = ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"];
 
-ensureTypedStyles();
+ensureTypedAssets();
 
 for (const archetype of archetypes) {
   const files = buildBundleFiles(archetype);
@@ -65,9 +65,9 @@ function buildBundleFiles(archetype) {
     applyOverlay(files, archetype);
     selectTypedSurface(files, archetype);
     pruneRuntimeSource(files);
+    compileBundleAssets(files, archetype);
     // This UI revision keeps its licensed snapshot as an offline agent palette.
     walk(files, "kiwa", "kiwa");
-    compileBundleStyles(files, archetype);
   }
 
   files[".mantle/launch-state.json.template"] = [
@@ -165,7 +165,7 @@ function findLocalizedFiles(files, archetype) {
   }).sort();
 }
 
-function compileBundleStyles(files, archetype) {
+function compileBundleAssets(files, archetype) {
   const tempRoot = mkdtempSync(join(tmpdir(), `mantle-${archetype}-styles-`));
   try {
     for (const [path, content] of Object.entries(files)) {
@@ -176,15 +176,16 @@ function compileBundleStyles(files, archetype) {
       mkdirSync(dirname(target), { recursive: true });
       writeFileSync(target, content);
     }
-    symlinkSync(join(root, "node_modules"), join(tempRoot, "node_modules"), "dir");
+    symlinkSync(join(root, "recipes", "typed-web", "node_modules"), join(tempRoot, "node_modules"), "dir");
     const result = spawnSync(process.execPath, [
       join(root, "recipes", "typed-web", "scripts", "build-styles.mjs"),
       "--root",
       tempRoot,
     ], { stdio: "inherit" });
     if (result.status !== 0) throw new Error(`failed to build ${archetype} styles`);
-    files["styles/generated.css"] = readFileSync(join(tempRoot, "styles", "generated.css"), "utf8");
-    files["src/web/assets.ts"] = readFileSync(join(tempRoot, "src", "web", "assets.ts"), "utf8");
+    for (const path of listFilesFrom(tempRoot, "public")) {
+      files[`public/${path}`] = readFileSync(join(tempRoot, "public", path), "utf8");
+    }
   } finally {
     rmSync(tempRoot, { recursive: true, force: true });
   }
@@ -206,6 +207,7 @@ function assertBundle(bundle, archetype) {
     ".claude/skills/mantle-plugin/SKILL.md",
     ".claude/skills/mantle-theme/SKILL.md",
     ".claude/skills/mantle-update/SKILL.md",
+    "public/site-icon.svg",
   ]) {
     if (!bundle.files[required]) throw new Error(`${archetype} bundle missing ${required}`);
   }
@@ -217,6 +219,9 @@ function assertBundle(bundle, archetype) {
   }
   if (!bundle.files["wrangler.toml"]?.includes('MANTLE_AUTH_MODE = "{{AUTH_MODE}}"')) {
     throw new Error(`${archetype} bundle must declare the explicit auth mode`);
+  }
+  if (!bundle.files["wrangler.toml"]?.includes('[assets]\ndirectory = "./public"\nbinding = "ASSETS"')) {
+    throw new Error(`${archetype} bundle must use Cloudflare Static Assets`);
   }
   const worker = archetype === "blank" ? bundle.files["src/index.ts"] : bundle.files["src/mantle/worker.ts"];
   if (!bundle.files["src/auth.ts"] || !worker?.includes("auth: buildAuth")) {
@@ -245,18 +250,14 @@ function assertBundle(bundle, archetype) {
       "src/web/content/types.ts",
       "kiwa/manifest.json",
       "kiwa/LICENSE",
-      "styles/generated.css",
+      "public/assets/styles.css",
+      "public/assets/kiwa-home.js",
+      "public/site-icon.svg",
     ]) {
       if (!bundle.files[required]) throw new Error(`${archetype} bundle missing ${required}`);
     }
-    if (!bundle.files["src/worker/routes/assets.ts"]?.includes("/styles.css")) {
-      throw new Error(`${archetype} bundle missing generated stylesheet route`);
-    }
-    if (!bundle.files["src/web/assets.ts"]?.includes("assetBuild")) {
-      throw new Error(`${archetype} homepage assets must be cache-busted`);
-    }
-    if (!bundle.files["src/worker/routes/assets.ts"]?.includes("max-age=31536000, immutable")) {
-      throw new Error(`${archetype} versioned homepage assets must be immutable`);
+    if (bundle.files["src/worker/routes/assets.ts"] || bundle.files["src/web/assets.ts"]) {
+      throw new Error(`${archetype} bundle still contains Worker-served asset plumbing`);
     }
     const seedImport = `../../.mantle/overlays/${archetype}/seed.json`;
     if (!bundle.files["src/mantle/seed.ts"]?.includes(seedImport)) {
@@ -392,7 +393,7 @@ function assertProvisionedReadme(bundle, archetype) {
   }
 }
 
-function ensureTypedStyles() {
+function ensureTypedAssets() {
   const args = [
     join(root, "recipes", "typed-web", "scripts", "build-styles.mjs"),
     "--root",
@@ -547,44 +548,6 @@ function selectTypedSurface(files, archetype) {
     "",
   ].join("\n");
 
-  const enhance = selected.includes("faq");
-  files["src/worker/routes/assets.ts"] = [
-    'import type { MantleExtensionApp } from "@aotter/mantle/cloudflare";',
-    'import stylesCss from "../../../styles/generated.css";',
-    'import { homeClientJs } from "../../web/client/homeClient.js";',
-    ...(enhance ? ['import { kiwaEnhanceAssets } from "../../web/client/kiwaEnhanceAssets.js";'] : []),
-    'import { mantleOceanHeroDarkSvg, mantleOceanHeroLightSvg } from "../../web/mantleOceanHero.js";',
-    'import type { Env } from "../../mantle/config.js";',
-    "",
-    'const ASSET_CACHE_CONTROL = "public, max-age=31536000, immutable";',
-    "",
-    "export function mountAssetRoutes(app: MantleExtensionApp<Env>): void {",
-    '  app.get("/assets/styles.css", () => new Response(stylesCss, {',
-    '    headers: { "cache-control": ASSET_CACHE_CONTROL, "content-type": "text/css; charset=utf-8" },',
-    "  }));",
-    '  app.get("/assets/kiwa-home.js", () => new Response(homeClientJs, {',
-    '    headers: { "cache-control": ASSET_CACHE_CONTROL, "content-type": "text/javascript; charset=utf-8" },',
-    "  }));",
-    '  app.get("/assets/mantle-ocean-hero-light.svg", () => svgResponse(mantleOceanHeroLightSvg));',
-    '  app.get("/assets/mantle-ocean-hero-dark.svg", () => svgResponse(mantleOceanHeroDarkSvg));',
-    ...(enhance ? [
-      '  app.get("/enhance/:file", (c) => {',
-      '    const file = c.req.param("file");',
-      '    if (!/^[A-Za-z0-9._-]+\\.js$/.test(file)) return c.notFound();',
-      '    const assetText = kiwaEnhanceAssets[file];',
-      '    if (!assetText) return c.notFound();',
-      '    return new Response(assetText, {',
-      '      headers: { "cache-control": ASSET_CACHE_CONTROL, "content-type": "text/javascript; charset=utf-8" },',
-      "    });",
-      "  });",
-    ] : []),
-    "}",
-    "",
-    "function svgResponse(svg: string): Response {",
-    '  return new Response(svg, { headers: { "cache-control": ASSET_CACHE_CONTROL, "content-type": "image/svg+xml; charset=utf-8" } });',
-    "}",
-    "",
-  ].join("\n");
 }
 
 function selectedSectionNames(files, archetype) {
@@ -616,7 +579,10 @@ function upperFirst(value) {
 
 function pruneRuntimeSource(files) {
   const reachable = new Set();
-  const pending = ["src/index.ts"];
+  const pending = ["src/index.ts", "src/web/client/homeClient.ts", "src/web/mantleOceanHero.ts"];
+  if (files["src/web/client/homeClient.ts"]?.includes("enhanceClientJs")) {
+    pending.push("src/web/client/kiwaEnhanceAssets.ts");
+  }
   while (pending.length > 0) {
     const path = pending.pop();
     if (!path || reachable.has(path) || !files[path]) continue;
@@ -662,6 +628,18 @@ function listFiles(from, prefix = "") {
     const relative = posix.join(prefix, name);
     const stat = statSync(source);
     if (stat.isDirectory()) found.push(...listFiles(posix.join(from, name), relative));
+    else if (stat.isFile()) found.push(relative);
+  }
+  return found;
+}
+
+function listFilesFrom(base, from, prefix = "") {
+  const found = [];
+  for (const name of readdirSync(join(base, from))) {
+    const source = join(base, from, name);
+    const relative = posix.join(prefix, name);
+    const stat = statSync(source);
+    if (stat.isDirectory()) found.push(...listFilesFrom(base, posix.join(from, name), relative));
     else if (stat.isFile()) found.push(relative);
   }
   return found;

@@ -20,5 +20,6 @@ export default createMantleWorker<Env>({
     description: "{{DESCRIPTION}}",
     origin: env.PUBLIC_ORIGIN ?? "http://localhost:8787",
     locales,
+    icons: [{ src: "/site-icon.svg", mimeType: "image/svg+xml", sizes: ["any"] }],
   }),
 });

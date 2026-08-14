@@ -10,6 +10,10 @@ head_sampling_rate = 1
 [cache]
 enabled = true
 
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
 [vars]
 # Post-deploy provisioning writes PUBLIC_ORIGIN and the chosen auth
 # client metadata here. Secrets stay in Cloudflare via `wrangler secret put`.
@@ -46,9 +50,4 @@ binding = "OAUTH_KV"
 [[rules]]
 type = "Text"
 globs = ["**/*.yaml"]
-fallthrough = true
-
-[[rules]]
-type = "Text"
-globs = ["**/*.css"]
 fallthrough = true
