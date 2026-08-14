@@ -732,6 +732,20 @@ function assertTransactionSeed(root) {
   const adjust = procedures.find((procedure) => procedure.metadata?.name === "adjust-inventory");
   const fulfill = procedures.find((procedure) => procedure.metadata?.name === "fulfill-order");
   const cancel = procedures.find((procedure) => procedure.metadata?.name === "cancel-order");
+  for (const atom of [...schemas, pickingList, createOrder, adjust, fulfill, cancel]) {
+    if (!hasTransactionLocales(atom?.spec?.title)) {
+      throw new Error(`transaction ${atom?.metadata?.name ?? "manifest"} title is not available in all five languages`);
+    }
+  }
+  for (const schema of schemas) {
+    if (!hasTransactionLocales(schema.spec.description)) {
+      throw new Error(`transaction ${schema.metadata.name} description is not available in all five languages`);
+    }
+    assertLocalizedProperties(schema.spec.schema, schema.metadata.name);
+  }
+  for (const procedure of [createOrder, adjust, fulfill, cancel]) {
+    assertLocalizedProperties(procedure.spec.input, procedure.metadata.name);
+  }
   if (
     procedures.some((procedure) => ["inspect-inventory", "restock-product"].includes(procedure.metadata?.name))
     || inventory?.spec?.schema?.properties?.revision?.type !== "integer"
@@ -744,6 +758,18 @@ function assertTransactionSeed(root) {
     || cancel?.spec?.input?.properties?.orderToken?.["x-mantle-ref"] !== "orders"
   ) {
     throw new Error("transaction staff operations are not explicit, read-only, and idempotent");
+  }
+}
+
+function hasTransactionLocales(value) {
+  return ["en", "zh-TW", "ja", "ko", "fr"].every((locale) => typeof value?.[locale] === "string");
+}
+
+function assertLocalizedProperties(schema, path) {
+  for (const [name, property] of Object.entries(schema?.properties ?? {})) {
+    if (!hasTransactionLocales(property.title)) throw new Error(`transaction ${path}.${name} title is not available in all five languages`);
+    assertLocalizedProperties(property, `${path}.${name}`);
+    if (property.items) assertLocalizedProperties(property.items, `${path}.${name}[]`);
   }
 }
 

@@ -11,8 +11,20 @@ export const manifest = [
       "name": "page"
     },
     "spec": {
-      "title": "Pages",
-      "description": "Stable page identities shared by every language version.",
+      "title": {
+        "en": "Pages",
+        "zh-TW": "頁面",
+        "ja": "ページ",
+        "ko": "페이지",
+        "fr": "Pages"
+      },
+      "description": {
+        "en": "Stable page identities shared by every language version.",
+        "zh-TW": "所有語言版本共用的穩定頁面識別資料。",
+        "ja": "すべての言語版で共有する安定したページ識別情報です。",
+        "ko": "모든 언어 버전이 공유하는 안정적인 페이지 식별 정보입니다.",
+        "fr": "Identités de page stables partagées par toutes les versions linguistiques."
+      },
       "schema": {
         "type": "object",
         "required": [
@@ -22,14 +34,28 @@ export const manifest = [
         "properties": {
           "slug": {
             "type": "string",
-            "pattern": "^[a-z0-9-]+$"
+            "pattern": "^[a-z0-9-]+$",
+            "title": {
+              "en": "URL slug",
+              "zh-TW": "網址代稱",
+              "ja": "URL スラッグ",
+              "ko": "URL 슬러그",
+              "fr": "Slug d’URL"
+            }
           },
           "type": {
             "type": "string",
             "enum": [
               "home",
               "page"
-            ]
+            ],
+            "title": {
+              "en": "Page type",
+              "zh-TW": "頁面類型",
+              "ja": "ページ種別",
+              "ko": "페이지 유형",
+              "fr": "Type de page"
+            }
           }
         }
       },
@@ -49,8 +75,20 @@ export const manifest = [
       "name": "page-translations"
     },
     "spec": {
-      "title": "Page translations",
-      "description": "Localized page copy and sections.",
+      "title": {
+        "en": "Page translations",
+        "zh-TW": "頁面翻譯",
+        "ja": "ページ翻訳",
+        "ko": "페이지 번역",
+        "fr": "Traductions de pages"
+      },
+      "description": {
+        "en": "Localized page copy and sections.",
+        "zh-TW": "各語言的頁面文案與區塊。",
+        "ja": "各言語のページ文言とセクションです。",
+        "ko": "언어별 페이지 문구와 섹션입니다.",
+        "fr": "Textes et sections de page localisés."
+      },
       "localized": true,
       "translates": {
         "parent": "page",
@@ -67,20 +105,55 @@ export const manifest = [
         "properties": {
           "slug": {
             "type": "string",
-            "pattern": "^[a-z0-9-]+$"
+            "pattern": "^[a-z0-9-]+$",
+            "title": {
+              "en": "URL slug",
+              "zh-TW": "網址代稱",
+              "ja": "URL スラッグ",
+              "ko": "URL 슬러그",
+              "fr": "Slug d’URL"
+            }
           },
           "locale": {
-            "type": "string"
+            "type": "string",
+            "title": {
+              "en": "Language",
+              "zh-TW": "語言",
+              "ja": "言語",
+              "ko": "언어",
+              "fr": "Langue"
+            }
           },
           "title": {
-            "type": "string"
+            "type": "string",
+            "title": {
+              "en": "Title",
+              "zh-TW": "標題",
+              "ja": "タイトル",
+              "ko": "제목",
+              "fr": "Titre"
+            }
           },
           "summary": {
-            "type": "string"
+            "type": "string",
+            "title": {
+              "en": "Summary",
+              "zh-TW": "摘要",
+              "ja": "概要",
+              "ko": "요약",
+              "fr": "Résumé"
+            }
           },
           "sections": {
             "type": "array",
             "minItems": 1,
+            "title": {
+              "en": "Sections",
+              "zh-TW": "區塊",
+              "ja": "セクション",
+              "ko": "섹션",
+              "fr": "Sections"
+            },
             "items": {
               "type": "object",
               "required": [
@@ -96,23 +169,65 @@ export const manifest = [
                     "content",
                     "faq",
                     "cta"
-                  ]
+                  ],
+                  "title": {
+                    "en": "Section type",
+                    "zh-TW": "區塊類型",
+                    "ja": "セクション種別",
+                    "ko": "섹션 유형",
+                    "fr": "Type de section"
+                  }
                 },
                 "id": {
-                  "type": "string"
+                  "type": "string",
+                  "title": {
+                    "en": "ID",
+                    "zh-TW": "ID",
+                    "ja": "ID",
+                    "ko": "ID",
+                    "fr": "ID"
+                  }
                 },
                 "eyebrow": {
-                  "type": "string"
+                  "type": "string",
+                  "title": {
+                    "en": "Eyebrow",
+                    "zh-TW": "引導文字",
+                    "ja": "アイブロウ",
+                    "ko": "아이브로우",
+                    "fr": "Surtitre"
+                  }
                 },
                 "title": {
-                  "type": "string"
+                  "type": "string",
+                  "title": {
+                    "en": "Title",
+                    "zh-TW": "標題",
+                    "ja": "タイトル",
+                    "ko": "제목",
+                    "fr": "Titre"
+                  }
                 },
                 "body": {
                   "type": "string",
-                  "x-mcp-hint": "markdown"
+                  "x-mcp-hint": "markdown",
+                  "title": {
+                    "en": "Body",
+                    "zh-TW": "內文",
+                    "ja": "本文",
+                    "ko": "본문",
+                    "fr": "Contenu"
+                  }
                 },
                 "showImage": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "title": {
+                    "en": "Show image",
+                    "zh-TW": "顯示圖片",
+                    "ja": "画像を表示",
+                    "ko": "이미지 표시",
+                    "fr": "Afficher l’image"
+                  }
                 },
                 "image": {
                   "type": "object",
@@ -120,54 +235,152 @@ export const manifest = [
                     "src",
                     "alt"
                   ],
+                  "title": {
+                    "en": "Image",
+                    "zh-TW": "圖片",
+                    "ja": "画像",
+                    "ko": "이미지",
+                    "fr": "Image"
+                  },
                   "properties": {
                     "src": {
-                      "type": "string"
+                      "type": "string",
+                      "title": {
+                        "en": "Image URL",
+                        "zh-TW": "圖片網址",
+                        "ja": "画像 URL",
+                        "ko": "이미지 URL",
+                        "fr": "URL de l’image"
+                      }
                     },
                     "alt": {
-                      "type": "string"
+                      "type": "string",
+                      "title": {
+                        "en": "Alternative text",
+                        "zh-TW": "替代文字",
+                        "ja": "代替テキスト",
+                        "ko": "대체 텍스트",
+                        "fr": "Texte alternatif"
+                      }
                     }
                   }
                 },
                 "action": {
                   "type": "object",
+                  "title": {
+                    "en": "Primary action",
+                    "zh-TW": "主要動作",
+                    "ja": "メインアクション",
+                    "ko": "기본 동작",
+                    "fr": "Action principale"
+                  },
                   "properties": {
                     "label": {
-                      "type": "string"
+                      "type": "string",
+                      "title": {
+                        "en": "Label",
+                        "zh-TW": "標籤",
+                        "ja": "ラベル",
+                        "ko": "레이블",
+                        "fr": "Libellé"
+                      }
                     },
                     "href": {
-                      "type": "string"
+                      "type": "string",
+                      "title": {
+                        "en": "Link",
+                        "zh-TW": "連結",
+                        "ja": "リンク",
+                        "ko": "링크",
+                        "fr": "Lien"
+                      }
                     }
                   }
                 },
                 "secondaryAction": {
                   "type": "object",
+                  "title": {
+                    "en": "Secondary action",
+                    "zh-TW": "次要動作",
+                    "ja": "サブアクション",
+                    "ko": "보조 동작",
+                    "fr": "Action secondaire"
+                  },
                   "properties": {
                     "label": {
-                      "type": "string"
+                      "type": "string",
+                      "title": {
+                        "en": "Label",
+                        "zh-TW": "標籤",
+                        "ja": "ラベル",
+                        "ko": "레이블",
+                        "fr": "Libellé"
+                      }
                     },
                     "href": {
-                      "type": "string"
+                      "type": "string",
+                      "title": {
+                        "en": "Link",
+                        "zh-TW": "連結",
+                        "ja": "リンク",
+                        "ko": "링크",
+                        "fr": "Lien"
+                      }
                     }
                   }
                 },
                 "items": {
                   "type": "array",
+                  "title": {
+                    "en": "Items",
+                    "zh-TW": "項目",
+                    "ja": "項目",
+                    "ko": "항목",
+                    "fr": "Éléments"
+                  },
                   "items": {
                     "type": "object",
                     "properties": {
                       "title": {
-                        "type": "string"
+                        "type": "string",
+                        "title": {
+                          "en": "Title",
+                          "zh-TW": "標題",
+                          "ja": "タイトル",
+                          "ko": "제목",
+                          "fr": "Titre"
+                        }
                       },
                       "body": {
                         "type": "string",
-                        "x-mcp-hint": "markdown"
+                        "x-mcp-hint": "markdown",
+                        "title": {
+                          "en": "Body",
+                          "zh-TW": "內文",
+                          "ja": "本文",
+                          "ko": "본문",
+                          "fr": "Contenu"
+                        }
                       },
                       "icon": {
-                        "type": "string"
+                        "type": "string",
+                        "title": {
+                          "en": "Icon",
+                          "zh-TW": "圖示",
+                          "ja": "アイコン",
+                          "ko": "아이콘",
+                          "fr": "Icône"
+                        }
                       },
                       "href": {
-                        "type": "string"
+                        "type": "string",
+                        "title": {
+                          "en": "Link",
+                          "zh-TW": "連結",
+                          "ja": "リンク",
+                          "ko": "링크",
+                          "fr": "Lien"
+                        }
                       }
                     }
                   }
@@ -313,8 +526,20 @@ export const manifest = [
       "name": "products"
     },
     "spec": {
-      "title": "Products",
-      "description": "Stable product identity, price, and media shared by every language version.",
+      "title": {
+        "en": "Products",
+        "zh-TW": "商品",
+        "ja": "商品",
+        "ko": "상품",
+        "fr": "Produits"
+      },
+      "description": {
+        "en": "Stable product identity, price, and media shared by every language version.",
+        "zh-TW": "所有語言版本共用的商品識別、價格與媒體資料。",
+        "ja": "すべての言語版で共有する商品識別情報、価格、メディアです。",
+        "ko": "모든 언어 버전이 공유하는 상품 식별 정보, 가격, 미디어입니다.",
+        "fr": "Identité, prix et médias du produit partagés par toutes les versions linguistiques."
+      },
       "schema": {
         "type": "object",
         "required": [
@@ -326,19 +551,53 @@ export const manifest = [
         "properties": {
           "slug": {
             "type": "string",
-            "pattern": "^[a-z0-9-]+$"
+            "pattern": "^[a-z0-9-]+$",
+            "title": {
+              "en": "Product slug",
+              "zh-TW": "商品代稱",
+              "ja": "商品スラッグ",
+              "ko": "상품 슬러그",
+              "fr": "Slug du produit"
+            }
           },
           "priceMinor": {
             "type": "integer",
-            "minimum": 0
+            "minimum": 0,
+            "title": {
+              "en": "Price (minor units)",
+              "zh-TW": "價格（最小貨幣單位）",
+              "ja": "価格（最小通貨単位）",
+              "ko": "가격(최소 통화 단위)",
+              "fr": "Prix (unité monétaire minimale)"
+            }
           },
           "currency": {
             "type": "string",
-            "pattern": "^[A-Z]{3}$"
+            "pattern": "^[A-Z]{3}$",
+            "title": {
+              "en": "Currency",
+              "zh-TW": "幣別",
+              "ja": "通貨",
+              "ko": "통화",
+              "fr": "Devise"
+            }
           },
           "coverUrl": {
             "type": "string",
-            "description": "Public product image URL. Relative static asset paths are supported."
+            "title": {
+              "en": "Cover image URL",
+              "zh-TW": "封面圖片網址",
+              "ja": "カバー画像 URL",
+              "ko": "표지 이미지 URL",
+              "fr": "URL de l’image de couverture"
+            },
+            "description": {
+              "en": "Public product image URL. Relative static asset paths are supported.",
+              "zh-TW": "公開商品圖片網址，也支援相對的靜態資產路徑。",
+              "ja": "公開商品画像の URL。相対的な静的アセットパスにも対応します。",
+              "ko": "공개 상품 이미지 URL입니다. 상대 정적 자산 경로도 지원합니다.",
+              "fr": "URL publique de l’image du produit. Les chemins relatifs vers les ressources statiques sont pris en charge."
+            }
           }
         }
       },
@@ -358,8 +617,20 @@ export const manifest = [
       "name": "product-translations"
     },
     "spec": {
-      "title": "Product translations",
-      "description": "Localized product titles, summaries, and descriptions.",
+      "title": {
+        "en": "Product translations",
+        "zh-TW": "商品翻譯",
+        "ja": "商品翻訳",
+        "ko": "상품 번역",
+        "fr": "Traductions de produits"
+      },
+      "description": {
+        "en": "Localized product titles, summaries, and descriptions.",
+        "zh-TW": "各語言的商品標題、摘要與描述。",
+        "ja": "各言語の商品タイトル、概要、説明です。",
+        "ko": "언어별 상품 제목, 요약, 설명입니다.",
+        "fr": "Titres, résumés et descriptions de produits localisés."
+      },
       "localized": true,
       "translates": {
         "parent": "products",
@@ -376,20 +647,55 @@ export const manifest = [
         "properties": {
           "slug": {
             "type": "string",
-            "pattern": "^[a-z0-9-]+$"
+            "pattern": "^[a-z0-9-]+$",
+            "title": {
+              "en": "Product slug",
+              "zh-TW": "商品代稱",
+              "ja": "商品スラッグ",
+              "ko": "상품 슬러그",
+              "fr": "Slug du produit"
+            }
           },
           "locale": {
-            "type": "string"
+            "type": "string",
+            "title": {
+              "en": "Language",
+              "zh-TW": "語言",
+              "ja": "言語",
+              "ko": "언어",
+              "fr": "Langue"
+            }
           },
           "title": {
-            "type": "string"
+            "type": "string",
+            "title": {
+              "en": "Title",
+              "zh-TW": "標題",
+              "ja": "タイトル",
+              "ko": "제목",
+              "fr": "Titre"
+            }
           },
           "summary": {
-            "type": "string"
+            "type": "string",
+            "title": {
+              "en": "Summary",
+              "zh-TW": "摘要",
+              "ja": "概要",
+              "ko": "요약",
+              "fr": "Résumé"
+            }
           },
           "description": {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "title": {
+              "en": "Description",
+              "zh-TW": "描述",
+              "ja": "説明",
+              "ko": "설명",
+              "fr": "Description"
+            }
           }
         }
       },
@@ -415,8 +721,20 @@ export const manifest = [
       "name": "orders"
     },
     "spec": {
-      "title": "Orders",
-      "description": "Guest orders created by checkout and managed by staff operations.",
+      "title": {
+        "en": "Orders",
+        "zh-TW": "訂單",
+        "ja": "注文",
+        "ko": "주문",
+        "fr": "Commandes"
+      },
+      "description": {
+        "en": "Guest orders created by checkout and managed by staff operations.",
+        "zh-TW": "由結帳建立並由後台操作管理的訪客訂單。",
+        "ja": "チェックアウトで作成され、管理操作で処理されるゲスト注文です。",
+        "ko": "결제 과정에서 생성되고 관리자 작업으로 관리되는 비회원 주문입니다.",
+        "fr": "Commandes invité créées lors du paiement et gérées par les opérations du personnel."
+      },
       "schema": {
         "readOnly": true,
         "type": "object",
@@ -438,10 +756,24 @@ export const manifest = [
         "properties": {
           "orderToken": {
             "type": "string",
-            "pattern": "^[0-9a-f-]{36}$"
+            "pattern": "^[0-9a-f-]{36}$",
+            "title": {
+              "en": "Order token",
+              "zh-TW": "訂單識別碼",
+              "ja": "注文トークン",
+              "ko": "주문 토큰",
+              "fr": "Jeton de commande"
+            }
           },
           "orderNumber": {
-            "type": "string"
+            "type": "string",
+            "title": {
+              "en": "Order number",
+              "zh-TW": "訂單編號",
+              "ja": "注文番号",
+              "ko": "주문 번호",
+              "fr": "Numéro de commande"
+            }
           },
           "orderStatus": {
             "type": "string",
@@ -450,41 +782,104 @@ export const manifest = [
               "paid",
               "fulfilled",
               "cancelled"
-            ]
+            ],
+            "title": {
+              "en": "Order status",
+              "zh-TW": "訂單狀態",
+              "ja": "注文ステータス",
+              "ko": "주문 상태",
+              "fr": "Statut de la commande"
+            }
           },
           "orderLocale": {
-            "type": "string"
+            "type": "string",
+            "title": {
+              "en": "Customer language",
+              "zh-TW": "顧客語言",
+              "ja": "顧客の言語",
+              "ko": "고객 언어",
+              "fr": "Langue du client"
+            }
           },
           "currency": {
             "type": "string",
-            "pattern": "^[A-Z]{3}$"
+            "pattern": "^[A-Z]{3}$",
+            "title": {
+              "en": "Currency",
+              "zh-TW": "幣別",
+              "ja": "通貨",
+              "ko": "통화",
+              "fr": "Devise"
+            }
           },
           "subtotalMinor": {
             "type": "integer",
-            "minimum": 0
+            "minimum": 0,
+            "title": {
+              "en": "Subtotal (minor units)",
+              "zh-TW": "小計（最小貨幣單位）",
+              "ja": "小計（最小通貨単位）",
+              "ko": "소계(최소 통화 단위)",
+              "fr": "Sous-total (unité monétaire minimale)"
+            }
           },
           "totalMinor": {
             "type": "integer",
-            "minimum": 0
+            "minimum": 0,
+            "title": {
+              "en": "Total (minor units)",
+              "zh-TW": "總計（最小貨幣單位）",
+              "ja": "合計（最小通貨単位）",
+              "ko": "합계(최소 통화 단위)",
+              "fr": "Total (unité monétaire minimale)"
+            }
           },
           "customerName": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 120
+            "maxLength": 120,
+            "title": {
+              "en": "Customer name",
+              "zh-TW": "顧客姓名",
+              "ja": "顧客名",
+              "ko": "고객 이름",
+              "fr": "Nom du client"
+            }
           },
           "customerEmail": {
             "type": "string",
-            "format": "email"
+            "format": "email",
+            "title": {
+              "en": "Customer email",
+              "zh-TW": "顧客 Email",
+              "ja": "顧客メール",
+              "ko": "고객 이메일",
+              "fr": "E-mail du client"
+            }
           },
           "shippingAddress": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 500
+            "maxLength": 500,
+            "title": {
+              "en": "Shipping address",
+              "zh-TW": "收件地址",
+              "ja": "配送先住所",
+              "ko": "배송 주소",
+              "fr": "Adresse de livraison"
+            }
           },
           "items": {
             "type": "array",
             "minItems": 1,
             "maxItems": 20,
+            "title": {
+              "en": "Items",
+              "zh-TW": "訂單項目",
+              "ja": "注文明細",
+              "ko": "주문 항목",
+              "fr": "Articles"
+            },
             "items": {
               "type": "object",
               "required": [
@@ -496,53 +891,137 @@ export const manifest = [
               ],
               "properties": {
                 "productSlug": {
-                  "type": "string"
+                  "type": "string",
+                  "title": {
+                    "en": "Product slug",
+                    "zh-TW": "商品代稱",
+                    "ja": "商品スラッグ",
+                    "ko": "상품 슬러그",
+                    "fr": "Slug du produit"
+                  }
                 },
                 "title": {
-                  "type": "string"
+                  "type": "string",
+                  "title": {
+                    "en": "Product",
+                    "zh-TW": "商品",
+                    "ja": "商品",
+                    "ko": "상품",
+                    "fr": "Produit"
+                  }
                 },
                 "quantity": {
                   "type": "integer",
                   "minimum": 1,
-                  "maximum": 99
+                  "maximum": 99,
+                  "title": {
+                    "en": "Quantity",
+                    "zh-TW": "數量",
+                    "ja": "数量",
+                    "ko": "수량",
+                    "fr": "Quantité"
+                  }
                 },
                 "unitPriceMinor": {
                   "type": "integer",
-                  "minimum": 0
+                  "minimum": 0,
+                  "title": {
+                    "en": "Unit price (minor units)",
+                    "zh-TW": "單價（最小貨幣單位）",
+                    "ja": "単価（最小通貨単位）",
+                    "ko": "단가(최소 통화 단위)",
+                    "fr": "Prix unitaire (unité monétaire minimale)"
+                  }
                 },
                 "lineTotalMinor": {
                   "type": "integer",
-                  "minimum": 0
+                  "minimum": 0,
+                  "title": {
+                    "en": "Line total (minor units)",
+                    "zh-TW": "項目小計（最小貨幣單位）",
+                    "ja": "明細合計（最小通貨単位）",
+                    "ko": "항목 합계(최소 통화 단위)",
+                    "fr": "Total de la ligne (unité monétaire minimale)"
+                  }
                 }
               }
             }
           },
           "expiresAt": {
             "type": "number",
-            "x-mcp-hint": "timestamp-ms"
+            "x-mcp-hint": "timestamp-ms",
+            "title": {
+              "en": "Expires at",
+              "zh-TW": "到期時間",
+              "ja": "有効期限",
+              "ko": "만료 시간",
+              "fr": "Expire le"
+            }
           },
           "paidAt": {
             "type": "number",
-            "x-mcp-hint": "timestamp-ms"
+            "x-mcp-hint": "timestamp-ms",
+            "title": {
+              "en": "Paid at",
+              "zh-TW": "付款時間",
+              "ja": "支払日時",
+              "ko": "결제 시간",
+              "fr": "Payée le"
+            }
           },
           "fulfilledAt": {
             "type": "number",
-            "x-mcp-hint": "timestamp-ms"
+            "x-mcp-hint": "timestamp-ms",
+            "title": {
+              "en": "Fulfilled at",
+              "zh-TW": "出貨完成時間",
+              "ja": "発送完了日時",
+              "ko": "처리 완료 시간",
+              "fr": "Traitée le"
+            }
           },
           "cancelledAt": {
             "type": "number",
-            "x-mcp-hint": "timestamp-ms"
+            "x-mcp-hint": "timestamp-ms",
+            "title": {
+              "en": "Cancelled at",
+              "zh-TW": "取消時間",
+              "ja": "キャンセル日時",
+              "ko": "취소 시간",
+              "fr": "Annulée le"
+            }
           },
           "trackingNumber": {
-            "type": "string"
+            "type": "string",
+            "title": {
+              "en": "Tracking number",
+              "zh-TW": "物流追蹤編號",
+              "ja": "追跡番号",
+              "ko": "운송장 번호",
+              "fr": "Numéro de suivi"
+            }
           },
           "cancelReason": {
-            "type": "string"
+            "type": "string",
+            "title": {
+              "en": "Cancellation reason",
+              "zh-TW": "取消原因",
+              "ja": "キャンセル理由",
+              "ko": "취소 사유",
+              "fr": "Motif d’annulation"
+            }
           },
           "createdAt": {
             "type": "integer",
             "x-mcp-hint": "timestamp-ms",
-            "x-mantle-bind": "now"
+            "x-mantle-bind": "now",
+            "title": {
+              "en": "Created at",
+              "zh-TW": "建立時間",
+              "ja": "作成日時",
+              "ko": "생성 시간",
+              "fr": "Créée le"
+            }
           }
         }
       },
@@ -554,6 +1033,11 @@ export const manifest = [
         [
           "orderNumber"
         ]
+      ],
+      "searchableFields": [
+        "orderNumber",
+        "customerName",
+        "customerEmail"
       ],
       "indexes": [
         [
@@ -580,8 +1064,20 @@ export const manifest = [
       "name": "inventory"
     },
     "spec": {
-      "title": "Inventory",
-      "description": "Query mirror of the InventoryCoordinator Durable Object, which is the stock authority.",
+      "title": {
+        "en": "Inventory",
+        "zh-TW": "庫存",
+        "ja": "在庫",
+        "ko": "재고",
+        "fr": "Stock"
+      },
+      "description": {
+        "en": "Query mirror of the InventoryCoordinator Durable Object, which is the stock authority.",
+        "zh-TW": "庫存權威來源 InventoryCoordinator Durable Object 的查詢鏡像。",
+        "ja": "在庫の正本である InventoryCoordinator Durable Object の参照用ミラーです。",
+        "ko": "재고의 원본인 InventoryCoordinator Durable Object의 조회용 미러입니다.",
+        "fr": "Miroir de consultation de l’objet durable InventoryCoordinator, source d’autorité du stock."
+      },
       "schema": {
         "readOnly": true,
         "type": "object",
@@ -594,23 +1090,58 @@ export const manifest = [
         ],
         "properties": {
           "productSlug": {
-            "type": "string"
+            "type": "string",
+            "title": {
+              "en": "Product slug",
+              "zh-TW": "商品代稱",
+              "ja": "商品スラッグ",
+              "ko": "상품 슬러그",
+              "fr": "Slug du produit"
+            }
           },
           "available": {
             "type": "integer",
-            "minimum": 0
+            "minimum": 0,
+            "title": {
+              "en": "Available",
+              "zh-TW": "可售數量",
+              "ja": "販売可能数",
+              "ko": "판매 가능 수량",
+              "fr": "Disponible"
+            }
           },
           "reserved": {
             "type": "integer",
-            "minimum": 0
+            "minimum": 0,
+            "title": {
+              "en": "Reserved",
+              "zh-TW": "保留數量",
+              "ja": "予約済み数",
+              "ko": "예약 수량",
+              "fr": "Réservé"
+            }
           },
           "revision": {
             "type": "integer",
-            "minimum": 0
+            "minimum": 0,
+            "title": {
+              "en": "Revision",
+              "zh-TW": "修訂版號",
+              "ja": "リビジョン",
+              "ko": "리비전",
+              "fr": "Révision"
+            }
           },
           "updatedAt": {
             "type": "number",
-            "x-mcp-hint": "timestamp-ms"
+            "x-mcp-hint": "timestamp-ms",
+            "title": {
+              "en": "Updated at",
+              "zh-TW": "更新時間",
+              "ja": "更新日時",
+              "ko": "업데이트 시간",
+              "fr": "Mis à jour le"
+            }
           }
         }
       },
@@ -645,8 +1176,20 @@ export const manifest = [
       "name": "inventory-movements"
     },
     "spec": {
-      "title": "Inventory movements",
-      "description": "Append-only audit trail for stock changes caused by checkout and staff operations.",
+      "title": {
+        "en": "Inventory movements",
+        "zh-TW": "庫存異動",
+        "ja": "在庫履歴",
+        "ko": "재고 변동",
+        "fr": "Mouvements de stock"
+      },
+      "description": {
+        "en": "Append-only audit trail for stock changes caused by checkout and staff operations.",
+        "zh-TW": "結帳與後台操作造成的庫存變更，只能新增的稽核紀錄。",
+        "ja": "チェックアウトと管理操作による在庫変更を記録する追記専用の監査履歴です。",
+        "ko": "결제와 관리자 작업으로 발생한 재고 변경을 기록하는 추가 전용 감사 로그입니다.",
+        "fr": "Journal d’audit en ajout seul des changements de stock dus au paiement et aux opérations du personnel."
+      },
       "schema": {
         "readOnly": true,
         "type": "object",
@@ -660,13 +1203,34 @@ export const manifest = [
         ],
         "properties": {
           "movementKey": {
-            "type": "string"
+            "type": "string",
+            "title": {
+              "en": "Movement key",
+              "zh-TW": "異動識別碼",
+              "ja": "履歴キー",
+              "ko": "변동 키",
+              "fr": "Clé du mouvement"
+            }
           },
           "productSlug": {
-            "type": "string"
+            "type": "string",
+            "title": {
+              "en": "Product slug",
+              "zh-TW": "商品代稱",
+              "ja": "商品スラッグ",
+              "ko": "상품 슬러그",
+              "fr": "Slug du produit"
+            }
           },
           "orderToken": {
-            "type": "string"
+            "type": "string",
+            "title": {
+              "en": "Order token",
+              "zh-TW": "訂單識別碼",
+              "ja": "注文トークン",
+              "ko": "주문 토큰",
+              "fr": "Jeton de commande"
+            }
           },
           "kind": {
             "type": "string",
@@ -676,20 +1240,55 @@ export const manifest = [
               "sale",
               "release",
               "cancellation"
-            ]
+            ],
+            "title": {
+              "en": "Movement type",
+              "zh-TW": "異動類型",
+              "ja": "履歴種別",
+              "ko": "변동 유형",
+              "fr": "Type de mouvement"
+            }
           },
           "availableDelta": {
-            "type": "integer"
+            "type": "integer",
+            "title": {
+              "en": "Available change",
+              "zh-TW": "可售數量變化",
+              "ja": "販売可能数の変化",
+              "ko": "판매 가능 수량 변경",
+              "fr": "Variation disponible"
+            }
           },
           "reservedDelta": {
-            "type": "integer"
+            "type": "integer",
+            "title": {
+              "en": "Reserved change",
+              "zh-TW": "保留數量變化",
+              "ja": "予約済み数の変化",
+              "ko": "예약 수량 변경",
+              "fr": "Variation réservée"
+            }
           },
           "note": {
-            "type": "string"
+            "type": "string",
+            "title": {
+              "en": "Note",
+              "zh-TW": "備註",
+              "ja": "メモ",
+              "ko": "메모",
+              "fr": "Note"
+            }
           },
           "occurredAt": {
             "type": "number",
-            "x-mcp-hint": "timestamp-ms"
+            "x-mcp-hint": "timestamp-ms",
+            "title": {
+              "en": "Occurred at",
+              "zh-TW": "發生時間",
+              "ja": "発生日時",
+              "ko": "발생 시간",
+              "fr": "Survenu le"
+            }
           }
         }
       },
@@ -701,6 +1300,10 @@ export const manifest = [
       ],
       "indexes": [
         [
+          "kind",
+          "occurredAt"
+        ],
+        [
           "productSlug",
           "occurredAt"
         ],
@@ -710,6 +1313,7 @@ export const manifest = [
       ],
       "uiSchema": {
         "list": {
+          "filterField": "kind",
           "primaryField": "productSlug",
           "columns": [
             "kind",
@@ -945,7 +1549,14 @@ export const manifest = [
           "operationId": {
             "type": "string",
             "format": "uuid",
-            "x-mcp-hint": "idempotency-key"
+            "x-mcp-hint": "idempotency-key",
+            "title": {
+              "en": "Operation ID",
+              "zh-TW": "操作識別碼",
+              "ja": "操作 ID",
+              "ko": "작업 ID",
+              "fr": "ID d’opération"
+            }
           },
           "locale": {
             "type": "string",
@@ -967,21 +1578,49 @@ export const manifest = [
           "customerName": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 120
+            "maxLength": 120,
+            "title": {
+              "en": "Customer name",
+              "zh-TW": "顧客姓名",
+              "ja": "顧客名",
+              "ko": "고객 이름",
+              "fr": "Nom du client"
+            }
           },
           "customerEmail": {
             "type": "string",
-            "format": "email"
+            "format": "email",
+            "title": {
+              "en": "Customer email",
+              "zh-TW": "顧客 Email",
+              "ja": "顧客メール",
+              "ko": "고객 이메일",
+              "fr": "E-mail du client"
+            }
           },
           "shippingAddress": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 500
+            "maxLength": 500,
+            "title": {
+              "en": "Shipping address",
+              "zh-TW": "收件地址",
+              "ja": "配送先住所",
+              "ko": "배송 주소",
+              "fr": "Adresse de livraison"
+            }
           },
           "items": {
             "type": "array",
             "minItems": 1,
             "maxItems": 20,
+            "title": {
+              "en": "Items",
+              "zh-TW": "訂單項目",
+              "ja": "注文明細",
+              "ko": "주문 항목",
+              "fr": "Articles"
+            },
             "items": {
               "type": "object",
               "additionalProperties": false,
@@ -992,12 +1631,26 @@ export const manifest = [
               "properties": {
                 "productSlug": {
                   "type": "string",
-                  "pattern": "^[a-z0-9-]+$"
+                  "pattern": "^[a-z0-9-]+$",
+                  "title": {
+                    "en": "Product",
+                    "zh-TW": "商品",
+                    "ja": "商品",
+                    "ko": "상품",
+                    "fr": "Produit"
+                  }
                 },
                 "quantity": {
                   "type": "integer",
                   "minimum": 1,
-                  "maximum": 99
+                  "maximum": 99,
+                  "title": {
+                    "en": "Quantity",
+                    "zh-TW": "數量",
+                    "ja": "数量",
+                    "ko": "수량",
+                    "fr": "Quantité"
+                  }
                 }
               }
             }
@@ -1199,7 +1852,13 @@ export const manifest = [
       "name": "adjust-inventory"
     },
     "spec": {
-      "title": "Adjust inventory",
+      "title": {
+        "en": "Adjust inventory",
+        "zh-TW": "調整庫存",
+        "ja": "在庫を調整",
+        "ko": "재고 조정",
+        "fr": "Ajuster le stock"
+      },
       "input": {
         "type": "object",
         "additionalProperties": false,
@@ -1213,22 +1872,50 @@ export const manifest = [
           "operationId": {
             "type": "string",
             "format": "uuid",
-            "x-mcp-hint": "idempotency-key"
+            "x-mcp-hint": "idempotency-key",
+            "title": {
+              "en": "Operation ID",
+              "zh-TW": "操作識別碼",
+              "ja": "操作 ID",
+              "ko": "작업 ID",
+              "fr": "ID d’opération"
+            }
           },
           "productSlug": {
             "type": "string",
             "pattern": "^[a-z0-9-]+$",
-            "x-mantle-ref": "products"
+            "x-mantle-ref": "products",
+            "title": {
+              "en": "Product",
+              "zh-TW": "商品",
+              "ja": "商品",
+              "ko": "상품",
+              "fr": "Produit"
+            }
           },
           "delta": {
             "type": "integer",
             "minimum": -100000,
-            "maximum": 100000
+            "maximum": 100000,
+            "title": {
+              "en": "Quantity change",
+              "zh-TW": "數量變化",
+              "ja": "数量の変更",
+              "ko": "수량 변경",
+              "fr": "Variation de quantité"
+            }
           },
           "reason": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 500
+            "maxLength": 500,
+            "title": {
+              "en": "Reason",
+              "zh-TW": "原因",
+              "ja": "理由",
+              "ko": "사유",
+              "fr": "Motif"
+            }
           }
         }
       },
@@ -1287,7 +1974,13 @@ export const manifest = [
       "name": "fulfill-order"
     },
     "spec": {
-      "title": "Fulfill order",
+      "title": {
+        "en": "Fulfill order",
+        "zh-TW": "完成出貨",
+        "ja": "注文を発送完了にする",
+        "ko": "주문 처리 완료",
+        "fr": "Traiter la commande"
+      },
       "input": {
         "type": "object",
         "additionalProperties": false,
@@ -1298,11 +1991,25 @@ export const manifest = [
           "orderToken": {
             "type": "string",
             "pattern": "^[0-9a-f-]{36}$",
-            "x-mantle-ref": "orders"
+            "x-mantle-ref": "orders",
+            "title": {
+              "en": "Order",
+              "zh-TW": "訂單",
+              "ja": "注文",
+              "ko": "주문",
+              "fr": "Commande"
+            }
           },
           "trackingNumber": {
             "type": "string",
-            "maxLength": 120
+            "maxLength": 120,
+            "title": {
+              "en": "Tracking number",
+              "zh-TW": "物流追蹤編號",
+              "ja": "追跡番号",
+              "ko": "운송장 번호",
+              "fr": "Numéro de suivi"
+            }
           }
         }
       },
@@ -1352,7 +2059,13 @@ export const manifest = [
       "name": "cancel-order"
     },
     "spec": {
-      "title": "Cancel order",
+      "title": {
+        "en": "Cancel order",
+        "zh-TW": "取消訂單",
+        "ja": "注文をキャンセル",
+        "ko": "주문 취소",
+        "fr": "Annuler la commande"
+      },
       "input": {
         "type": "object",
         "additionalProperties": false,
@@ -1364,12 +2077,26 @@ export const manifest = [
           "orderToken": {
             "type": "string",
             "pattern": "^[0-9a-f-]{36}$",
-            "x-mantle-ref": "orders"
+            "x-mantle-ref": "orders",
+            "title": {
+              "en": "Order",
+              "zh-TW": "訂單",
+              "ja": "注文",
+              "ko": "주문",
+              "fr": "Commande"
+            }
           },
           "reason": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 500
+            "maxLength": 500,
+            "title": {
+              "en": "Reason",
+              "zh-TW": "原因",
+              "ja": "理由",
+              "ko": "사유",
+              "fr": "Motif"
+            }
           }
         }
       },
