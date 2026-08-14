@@ -771,11 +771,11 @@ function assertTransactionPublicSurface(root) {
   if (!features.includes("href={feature.href}")) {
     throw new Error("transaction homepage feature cards do not link to their seeded href");
   }
-  if (!commerce.includes("data-cart-layout") || !commerce.includes("data-cover-url={item.coverUrl}")) {
-    throw new Error("transaction cart is missing its responsive layout or product images");
+  if (!commerce.includes("data-cart-layout") || !commerce.includes("data-checkout-layout") || !commerce.includes("data-cover-url={item.coverUrl}")) {
+    throw new Error("transaction cart or checkout is missing its responsive layout or product images");
   }
-  if (!commerceClient.includes("layout.hidden = !hasItems") || !commerceClient.includes("product.coverUrl")) {
-    throw new Error("transaction cart client does not render its responsive product rows");
+  if (!commerceClient.includes("layout.hidden = !hasItems") || !commerceClient.includes("product.coverUrl") || !commerceClient.includes("[data-checkout-total]")) {
+    throw new Error("transaction commerce client does not render its responsive product rows or checkout total");
   }
   if (content.includes('message["nav.home"]') || !page.includes('value === "/"')) {
     throw new Error("transaction navigation must use the brand as home without generating /:locale/");

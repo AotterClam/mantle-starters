@@ -73,27 +73,35 @@ export function mountCommerceRoutes(
     const copy = commerceCopy(page.locale);
     return html(
       <CommerceDocument page={page} localePath="/:locale/checkout" title={copy.checkout}>
-        <section class="mx-auto max-w-4xl px-4 py-16 sm:px-6 md:py-24 lg:px-8">
+        <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24 lg:px-8">
           <p class="text-xs font-medium uppercase tracking-wide text-primary">{copy.shop}</p>
-          <h1 class="mt-3 text-4xl tracking-tight">{copy.checkout}</h1>
+          <h1 class="mt-3 text-4xl tracking-tight sm:text-5xl">{copy.checkout}</h1>
           <CatalogData items={page.catalog} />
-          <div class="mt-10 rounded-xl border border-border bg-card p-5" data-cart-summary data-empty-label={copy.emptyCart}></div>
-          <form class="mt-8 grid gap-5" data-checkout-form data-locale={page.locale} data-error-label={copy.checkoutFailed}>
-            <label class="grid gap-2">
-              <span class="text-sm font-medium">{copy.name}</span>
-              <input name="customerName" required maxLength={120} autocomplete="name" class="rounded-lg border border-border bg-background px-3 py-2" />
-            </label>
-            <label class="grid gap-2">
-              <span class="text-sm font-medium">{copy.email}</span>
-              <input name="customerEmail" type="email" required autocomplete="email" class="rounded-lg border border-border bg-background px-3 py-2" />
-            </label>
-            <label class="grid gap-2">
-              <span class="text-sm font-medium">{copy.address}</span>
-              <textarea name="shippingAddress" required maxLength={500} autocomplete="street-address" rows={4} class="rounded-lg border border-border bg-background px-3 py-2"></textarea>
-            </label>
-            <button type="submit" class="rounded-lg bg-primary px-5 py-3 font-medium text-primary-foreground">{copy.placeOrder}</button>
-            <p role="status" class="text-sm text-foreground-muted" data-commerce-status></p>
-          </form>
+          <div class="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start" data-checkout-layout>
+            <form class="order-2 grid gap-5 rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6 lg:order-1" data-checkout-form data-locale={page.locale} data-error-label={copy.checkoutFailed}>
+              <label class="grid gap-2">
+                <span class="text-sm font-medium">{copy.name}</span>
+                <input name="customerName" required maxLength={120} autocomplete="name" class="h-11 rounded-lg border border-border bg-background px-3 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/20" />
+              </label>
+              <label class="grid gap-2">
+                <span class="text-sm font-medium">{copy.email}</span>
+                <input name="customerEmail" type="email" required autocomplete="email" class="h-11 rounded-lg border border-border bg-background px-3 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/20" />
+              </label>
+              <label class="grid gap-2">
+                <span class="text-sm font-medium">{copy.address}</span>
+                <textarea name="shippingAddress" required maxLength={500} autocomplete="street-address" rows={4} class="min-h-28 rounded-lg border border-border bg-background px-3 py-2 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/20"></textarea>
+              </label>
+              <button type="submit" class="mt-2 w-full rounded-lg bg-primary px-5 py-3 font-medium text-primary-foreground">{copy.placeOrder}</button>
+              <p role="status" class="text-sm text-foreground-muted" data-commerce-status></p>
+            </form>
+            <aside class="order-1 rounded-xl border border-border bg-card p-5 shadow-sm lg:order-2 lg:sticky lg:top-6" aria-label={copy.total}>
+              <div class="divide-y divide-border" data-cart-summary data-empty-label={copy.emptyCart}></div>
+              <div class="mt-2 flex items-center justify-between gap-4 border-t border-border pt-5" data-checkout-total-row hidden>
+                <span class="text-foreground-muted">{copy.total}</span>
+                <strong class="text-xl" data-checkout-total></strong>
+              </div>
+            </aside>
+          </div>
         </section>
       </CommerceDocument>,
     );

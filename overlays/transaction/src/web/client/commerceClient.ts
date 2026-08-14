@@ -117,21 +117,35 @@ const renderCart = () => {
 const renderCheckout = () => {
   const root = document.querySelector('[data-cart-summary]');
   if (!root) return;
+  const totalRow = document.querySelector('[data-checkout-total-row]');
+  const total = document.querySelector('[data-checkout-total]');
   const products = catalog();
   const cart = readCart().filter((item) => products.has(item.productSlug));
   root.replaceChildren();
   for (const item of cart) {
     const product = products.get(item.productSlug);
-    const row = document.createElement('p');
-    row.className = 'flex justify-between gap-4 py-2';
-    const name = document.createElement('span'); name.textContent = product.title + ' × ' + item.quantity;
-    const price = document.createElement('strong'); price.textContent = money(product.priceMinor * item.quantity, product.currency);
-    row.append(name, price); root.append(row);
+    const row = document.createElement('div');
+    row.className = 'grid grid-cols-[3rem_minmax(0,1fr)_auto] items-center gap-3 py-4';
+    const media = document.createElement('div');
+    media.className = 'aspect-square overflow-hidden rounded-md bg-muted';
+    if (product.coverUrl) {
+      const image = document.createElement('img');
+      image.src = product.coverUrl; image.alt = ''; image.loading = 'lazy';
+      image.className = 'h-full w-full object-cover'; media.append(image);
+    }
+    const name = document.createElement('span');
+    name.className = 'min-w-0 text-sm'; name.textContent = product.title + ' × ' + item.quantity;
+    const price = document.createElement('strong'); price.className = 'shrink-0 text-sm'; price.textContent = money(product.priceMinor * item.quantity, product.currency);
+    row.append(media, name, price); root.append(row);
   }
   const form = document.querySelector('[data-checkout-form]');
-  if (!cart.length) {
+  const hasItems = cart.length > 0;
+  form.querySelector('button[type="submit"]').disabled = !hasItems;
+  totalRow.hidden = !hasItems;
+  if (hasItems) {
+    total.textContent = money(cartTotal(cart, products), products.get(cart[0].productSlug).currency);
+  } else {
     root.textContent = root.dataset.emptyLabel || 'Cart is empty.';
-    form.querySelector('button[type="submit"]').disabled = true;
   }
 };
 
