@@ -87,6 +87,7 @@ kind: View
 metadata:
   name: home
 spec:
+  surface: public
   from: page
   fields: [id, type, title, summary, sections, updatedAt]
   filter:

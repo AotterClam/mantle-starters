@@ -69,6 +69,7 @@ kind: View
 metadata:
   name: home
 spec:
+  surface: public
   from: page
   fields: [id, type, title, summary, sections, updatedAt]
   filter:
@@ -133,6 +134,7 @@ kind: View
 metadata:
   name: public-community-updates
 spec:
+  surface: public
   from: community-updates
   fields: [id, slug, title, body, publishedAt, updatedAt]
   filter:
