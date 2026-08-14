@@ -19,6 +19,7 @@ type CatalogItem = {
   readonly title: string;
   readonly priceMinor: number;
   readonly currency: string;
+  readonly coverUrl: string | undefined;
 };
 
 type OrderData = MantleSite.Entry_orders;
@@ -40,23 +41,27 @@ export function mountCommerceRoutes(
     return html(
       <CommerceDocument page={page} localePath="/:locale/cart" title={copy.cart}>
         <section
-          class="mx-auto max-w-4xl px-4 py-16 sm:px-6 md:py-24 lg:px-8"
+          class="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24 lg:px-8"
           data-cart-page
           data-quantity-label={copy.quantity}
           data-remove-label={copy.remove}
         >
           <p class="text-xs font-medium uppercase tracking-wide text-primary">{copy.shop}</p>
-          <h1 class="mt-3 text-4xl tracking-tight">{copy.cart}</h1>
+          <h1 class="mt-3 text-4xl tracking-tight sm:text-5xl">{copy.cart}</h1>
           <CatalogData items={page.catalog} />
-          <div class="mt-10 space-y-4" data-cart-items></div>
-          <p class="mt-8 text-foreground-muted" data-cart-empty>{copy.emptyCart}</p>
-          <div class="mt-8 flex items-center justify-between border-t border-border pt-6" data-cart-total-row hidden>
-            <strong>{copy.total}</strong>
-            <strong class="text-xl" data-cart-total></strong>
+          <p class="mt-10 rounded-xl border border-dashed border-border p-8 text-center text-foreground-muted" data-cart-empty>{copy.emptyCart}</p>
+          <div class="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start" data-cart-layout hidden>
+            <div class="space-y-4" data-cart-items></div>
+            <aside class="rounded-xl border border-border bg-card p-5 shadow-sm lg:sticky lg:top-6" aria-label={copy.total}>
+              <div class="flex items-center justify-between gap-4 border-b border-border pb-5" data-cart-total-row>
+                <span class="text-foreground-muted">{copy.total}</span>
+                <strong class="text-xl" data-cart-total></strong>
+              </div>
+              <a href={`/${toUrlLocale(page.locale)}/checkout`} class="mt-5 inline-flex w-full justify-center rounded-lg bg-primary px-5 py-3 font-medium text-primary-foreground" data-checkout-link>
+                {copy.checkout}
+              </a>
+            </aside>
           </div>
-          <a href={`/${toUrlLocale(page.locale)}/checkout`} class="mt-8 inline-flex rounded-lg bg-primary px-5 py-3 font-medium text-primary-foreground" data-checkout-link hidden>
-            {copy.checkout}
-          </a>
         </section>
       </CommerceDocument>,
     );
@@ -186,6 +191,7 @@ function CatalogData({ items }: { readonly items: readonly CatalogItem[] }) {
       data-product-title={item.title}
       data-price-minor={item.priceMinor}
       data-currency={item.currency}
+      data-cover-url={item.coverUrl}
     ></i>
   ))}</div>;
 }
@@ -211,8 +217,9 @@ async function catalog(runtime: CmsRuntime, locale: string): Promise<readonly Ca
     const title = translation.data["title"];
     const priceMinor = parent?.data["priceMinor"];
     const currency = parent?.data["currency"];
+    const coverUrl = parent?.data["coverUrl"];
     return typeof title === "string" && typeof priceMinor === "number" && typeof currency === "string"
-      ? { slug, title, priceMinor, currency }
+      ? { slug, title, priceMinor, currency, coverUrl: typeof coverUrl === "string" ? coverUrl : undefined }
       : null;
   }))).filter((item): item is CatalogItem => item !== null);
 }
