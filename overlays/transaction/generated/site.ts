@@ -165,6 +165,9 @@ export const manifest = [
                       },
                       "icon": {
                         "type": "string"
+                      },
+                      "href": {
+                        "type": "string"
                       }
                     }
                   }
@@ -316,7 +319,8 @@ export const manifest = [
         "required": [
           "slug",
           "priceMinor",
-          "currency"
+          "currency",
+          "coverUrl"
         ],
         "properties": {
           "slug": {
@@ -331,9 +335,9 @@ export const manifest = [
             "type": "string",
             "pattern": "^[A-Z]{3}$"
           },
-          "coverAssetId": {
+          "coverUrl": {
             "type": "string",
-            "x-mcp-hint": "media-image"
+            "description": "Public product image URL. Relative static asset paths are supported."
           }
         }
       },
@@ -354,7 +358,7 @@ export const manifest = [
     },
     "spec": {
       "title": "Product translations",
-      "description": "Localized product titles and summaries.",
+      "description": "Localized product titles, summaries, and descriptions.",
       "localized": true,
       "translates": {
         "parent": "products",
@@ -365,7 +369,8 @@ export const manifest = [
         "required": [
           "slug",
           "locale",
-          "title"
+          "title",
+          "description"
         ],
         "properties": {
           "slug": {
@@ -380,6 +385,10 @@ export const manifest = [
           },
           "summary": {
             "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
           }
         }
       },
@@ -704,6 +713,7 @@ export const manifest = [
         "locale",
         "title",
         "summary",
+        "description",
         "updatedAt"
       ],
       "filter": {

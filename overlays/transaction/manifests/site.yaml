@@ -85,6 +85,7 @@ spec:
                     type: string
                     x-mcp-hint: markdown
                   icon: { type: string }
+                  href: { type: string }
   uniqueIndexes:
     - [slug, locale]
   indexes:
@@ -142,7 +143,7 @@ spec:
   description: Stable product identity, price, and media shared by every language version.
   schema:
     type: object
-    required: [slug, priceMinor, currency]
+    required: [slug, priceMinor, currency, coverUrl]
     properties:
       slug:
         type: string
@@ -153,9 +154,9 @@ spec:
       currency:
         type: string
         pattern: "^[A-Z]{3}$"
-      coverAssetId:
+      coverUrl:
         type: string
-        x-mcp-hint: media-image
+        description: Public product image URL. Relative static asset paths are supported.
   uniqueIndexes:
     - [slug]
   localized: false
@@ -167,14 +168,14 @@ metadata:
   name: product-translations
 spec:
   title: Product translations
-  description: Localized product titles and summaries.
+  description: Localized product titles, summaries, and descriptions.
   localized: true
   translates:
     parent: products
     on: slug
   schema:
     type: object
-    required: [slug, locale, title]
+    required: [slug, locale, title, description]
     properties:
       slug:
         type: string
@@ -183,6 +184,7 @@ spec:
         type: string
       title: { type: string }
       summary: { type: string }
+      description: { type: string, minLength: 1 }
   uniqueIndexes:
     - [slug, locale]
   indexes:
@@ -331,7 +333,7 @@ spec:
     required: [locale]
     properties:
       locale: { type: string }
-  fields: [id, slug, locale, title, summary, updatedAt]
+  fields: [id, slug, locale, title, summary, description, updatedAt]
   filter:
     and:
       - eq: { field: status, value: published }

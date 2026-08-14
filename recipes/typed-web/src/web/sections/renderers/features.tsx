@@ -13,6 +13,7 @@ export const renderFeatures: SectionRenderer = (section, index) => {
         icon: featureIcon(item.icon),
         title: item.title ?? "",
         description: item.body ?? "",
+        href: item.href,
       }))}
     />
   ));

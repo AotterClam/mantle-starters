@@ -692,6 +692,16 @@ function assertTransactionSeed(root) {
   if (about?.sections?.[0]?.image?.src !== "/assets/mantle-ocean-hero-light.svg") {
     throw new Error("transaction About seed is missing its image");
   }
+  const home = parsed.locales[locales[0]]?.["page-translations"]?.find((entry) => entry.slug === "home");
+  const featuredProduct = home?.sections?.find((section) => section.id === "products")?.items?.[0];
+  const product = parsed.locales[locales[0]]?.["product-translations"]?.[0];
+  if (
+    parsed.collections.products[0]?.coverUrl !== "/assets/mantle-ocean-hero-light.svg"
+    || featuredProduct?.href !== "/products/sample-product"
+    || !product?.description
+  ) {
+    throw new Error("transaction sample product must include a cover, description, and seeded homepage link");
+  }
   const schemas = parseAllDocuments(readFileSync(join(root, "manifests", "site.yaml"), "utf8"))
     .map((document) => document.toJSON())
     .filter((atom) => atom?.kind === "Schema");
@@ -715,6 +725,7 @@ function assertTransactionPublicSurface(root) {
   const content = readFileSync(join(root, "src", "web", "content", "siteContent.ts"), "utf8");
   const client = readFileSync(join(root, "src", "web", "client", "homeClient.ts"), "utf8");
   const nav = readFileSync(join(root, "components", "blocks", "marketing", "nav-02.tsx"), "utf8");
+  const features = readFileSync(join(root, "components", "blocks", "marketing", "features-02.tsx"), "utf8");
   const wrangler = readFileSync(join(root, "wrangler.toml"), "utf8");
   if (!composition.includes("mountPublicRoutes") || !composition.includes("publicPathResolver")) {
     throw new Error("transaction Worker does not mount the Core public route surface");
@@ -754,6 +765,9 @@ function assertTransactionPublicSurface(root) {
   if (!client.includes("commerceClientJs")) throw new Error("transaction client bundle is missing cart behavior");
   if (!nav.includes("ShoppingCartIcon") || !nav.includes("data-cart-count")) {
     throw new Error("transaction navigation is missing the cart icon/count surface");
+  }
+  if (!features.includes("href={feature.href}")) {
+    throw new Error("transaction homepage feature cards do not link to their seeded href");
   }
   if (content.includes('message["nav.home"]') || !page.includes('value === "/"')) {
     throw new Error("transaction navigation must use the brand as home without generating /:locale/");

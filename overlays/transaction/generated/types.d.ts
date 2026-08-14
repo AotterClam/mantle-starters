@@ -39,6 +39,7 @@ export namespace MantleSite {
   title?: string;
   body?: string;
   icon?: string;
+  href?: string;
 }[];
 }[];
   }
@@ -48,7 +49,7 @@ export namespace MantleSite {
     slug: string;
     priceMinor: number;
     currency: string;
-    coverAssetId?: string;
+    coverUrl: string;
   }
 
   /** Entry data for Schema 'product-translations' */
@@ -57,6 +58,7 @@ export namespace MantleSite {
     locale: string;
     title: string;
     summary?: string;
+    description: string;
   }
 
   /** Entry data for Schema 'orders' */
@@ -273,6 +275,7 @@ export namespace MantleSite {
   title?: string;
   body?: string;
   icon?: string;
+  href?: string;
 }[];
 }[];
     updatedAt: number;
@@ -313,6 +316,7 @@ export namespace MantleSite {
   title?: string;
   body?: string;
   icon?: string;
+  href?: string;
 }[];
 }[];
     updatedAt: number;
@@ -330,6 +334,7 @@ export namespace MantleSite {
     locale?: string;
     title?: string;
     summary?: string;
+    description?: string;
     updatedAt: number;
   }
 
