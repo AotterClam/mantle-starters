@@ -690,6 +690,9 @@ function assertTransactionSeed(root) {
   if (JSON.stringify(Object.keys(messages.locales)) !== JSON.stringify(locales)) {
     throw new Error("transaction entry and message locale catalogs differ");
   }
+  if (locales.some((locale) => !messages.locales[locale]?.["checkout.insufficientStock"])) {
+    throw new Error("transaction checkout stock conflict copy is missing");
+  }
   const about = parsed.locales[locales[0]]?.["page-translations"]?.find((entry) => entry.slug === "about");
   if (about?.sections?.[0]?.image?.src !== "/assets/mantle-ocean-hero-light.svg") {
     throw new Error("transaction About seed is missing its image");
@@ -784,6 +787,14 @@ function assertTransactionPublicSurface(root) {
   }
   if (!commerceHandlers.includes("await initializeInventory") || !inventoryCoordinator.includes("async initializeProduct") || !initialSeed.includes("data.productSlug")) {
     throw new Error("transaction checkout does not initialize seeded inventory before reserving stock");
+  }
+  if (
+    !commerceHandlers.includes('code: "CONFLICT"')
+    || commerceHandlers.includes('invalid("/items", reserved.insufficient')
+    || !commerce.includes("data-stock-insufficient-label")
+    || !commerceClient.includes("diagnostic?.code === 'CONFLICT' && diagnostic.path === '/items'")
+  ) {
+    throw new Error("transaction checkout does not surface stock conflicts through Core semantics");
   }
   if (content.includes('message["nav.home"]') || !page.includes('value === "/"')) {
     throw new Error("transaction navigation must use the brand as home without generating /:locale/");

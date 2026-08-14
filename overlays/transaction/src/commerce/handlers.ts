@@ -58,7 +58,13 @@ export function buildCommerceHandlers(getRuntime: RuntimeGetter): MantleHandlers
       await initializeInventory(runtime, ctx.env, stockItems);
       const reserved = await inventory(ctx.env).reserve(orderToken, stockItems, expiresAt);
       if (reserved.outcome === "insufficient_stock") {
-        invalid("/items", reserved.insufficient, "quantities currently in stock");
+        throw new DiagnosticError(runtimeDiagnostic({
+          code: "CONFLICT",
+          severity: "error",
+          path: "/items",
+          value: reserved.insufficient,
+          expected: "quantities currently in stock",
+        }));
       }
       if (reserved.outcome !== "reserved") throw new Error(`unexpected reservation outcome: ${reserved.outcome}`);
 

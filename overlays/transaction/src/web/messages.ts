@@ -16,6 +16,7 @@ export function commerceCopy(locale: string) {
     cart: message["nav.cart"], emptyCart: message["cart.empty"], quantity: message["cart.quantity"], remove: message["cart.remove"],
     total: message["cart.total"], checkout: message["cart.checkout"], name: message["checkout.name"], email: message["checkout.email"],
     address: message["checkout.address"], placeOrder: message["checkout.submit"], checkoutFailed: message["checkout.failed"],
+    stockInsufficient: message["checkout.insufficientStock"],
     fakePayment: message["payment.title"], fakePaymentNotice: message["payment.notice"], payNow: message["payment.submit"],
     cancelOrder: message["order.cancel"], order: message["order.title"], pendingPayment: message["order.pending"], paid: message["order.paid"],
     fulfilled: message["order.fulfilled"], cancelled: message["order.cancelled"], orderUpdateFailed: message["order.updateFailed"],

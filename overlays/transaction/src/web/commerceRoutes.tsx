@@ -78,7 +78,7 @@ export function mountCommerceRoutes(
           <h1 class="mt-3 text-4xl tracking-tight sm:text-5xl">{copy.checkout}</h1>
           <CatalogData items={page.catalog} />
           <div class="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start" data-checkout-layout>
-            <form class="order-2 grid gap-5 rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6 lg:order-1" data-checkout-form data-locale={page.locale} data-error-label={copy.checkoutFailed}>
+            <form class="order-2 grid gap-5 rounded-xl border border-border bg-card p-5 shadow-sm sm:p-6 lg:order-1" data-checkout-form data-locale={page.locale} data-error-label={copy.checkoutFailed} data-stock-insufficient-label={copy.stockInsufficient}>
               <label class="grid gap-2">
                 <span class="text-sm font-medium">{copy.name}</span>
                 <input name="customerName" required maxLength={120} autocomplete="name" class="h-11 rounded-lg border border-border bg-background px-3 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/20" />

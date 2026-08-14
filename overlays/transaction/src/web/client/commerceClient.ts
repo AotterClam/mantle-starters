@@ -162,7 +162,13 @@ document.querySelectorAll('[data-checkout-form]').forEach((form) => {
         body: JSON.stringify({ ...fields, locale: form.dataset.locale, items: readCart() }),
       });
       const payload = await response.json();
-      if (!response.ok || !payload.ok) throw new Error(payload.diagnostic?.message || form.dataset.errorLabel);
+      if (!response.ok || !payload.ok) {
+        const diagnostic = payload.diagnostic;
+        const message = diagnostic?.code === 'CONFLICT' && diagnostic.path === '/items'
+          ? form.dataset.stockInsufficientLabel
+          : diagnostic?.message;
+        throw new Error(message || form.dataset.errorLabel);
+      }
       localStorage.removeItem(CART_KEY); updateCartCount([]);
       location.href = '/' + form.dataset.locale.toLowerCase() + '/pay/' + payload.data.orderToken;
     } catch (error) {
