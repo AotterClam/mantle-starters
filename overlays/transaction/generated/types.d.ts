@@ -135,7 +135,7 @@ export namespace MantleSite {
   /** Procedure 'create-manual-order' input */
   export interface ProcInput_create_manual_order {
     operationId: string;
-    locale: "en" | "zh-TW" | "ja" | "ko" | "fr";
+    locale: "en" | "de" | "es" | "fr" | "id" | "it" | "ja" | "ko" | "pt-BR" | "ru" | "zh-CN" | "zh-TW";
     customerName: string;
     customerEmail: string;
     shippingAddress: string;

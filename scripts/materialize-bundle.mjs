@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { isMap, isSeq, parseAllDocuments } from "yaml";
 
 export function materializeBundle(root, bundle, values) {
   for (const [path, raw] of Object.entries(bundle.files ?? {})) {
@@ -7,12 +8,13 @@ export function materializeBundle(root, bundle, values) {
     mkdirSync(dirname(target), { recursive: true });
     writeFileSync(target, substitute(String(raw), values), "utf8");
   }
-  selectLocalizedFiles(root, bundle.localizedFiles ?? [], values);
+  const locales = selectedLocales(values);
+  selectLocalizedFiles(root, bundle.localizedFiles ?? [], locales);
+  selectManifestLocales(root, locales);
   applyProjectIdentity(root, values.PROJECT_NAME, values.SITE_URL);
 }
 
-function selectLocalizedFiles(root, paths, values) {
-  if (paths.length === 0) return;
+function selectedLocales(values) {
   const locales = JSON.parse(values.LOCALES);
   if (!Array.isArray(locales) || locales.some((locale) => typeof locale !== "string")) {
     throw new Error("LOCALES must be a JSON string array");
@@ -20,6 +22,11 @@ function selectLocalizedFiles(root, paths, values) {
   if (!locales.includes(values.CANONICAL_LOCALE)) {
     throw new Error("CANONICAL_LOCALE must be included in LOCALES");
   }
+  return locales;
+}
+
+function selectLocalizedFiles(root, paths, locales) {
+  if (paths.length === 0) return;
   for (const path of paths) {
     const target = join(root, path.replace(/\.template$/, ""));
     const value = JSON.parse(readFileSync(target, "utf8"));
@@ -32,6 +39,45 @@ function selectLocalizedFiles(root, paths, values) {
     value.locales = Object.fromEntries(locales.map((locale) => [locale, available[locale]]));
     writeFileSync(target, `${JSON.stringify(value, null, 2)}\n`, "utf8");
   }
+}
+
+function selectManifestLocales(root, locales) {
+  const path = join(root, "manifests", "site.yaml");
+  if (!existsSync(path)) return;
+  const documents = parseAllDocuments(readFileSync(path, "utf8"));
+  let changed = false;
+  for (const document of documents) changed = trimLocalizedText(document.contents, locales, path) || changed;
+  if (changed) writeFileSync(path, `${documents.map(String).join("---\n")}`, "utf8");
+}
+
+function trimLocalizedText(node, locales, path) {
+  if (isSeq(node)) {
+    let changed = false;
+    for (const item of node.items) changed = trimLocalizedText(item, locales, path) || changed;
+    return changed;
+  }
+  if (!isMap(node)) return false;
+  let changed = false;
+  for (const pair of node.items) {
+    const key = String(pair.key?.value ?? "");
+    if ((key === "title" || key === "description") && isLocalizedTextMap(pair.value)) {
+      const available = new Set(pair.value.items.map((item) => String(item.key?.value ?? "")));
+      const missing = locales.filter((locale) => !available.has(locale));
+      if (missing.length > 0) throw new Error(`${path} does not support manifest locales: ${missing.join(", ")}`);
+      const before = pair.value.items.length;
+      pair.value.items = pair.value.items.filter((item) => locales.includes(String(item.key?.value ?? "")));
+      changed ||= pair.value.items.length !== before;
+    } else {
+      changed = trimLocalizedText(pair.value, locales, path) || changed;
+    }
+  }
+  return changed;
+}
+
+function isLocalizedTextMap(node) {
+  return isMap(node)
+    && node.items.some((item) => item.key?.value === "en")
+    && node.items.every((item) => typeof item.value?.value === "string");
 }
 
 function substitute(text, values) {

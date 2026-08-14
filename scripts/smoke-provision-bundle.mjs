@@ -169,6 +169,17 @@ function smokeLocalMaterializer() {
         throw new Error(`transaction ${path} was not reduced to the selected locales`);
       }
     }
+    assertManifestLocaleSelection(shopOutput, ["en", "zh-TW", "ja", "ko", "fr"]);
+    const transactionLocales = Object.keys(JSON.parse(readFileSync(join(root, "overlays", "transaction", "seed.json"), "utf8")).locales);
+    const allLanguages = spawnSync(process.execPath, [
+      "scripts/dev-provision-bundle.mjs",
+      "transaction",
+      "--out",
+      join(tempRoot, "all-language-shop"),
+      "--locales",
+      transactionLocales.join(","),
+    ], { cwd: root, encoding: "utf8" });
+    if (allLanguages.status !== 0) throw new Error(`all-language materializer failed: ${allLanguages.stderr || allLanguages.stdout}`);
     const unsupported = spawnSync(process.execPath, [
       "scripts/dev-provision-bundle.mjs",
       "transaction",
@@ -733,18 +744,18 @@ function assertTransactionSeed(root) {
   const fulfill = procedures.find((procedure) => procedure.metadata?.name === "fulfill-order");
   const cancel = procedures.find((procedure) => procedure.metadata?.name === "cancel-order");
   for (const atom of [...schemas, pickingList, createOrder, adjust, fulfill, cancel]) {
-    if (!hasTransactionLocales(atom?.spec?.title)) {
-      throw new Error(`transaction ${atom?.metadata?.name ?? "manifest"} title is not available in all five languages`);
+    if (!hasTransactionLocales(atom?.spec?.title, locales)) {
+      throw new Error(`transaction ${atom?.metadata?.name ?? "manifest"} title is not available in every selected language`);
     }
   }
   for (const schema of schemas) {
-    if (!hasTransactionLocales(schema.spec.description)) {
-      throw new Error(`transaction ${schema.metadata.name} description is not available in all five languages`);
+    if (!hasTransactionLocales(schema.spec.description, locales)) {
+      throw new Error(`transaction ${schema.metadata.name} description is not available in every selected language`);
     }
-    assertLocalizedProperties(schema.spec.schema, schema.metadata.name);
+    assertLocalizedProperties(schema.spec.schema, schema.metadata.name, locales);
   }
   for (const procedure of [createOrder, adjust, fulfill, cancel]) {
-    assertLocalizedProperties(procedure.spec.input, procedure.metadata.name);
+    assertLocalizedProperties(procedure.spec.input, procedure.metadata.name, locales);
   }
   if (
     procedures.some((procedure) => ["inspect-inventory", "restock-product"].includes(procedure.metadata?.name))
@@ -761,16 +772,32 @@ function assertTransactionSeed(root) {
   }
 }
 
-function hasTransactionLocales(value) {
-  return ["en", "zh-TW", "ja", "ko", "fr"].every((locale) => typeof value?.[locale] === "string");
+function hasTransactionLocales(value, locales) {
+  return locales.every((locale) => typeof value?.[locale] === "string");
 }
 
-function assertLocalizedProperties(schema, path) {
+function assertLocalizedProperties(schema, path, locales) {
   for (const [name, property] of Object.entries(schema?.properties ?? {})) {
-    if (!hasTransactionLocales(property.title)) throw new Error(`transaction ${path}.${name} title is not available in all five languages`);
-    assertLocalizedProperties(property, `${path}.${name}`);
-    if (property.items) assertLocalizedProperties(property.items, `${path}.${name}[]`);
+    if (!hasTransactionLocales(property.title, locales)) throw new Error(`transaction ${path}.${name} title is not available in every selected language`);
+    assertLocalizedProperties(property, `${path}.${name}`, locales);
+    if (property.items) assertLocalizedProperties(property.items, `${path}.${name}[]`, locales);
   }
+}
+
+function assertManifestLocaleSelection(root, locales) {
+  const expected = [...locales].sort().join(",");
+  const atoms = parseAllDocuments(readFileSync(join(root, "manifests", "site.yaml"), "utf8")).map((document) => document.toJSON());
+  const visit = (value) => {
+    if (!value || typeof value !== "object") return;
+    for (const [key, child] of Object.entries(value)) {
+      if ((key === "title" || key === "description") && child && typeof child === "object" && typeof child.en === "string") {
+        if (Object.keys(child).sort().join(",") !== expected) throw new Error(`transaction manifest ${key} was not reduced to the selected locales`);
+      } else {
+        visit(child);
+      }
+    }
+  };
+  atoms.forEach(visit);
 }
 
 function assertTransactionPublicSurface(root) {

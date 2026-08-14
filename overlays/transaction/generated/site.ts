@@ -13,17 +13,31 @@ export const manifest = [
     "spec": {
       "title": {
         "en": "Pages",
-        "zh-TW": "頁面",
+        "de": "Seiten",
+        "es": "Páginas",
+        "fr": "Pages",
+        "id": "Halaman",
+        "it": "Pagine",
         "ja": "ページ",
         "ko": "페이지",
-        "fr": "Pages"
+        "pt-BR": "Páginas",
+        "ru": "Страницы",
+        "zh-CN": "页面",
+        "zh-TW": "頁面"
       },
       "description": {
         "en": "Stable page identities shared by every language version.",
-        "zh-TW": "所有語言版本共用的穩定頁面識別資料。",
+        "de": "Stabile Seitenidentitäten, die von allen Sprachversionen gemeinsam genutzt werden.",
+        "es": "Identidades de página estables compartidas por todas las versiones lingüísticas.",
+        "fr": "Identités de page stables partagées par toutes les versions linguistiques.",
+        "id": "Identitas halaman stabil yang digunakan bersama oleh semua versi bahasa.",
+        "it": "Identità di pagina stabili condivise da tutte le versioni linguistiche.",
         "ja": "すべての言語版で共有する安定したページ識別情報です。",
         "ko": "모든 언어 버전이 공유하는 안정적인 페이지 식별 정보입니다.",
-        "fr": "Identités de page stables partagées par toutes les versions linguistiques."
+        "pt-BR": "Identidades de página estáveis compartilhadas por todas as versões de idioma.",
+        "ru": "Стабильные идентификаторы страниц, общие для всех языковых версий.",
+        "zh-CN": "所有语言版本共享的稳定页面标识数据。",
+        "zh-TW": "所有語言版本共用的穩定頁面識別資料。"
       },
       "schema": {
         "type": "object",
@@ -37,10 +51,17 @@ export const manifest = [
             "pattern": "^[a-z0-9-]+$",
             "title": {
               "en": "URL slug",
-              "zh-TW": "網址代稱",
+              "de": "URL-Slug",
+              "es": "Slug de URL",
+              "fr": "Slug d’URL",
+              "id": "Slug URL",
+              "it": "Slug URL",
               "ja": "URL スラッグ",
               "ko": "URL 슬러그",
-              "fr": "Slug d’URL"
+              "pt-BR": "Slug da URL",
+              "ru": "URL-slug",
+              "zh-CN": "网址代称",
+              "zh-TW": "網址代稱"
             }
           },
           "type": {
@@ -51,10 +72,17 @@ export const manifest = [
             ],
             "title": {
               "en": "Page type",
-              "zh-TW": "頁面類型",
+              "de": "Seitentyp",
+              "es": "Tipo de página",
+              "fr": "Type de page",
+              "id": "Jenis halaman",
+              "it": "Tipo di pagina",
               "ja": "ページ種別",
               "ko": "페이지 유형",
-              "fr": "Type de page"
+              "pt-BR": "Tipo de página",
+              "ru": "Тип страницы",
+              "zh-CN": "页面类型",
+              "zh-TW": "頁面類型"
             }
           }
         }
@@ -77,17 +105,31 @@ export const manifest = [
     "spec": {
       "title": {
         "en": "Page translations",
-        "zh-TW": "頁面翻譯",
+        "de": "Seitenübersetzungen",
+        "es": "Traducciones de páginas",
+        "fr": "Traductions de pages",
+        "id": "Terjemahan halaman",
+        "it": "Traduzioni delle pagine",
         "ja": "ページ翻訳",
         "ko": "페이지 번역",
-        "fr": "Traductions de pages"
+        "pt-BR": "Traduções de páginas",
+        "ru": "Переводы страниц",
+        "zh-CN": "页面翻译",
+        "zh-TW": "頁面翻譯"
       },
       "description": {
         "en": "Localized page copy and sections.",
-        "zh-TW": "各語言的頁面文案與區塊。",
+        "de": "Lokalisierte Seitentexte und Abschnitte.",
+        "es": "Textos y secciones de página localizados.",
+        "fr": "Textes et sections de page localisés.",
+        "id": "Teks dan bagian halaman yang dilokalkan.",
+        "it": "Testi e sezioni di pagina localizzati.",
         "ja": "各言語のページ文言とセクションです。",
         "ko": "언어별 페이지 문구와 섹션입니다.",
-        "fr": "Textes et sections de page localisés."
+        "pt-BR": "Textos e seções de página localizados.",
+        "ru": "Локализованные тексты и разделы страницы.",
+        "zh-CN": "各语言的页面文案和区块。",
+        "zh-TW": "各語言的頁面文案與區塊。"
       },
       "localized": true,
       "translates": {
@@ -108,40 +150,68 @@ export const manifest = [
             "pattern": "^[a-z0-9-]+$",
             "title": {
               "en": "URL slug",
-              "zh-TW": "網址代稱",
+              "de": "URL-Slug",
+              "es": "Slug de URL",
+              "fr": "Slug d’URL",
+              "id": "Slug URL",
+              "it": "Slug URL",
               "ja": "URL スラッグ",
               "ko": "URL 슬러그",
-              "fr": "Slug d’URL"
+              "pt-BR": "Slug da URL",
+              "ru": "URL-slug",
+              "zh-CN": "网址代称",
+              "zh-TW": "網址代稱"
             }
           },
           "locale": {
             "type": "string",
             "title": {
               "en": "Language",
-              "zh-TW": "語言",
+              "de": "Sprache",
+              "es": "Idioma",
+              "fr": "Langue",
+              "id": "Bahasa",
+              "it": "Lingua",
               "ja": "言語",
               "ko": "언어",
-              "fr": "Langue"
+              "pt-BR": "Idioma",
+              "ru": "Язык",
+              "zh-CN": "语言",
+              "zh-TW": "語言"
             }
           },
           "title": {
             "type": "string",
             "title": {
               "en": "Title",
-              "zh-TW": "標題",
+              "de": "Titel",
+              "es": "Título",
+              "fr": "Titre",
+              "id": "Judul",
+              "it": "Titolo",
               "ja": "タイトル",
               "ko": "제목",
-              "fr": "Titre"
+              "pt-BR": "Título",
+              "ru": "Заголовок",
+              "zh-CN": "标题",
+              "zh-TW": "標題"
             }
           },
           "summary": {
             "type": "string",
             "title": {
               "en": "Summary",
-              "zh-TW": "摘要",
+              "de": "Zusammenfassung",
+              "es": "Resumen",
+              "fr": "Résumé",
+              "id": "Ringkasan",
+              "it": "Riepilogo",
               "ja": "概要",
               "ko": "요약",
-              "fr": "Résumé"
+              "pt-BR": "Resumo",
+              "ru": "Краткое описание",
+              "zh-CN": "摘要",
+              "zh-TW": "摘要"
             }
           },
           "sections": {
@@ -149,10 +219,17 @@ export const manifest = [
             "minItems": 1,
             "title": {
               "en": "Sections",
-              "zh-TW": "區塊",
+              "de": "Abschnitte",
+              "es": "Secciones",
+              "fr": "Sections",
+              "id": "Bagian",
+              "it": "Sezioni",
               "ja": "セクション",
               "ko": "섹션",
-              "fr": "Sections"
+              "pt-BR": "Seções",
+              "ru": "Разделы",
+              "zh-CN": "区块",
+              "zh-TW": "區塊"
             },
             "items": {
               "type": "object",
@@ -172,40 +249,68 @@ export const manifest = [
                   ],
                   "title": {
                     "en": "Section type",
-                    "zh-TW": "區塊類型",
+                    "de": "Abschnittstyp",
+                    "es": "Tipo de sección",
+                    "fr": "Type de section",
+                    "id": "Jenis bagian",
+                    "it": "Tipo di sezione",
                     "ja": "セクション種別",
                     "ko": "섹션 유형",
-                    "fr": "Type de section"
+                    "pt-BR": "Tipo de seção",
+                    "ru": "Тип раздела",
+                    "zh-CN": "区块类型",
+                    "zh-TW": "區塊類型"
                   }
                 },
                 "id": {
                   "type": "string",
                   "title": {
                     "en": "ID",
-                    "zh-TW": "ID",
+                    "de": "ID",
+                    "es": "ID",
+                    "fr": "ID",
+                    "id": "ID",
+                    "it": "ID",
                     "ja": "ID",
                     "ko": "ID",
-                    "fr": "ID"
+                    "pt-BR": "ID",
+                    "ru": "ID",
+                    "zh-CN": "ID",
+                    "zh-TW": "ID"
                   }
                 },
                 "eyebrow": {
                   "type": "string",
                   "title": {
                     "en": "Eyebrow",
-                    "zh-TW": "引導文字",
+                    "de": "Übertitel",
+                    "es": "Antetítulo",
+                    "fr": "Surtitre",
+                    "id": "Teks pengantar",
+                    "it": "Sopratitolo",
                     "ja": "アイブロウ",
                     "ko": "아이브로우",
-                    "fr": "Surtitre"
+                    "pt-BR": "Sobretítulo",
+                    "ru": "Надзаголовок",
+                    "zh-CN": "引导文字",
+                    "zh-TW": "引導文字"
                   }
                 },
                 "title": {
                   "type": "string",
                   "title": {
                     "en": "Title",
-                    "zh-TW": "標題",
+                    "de": "Titel",
+                    "es": "Título",
+                    "fr": "Titre",
+                    "id": "Judul",
+                    "it": "Titolo",
                     "ja": "タイトル",
                     "ko": "제목",
-                    "fr": "Titre"
+                    "pt-BR": "Título",
+                    "ru": "Заголовок",
+                    "zh-CN": "标题",
+                    "zh-TW": "標題"
                   }
                 },
                 "body": {
@@ -213,20 +318,34 @@ export const manifest = [
                   "x-mcp-hint": "markdown",
                   "title": {
                     "en": "Body",
-                    "zh-TW": "內文",
+                    "de": "Inhalt",
+                    "es": "Contenido",
+                    "fr": "Contenu",
+                    "id": "Isi",
+                    "it": "Contenuto",
                     "ja": "本文",
                     "ko": "본문",
-                    "fr": "Contenu"
+                    "pt-BR": "Conteúdo",
+                    "ru": "Содержимое",
+                    "zh-CN": "正文",
+                    "zh-TW": "內文"
                   }
                 },
                 "showImage": {
                   "type": "boolean",
                   "title": {
                     "en": "Show image",
-                    "zh-TW": "顯示圖片",
+                    "de": "Bild anzeigen",
+                    "es": "Mostrar imagen",
+                    "fr": "Afficher l’image",
+                    "id": "Tampilkan gambar",
+                    "it": "Mostra immagine",
                     "ja": "画像を表示",
                     "ko": "이미지 표시",
-                    "fr": "Afficher l’image"
+                    "pt-BR": "Exibir imagem",
+                    "ru": "Показывать изображение",
+                    "zh-CN": "显示图片",
+                    "zh-TW": "顯示圖片"
                   }
                 },
                 "image": {
@@ -237,30 +356,51 @@ export const manifest = [
                   ],
                   "title": {
                     "en": "Image",
-                    "zh-TW": "圖片",
+                    "de": "Bild",
+                    "es": "Imagen",
+                    "fr": "Image",
+                    "id": "Gambar",
+                    "it": "Immagine",
                     "ja": "画像",
                     "ko": "이미지",
-                    "fr": "Image"
+                    "pt-BR": "Imagem",
+                    "ru": "Изображение",
+                    "zh-CN": "图片",
+                    "zh-TW": "圖片"
                   },
                   "properties": {
                     "src": {
                       "type": "string",
                       "title": {
                         "en": "Image URL",
-                        "zh-TW": "圖片網址",
+                        "de": "Bild-URL",
+                        "es": "URL de la imagen",
+                        "fr": "URL de l’image",
+                        "id": "URL gambar",
+                        "it": "URL immagine",
                         "ja": "画像 URL",
                         "ko": "이미지 URL",
-                        "fr": "URL de l’image"
+                        "pt-BR": "URL da imagem",
+                        "ru": "URL изображения",
+                        "zh-CN": "图片网址",
+                        "zh-TW": "圖片網址"
                       }
                     },
                     "alt": {
                       "type": "string",
                       "title": {
                         "en": "Alternative text",
-                        "zh-TW": "替代文字",
+                        "de": "Alternativtext",
+                        "es": "Texto alternativo",
+                        "fr": "Texte alternatif",
+                        "id": "Teks alternatif",
+                        "it": "Testo alternativo",
                         "ja": "代替テキスト",
                         "ko": "대체 텍스트",
-                        "fr": "Texte alternatif"
+                        "pt-BR": "Texto alternativo",
+                        "ru": "Альтернативный текст",
+                        "zh-CN": "替代文字",
+                        "zh-TW": "替代文字"
                       }
                     }
                   }
@@ -269,30 +409,51 @@ export const manifest = [
                   "type": "object",
                   "title": {
                     "en": "Primary action",
-                    "zh-TW": "主要動作",
+                    "de": "Primäre Aktion",
+                    "es": "Acción principal",
+                    "fr": "Action principale",
+                    "id": "Tindakan utama",
+                    "it": "Azione principale",
                     "ja": "メインアクション",
                     "ko": "기본 동작",
-                    "fr": "Action principale"
+                    "pt-BR": "Ação principal",
+                    "ru": "Основное действие",
+                    "zh-CN": "主要操作",
+                    "zh-TW": "主要動作"
                   },
                   "properties": {
                     "label": {
                       "type": "string",
                       "title": {
                         "en": "Label",
-                        "zh-TW": "標籤",
+                        "de": "Beschriftung",
+                        "es": "Etiqueta",
+                        "fr": "Libellé",
+                        "id": "Label",
+                        "it": "Etichetta",
                         "ja": "ラベル",
                         "ko": "레이블",
-                        "fr": "Libellé"
+                        "pt-BR": "Rótulo",
+                        "ru": "Метка",
+                        "zh-CN": "标签",
+                        "zh-TW": "標籤"
                       }
                     },
                     "href": {
                       "type": "string",
                       "title": {
                         "en": "Link",
-                        "zh-TW": "連結",
+                        "de": "Link",
+                        "es": "Enlace",
+                        "fr": "Lien",
+                        "id": "Tautan",
+                        "it": "Link",
                         "ja": "リンク",
                         "ko": "링크",
-                        "fr": "Lien"
+                        "pt-BR": "Link",
+                        "ru": "Ссылка",
+                        "zh-CN": "链接",
+                        "zh-TW": "連結"
                       }
                     }
                   }
@@ -301,30 +462,51 @@ export const manifest = [
                   "type": "object",
                   "title": {
                     "en": "Secondary action",
-                    "zh-TW": "次要動作",
+                    "de": "Sekundäre Aktion",
+                    "es": "Acción secundaria",
+                    "fr": "Action secondaire",
+                    "id": "Tindakan sekunder",
+                    "it": "Azione secondaria",
                     "ja": "サブアクション",
                     "ko": "보조 동작",
-                    "fr": "Action secondaire"
+                    "pt-BR": "Ação secundária",
+                    "ru": "Дополнительное действие",
+                    "zh-CN": "次要操作",
+                    "zh-TW": "次要動作"
                   },
                   "properties": {
                     "label": {
                       "type": "string",
                       "title": {
                         "en": "Label",
-                        "zh-TW": "標籤",
+                        "de": "Beschriftung",
+                        "es": "Etiqueta",
+                        "fr": "Libellé",
+                        "id": "Label",
+                        "it": "Etichetta",
                         "ja": "ラベル",
                         "ko": "레이블",
-                        "fr": "Libellé"
+                        "pt-BR": "Rótulo",
+                        "ru": "Метка",
+                        "zh-CN": "标签",
+                        "zh-TW": "標籤"
                       }
                     },
                     "href": {
                       "type": "string",
                       "title": {
                         "en": "Link",
-                        "zh-TW": "連結",
+                        "de": "Link",
+                        "es": "Enlace",
+                        "fr": "Lien",
+                        "id": "Tautan",
+                        "it": "Link",
                         "ja": "リンク",
                         "ko": "링크",
-                        "fr": "Lien"
+                        "pt-BR": "Link",
+                        "ru": "Ссылка",
+                        "zh-CN": "链接",
+                        "zh-TW": "連結"
                       }
                     }
                   }
@@ -333,10 +515,17 @@ export const manifest = [
                   "type": "array",
                   "title": {
                     "en": "Items",
-                    "zh-TW": "項目",
+                    "de": "Positionen",
+                    "es": "Artículos",
+                    "fr": "Éléments",
+                    "id": "Item",
+                    "it": "Articoli",
                     "ja": "項目",
                     "ko": "항목",
-                    "fr": "Éléments"
+                    "pt-BR": "Itens",
+                    "ru": "Позиции",
+                    "zh-CN": "项目",
+                    "zh-TW": "項目"
                   },
                   "items": {
                     "type": "object",
@@ -345,10 +534,17 @@ export const manifest = [
                         "type": "string",
                         "title": {
                           "en": "Title",
-                          "zh-TW": "標題",
+                          "de": "Titel",
+                          "es": "Título",
+                          "fr": "Titre",
+                          "id": "Judul",
+                          "it": "Titolo",
                           "ja": "タイトル",
                           "ko": "제목",
-                          "fr": "Titre"
+                          "pt-BR": "Título",
+                          "ru": "Заголовок",
+                          "zh-CN": "标题",
+                          "zh-TW": "標題"
                         }
                       },
                       "body": {
@@ -356,30 +552,51 @@ export const manifest = [
                         "x-mcp-hint": "markdown",
                         "title": {
                           "en": "Body",
-                          "zh-TW": "內文",
+                          "de": "Inhalt",
+                          "es": "Contenido",
+                          "fr": "Contenu",
+                          "id": "Isi",
+                          "it": "Contenuto",
                           "ja": "本文",
                           "ko": "본문",
-                          "fr": "Contenu"
+                          "pt-BR": "Conteúdo",
+                          "ru": "Содержимое",
+                          "zh-CN": "正文",
+                          "zh-TW": "內文"
                         }
                       },
                       "icon": {
                         "type": "string",
                         "title": {
                           "en": "Icon",
-                          "zh-TW": "圖示",
+                          "de": "Symbol",
+                          "es": "Icono",
+                          "fr": "Icône",
+                          "id": "Ikon",
+                          "it": "Icona",
                           "ja": "アイコン",
                           "ko": "아이콘",
-                          "fr": "Icône"
+                          "pt-BR": "Ícone",
+                          "ru": "Значок",
+                          "zh-CN": "图标",
+                          "zh-TW": "圖示"
                         }
                       },
                       "href": {
                         "type": "string",
                         "title": {
                           "en": "Link",
-                          "zh-TW": "連結",
+                          "de": "Link",
+                          "es": "Enlace",
+                          "fr": "Lien",
+                          "id": "Tautan",
+                          "it": "Link",
                           "ja": "リンク",
                           "ko": "링크",
-                          "fr": "Lien"
+                          "pt-BR": "Link",
+                          "ru": "Ссылка",
+                          "zh-CN": "链接",
+                          "zh-TW": "連結"
                         }
                       }
                     }
@@ -528,17 +745,31 @@ export const manifest = [
     "spec": {
       "title": {
         "en": "Products",
-        "zh-TW": "商品",
+        "de": "Produkte",
+        "es": "Productos",
+        "fr": "Produits",
+        "id": "Produk",
+        "it": "Prodotti",
         "ja": "商品",
         "ko": "상품",
-        "fr": "Produits"
+        "pt-BR": "Produtos",
+        "ru": "Товары",
+        "zh-CN": "商品",
+        "zh-TW": "商品"
       },
       "description": {
         "en": "Stable product identity, price, and media shared by every language version.",
-        "zh-TW": "所有語言版本共用的商品識別、價格與媒體資料。",
+        "de": "Stabile Produktidentität, Preis und Medien, die von allen Sprachversionen gemeinsam genutzt werden.",
+        "es": "Identidad, precio y medios del producto estables compartidos por todas las versiones lingüísticas.",
+        "fr": "Identité, prix et médias du produit partagés par toutes les versions linguistiques.",
+        "id": "Identitas, harga, dan media produk stabil yang digunakan bersama oleh semua versi bahasa.",
+        "it": "Identità, prezzo e media del prodotto stabili condivisi da tutte le versioni linguistiche.",
         "ja": "すべての言語版で共有する商品識別情報、価格、メディアです。",
         "ko": "모든 언어 버전이 공유하는 상품 식별 정보, 가격, 미디어입니다.",
-        "fr": "Identité, prix et médias du produit partagés par toutes les versions linguistiques."
+        "pt-BR": "Identidade, preço e mídia do produto estáveis compartilhados por todas as versões de idioma.",
+        "ru": "Стабильные идентификаторы, цена и медиа товара, общие для всех языковых версий.",
+        "zh-CN": "所有语言版本共享的商品标识、价格和媒体数据。",
+        "zh-TW": "所有語言版本共用的商品識別、價格與媒體資料。"
       },
       "schema": {
         "type": "object",
@@ -554,10 +785,17 @@ export const manifest = [
             "pattern": "^[a-z0-9-]+$",
             "title": {
               "en": "Product slug",
-              "zh-TW": "商品代稱",
+              "de": "Produkt-Slug",
+              "es": "Slug del producto",
+              "fr": "Slug du produit",
+              "id": "Slug produk",
+              "it": "Slug prodotto",
               "ja": "商品スラッグ",
               "ko": "상품 슬러그",
-              "fr": "Slug du produit"
+              "pt-BR": "Slug do produto",
+              "ru": "Slug товара",
+              "zh-CN": "商品代称",
+              "zh-TW": "商品代稱"
             }
           },
           "priceMinor": {
@@ -565,10 +803,17 @@ export const manifest = [
             "minimum": 0,
             "title": {
               "en": "Price (minor units)",
-              "zh-TW": "價格（最小貨幣單位）",
+              "de": "Preis (kleinste Währungseinheit)",
+              "es": "Precio (unidad monetaria mínima)",
+              "fr": "Prix (unité monétaire minimale)",
+              "id": "Harga (unit mata uang terkecil)",
+              "it": "Prezzo (unità monetaria minima)",
               "ja": "価格（最小通貨単位）",
               "ko": "가격(최소 통화 단위)",
-              "fr": "Prix (unité monétaire minimale)"
+              "pt-BR": "Preço (unidade monetária mínima)",
+              "ru": "Цена (минимальные единицы валюты)",
+              "zh-CN": "价格（最小货币单位）",
+              "zh-TW": "價格（最小貨幣單位）"
             }
           },
           "currency": {
@@ -576,27 +821,48 @@ export const manifest = [
             "pattern": "^[A-Z]{3}$",
             "title": {
               "en": "Currency",
-              "zh-TW": "幣別",
+              "de": "Währung",
+              "es": "Moneda",
+              "fr": "Devise",
+              "id": "Mata uang",
+              "it": "Valuta",
               "ja": "通貨",
               "ko": "통화",
-              "fr": "Devise"
+              "pt-BR": "Moeda",
+              "ru": "Валюта",
+              "zh-CN": "币种",
+              "zh-TW": "幣別"
             }
           },
           "coverUrl": {
             "type": "string",
             "title": {
               "en": "Cover image URL",
-              "zh-TW": "封面圖片網址",
+              "de": "URL des Titelbilds",
+              "es": "URL de la imagen de portada",
+              "fr": "URL de l’image de couverture",
+              "id": "URL gambar sampul",
+              "it": "URL immagine di copertina",
               "ja": "カバー画像 URL",
               "ko": "표지 이미지 URL",
-              "fr": "URL de l’image de couverture"
+              "pt-BR": "URL da imagem de capa",
+              "ru": "URL обложки",
+              "zh-CN": "封面图片网址",
+              "zh-TW": "封面圖片網址"
             },
             "description": {
               "en": "Public product image URL. Relative static asset paths are supported.",
-              "zh-TW": "公開商品圖片網址，也支援相對的靜態資產路徑。",
+              "de": "Öffentliche URL des Produktbilds. Relative Pfade zu statischen Assets werden unterstützt.",
+              "es": "URL pública de la imagen del producto. Se admiten rutas relativas de recursos estáticos.",
+              "fr": "URL publique de l’image du produit. Les chemins relatifs vers les ressources statiques sont pris en charge.",
+              "id": "URL gambar produk publik. Jalur aset statis relatif didukung.",
+              "it": "URL pubblica dell’immagine del prodotto. Sono supportati i percorsi relativi delle risorse statiche.",
               "ja": "公開商品画像の URL。相対的な静的アセットパスにも対応します。",
               "ko": "공개 상품 이미지 URL입니다. 상대 정적 자산 경로도 지원합니다.",
-              "fr": "URL publique de l’image du produit. Les chemins relatifs vers les ressources statiques sont pris en charge."
+              "pt-BR": "URL pública da imagem do produto. Caminhos relativos de recursos estáticos são aceitos.",
+              "ru": "Публичный URL изображения товара. Поддерживаются относительные пути к статическим ресурсам.",
+              "zh-CN": "公开商品图片网址，也支持相对静态资源路径。",
+              "zh-TW": "公開商品圖片網址，也支援相對的靜態資產路徑。"
             }
           }
         }
@@ -619,17 +885,31 @@ export const manifest = [
     "spec": {
       "title": {
         "en": "Product translations",
-        "zh-TW": "商品翻譯",
+        "de": "Produktübersetzungen",
+        "es": "Traducciones de productos",
+        "fr": "Traductions de produits",
+        "id": "Terjemahan produk",
+        "it": "Traduzioni dei prodotti",
         "ja": "商品翻訳",
         "ko": "상품 번역",
-        "fr": "Traductions de produits"
+        "pt-BR": "Traduções de produtos",
+        "ru": "Переводы товаров",
+        "zh-CN": "商品翻译",
+        "zh-TW": "商品翻譯"
       },
       "description": {
         "en": "Localized product titles, summaries, and descriptions.",
-        "zh-TW": "各語言的商品標題、摘要與描述。",
+        "de": "Lokalisierte Produkttitel, Zusammenfassungen und Beschreibungen.",
+        "es": "Títulos, resúmenes y descripciones de productos localizados.",
+        "fr": "Titres, résumés et descriptions de produits localisés.",
+        "id": "Judul, ringkasan, dan deskripsi produk yang dilokalkan.",
+        "it": "Titoli, riepiloghi e descrizioni dei prodotti localizzati.",
         "ja": "各言語の商品タイトル、概要、説明です。",
         "ko": "언어별 상품 제목, 요약, 설명입니다.",
-        "fr": "Titres, résumés et descriptions de produits localisés."
+        "pt-BR": "Títulos, resumos e descrições de produtos localizados.",
+        "ru": "Локализованные названия, сводки и описания товаров.",
+        "zh-CN": "各语言的商品标题、摘要和描述。",
+        "zh-TW": "各語言的商品標題、摘要與描述。"
       },
       "localized": true,
       "translates": {
@@ -650,40 +930,68 @@ export const manifest = [
             "pattern": "^[a-z0-9-]+$",
             "title": {
               "en": "Product slug",
-              "zh-TW": "商品代稱",
+              "de": "Produkt-Slug",
+              "es": "Slug del producto",
+              "fr": "Slug du produit",
+              "id": "Slug produk",
+              "it": "Slug prodotto",
               "ja": "商品スラッグ",
               "ko": "상품 슬러그",
-              "fr": "Slug du produit"
+              "pt-BR": "Slug do produto",
+              "ru": "Slug товара",
+              "zh-CN": "商品代称",
+              "zh-TW": "商品代稱"
             }
           },
           "locale": {
             "type": "string",
             "title": {
               "en": "Language",
-              "zh-TW": "語言",
+              "de": "Sprache",
+              "es": "Idioma",
+              "fr": "Langue",
+              "id": "Bahasa",
+              "it": "Lingua",
               "ja": "言語",
               "ko": "언어",
-              "fr": "Langue"
+              "pt-BR": "Idioma",
+              "ru": "Язык",
+              "zh-CN": "语言",
+              "zh-TW": "語言"
             }
           },
           "title": {
             "type": "string",
             "title": {
               "en": "Title",
-              "zh-TW": "標題",
+              "de": "Titel",
+              "es": "Título",
+              "fr": "Titre",
+              "id": "Judul",
+              "it": "Titolo",
               "ja": "タイトル",
               "ko": "제목",
-              "fr": "Titre"
+              "pt-BR": "Título",
+              "ru": "Заголовок",
+              "zh-CN": "标题",
+              "zh-TW": "標題"
             }
           },
           "summary": {
             "type": "string",
             "title": {
               "en": "Summary",
-              "zh-TW": "摘要",
+              "de": "Zusammenfassung",
+              "es": "Resumen",
+              "fr": "Résumé",
+              "id": "Ringkasan",
+              "it": "Riepilogo",
               "ja": "概要",
               "ko": "요약",
-              "fr": "Résumé"
+              "pt-BR": "Resumo",
+              "ru": "Краткое описание",
+              "zh-CN": "摘要",
+              "zh-TW": "摘要"
             }
           },
           "description": {
@@ -691,10 +999,17 @@ export const manifest = [
             "minLength": 1,
             "title": {
               "en": "Description",
-              "zh-TW": "描述",
+              "de": "Beschreibung",
+              "es": "Descripción",
+              "fr": "Description",
+              "id": "Deskripsi",
+              "it": "Descrizione",
               "ja": "説明",
               "ko": "설명",
-              "fr": "Description"
+              "pt-BR": "Descrição",
+              "ru": "Описание",
+              "zh-CN": "描述",
+              "zh-TW": "描述"
             }
           }
         }
@@ -723,17 +1038,31 @@ export const manifest = [
     "spec": {
       "title": {
         "en": "Orders",
-        "zh-TW": "訂單",
+        "de": "Bestellungen",
+        "es": "Pedidos",
+        "fr": "Commandes",
+        "id": "Pesanan",
+        "it": "Ordini",
         "ja": "注文",
         "ko": "주문",
-        "fr": "Commandes"
+        "pt-BR": "Pedidos",
+        "ru": "Заказы",
+        "zh-CN": "订单",
+        "zh-TW": "訂單"
       },
       "description": {
         "en": "Guest orders created by checkout and managed by staff operations.",
-        "zh-TW": "由結帳建立並由後台操作管理的訪客訂單。",
+        "de": "Gastbestellungen, die beim Checkout erstellt und durch Mitarbeitervorgänge verwaltet werden.",
+        "es": "Pedidos de invitados creados durante el pago y gestionados por las operaciones del personal.",
+        "fr": "Commandes invité créées lors du paiement et gérées par les opérations du personnel.",
+        "id": "Pesanan tamu yang dibuat saat checkout dan dikelola melalui operasi staf.",
+        "it": "Ordini degli ospiti creati al checkout e gestiti dalle operazioni del personale.",
         "ja": "チェックアウトで作成され、管理操作で処理されるゲスト注文です。",
         "ko": "결제 과정에서 생성되고 관리자 작업으로 관리되는 비회원 주문입니다.",
-        "fr": "Commandes invité créées lors du paiement et gérées par les opérations du personnel."
+        "pt-BR": "Pedidos de visitantes criados no checkout e gerenciados pelas operações da equipe.",
+        "ru": "Гостевые заказы, созданные при оформлении и управляемые операциями сотрудников.",
+        "zh-CN": "由结账创建并由后台操作管理的访客订单。",
+        "zh-TW": "由結帳建立並由後台操作管理的訪客訂單。"
       },
       "schema": {
         "readOnly": true,
@@ -759,20 +1088,34 @@ export const manifest = [
             "pattern": "^[0-9a-f-]{36}$",
             "title": {
               "en": "Order token",
-              "zh-TW": "訂單識別碼",
+              "de": "Bestell-Token",
+              "es": "Token del pedido",
+              "fr": "Jeton de commande",
+              "id": "Token pesanan",
+              "it": "Token ordine",
               "ja": "注文トークン",
               "ko": "주문 토큰",
-              "fr": "Jeton de commande"
+              "pt-BR": "Token do pedido",
+              "ru": "Токен заказа",
+              "zh-CN": "订单标识",
+              "zh-TW": "訂單識別碼"
             }
           },
           "orderNumber": {
             "type": "string",
             "title": {
               "en": "Order number",
-              "zh-TW": "訂單編號",
+              "de": "Bestellnummer",
+              "es": "Número de pedido",
+              "fr": "Numéro de commande",
+              "id": "Nomor pesanan",
+              "it": "Numero ordine",
               "ja": "注文番号",
               "ko": "주문 번호",
-              "fr": "Numéro de commande"
+              "pt-BR": "Número do pedido",
+              "ru": "Номер заказа",
+              "zh-CN": "订单编号",
+              "zh-TW": "訂單編號"
             }
           },
           "orderStatus": {
@@ -785,20 +1128,34 @@ export const manifest = [
             ],
             "title": {
               "en": "Order status",
-              "zh-TW": "訂單狀態",
+              "de": "Bestellstatus",
+              "es": "Estado del pedido",
+              "fr": "Statut de la commande",
+              "id": "Status pesanan",
+              "it": "Stato dell’ordine",
               "ja": "注文ステータス",
               "ko": "주문 상태",
-              "fr": "Statut de la commande"
+              "pt-BR": "Status do pedido",
+              "ru": "Статус заказа",
+              "zh-CN": "订单状态",
+              "zh-TW": "訂單狀態"
             }
           },
           "orderLocale": {
             "type": "string",
             "title": {
               "en": "Customer language",
-              "zh-TW": "顧客語言",
+              "de": "Kundensprache",
+              "es": "Idioma del cliente",
+              "fr": "Langue du client",
+              "id": "Bahasa pelanggan",
+              "it": "Lingua del cliente",
               "ja": "顧客の言語",
               "ko": "고객 언어",
-              "fr": "Langue du client"
+              "pt-BR": "Idioma do cliente",
+              "ru": "Язык клиента",
+              "zh-CN": "客户语言",
+              "zh-TW": "顧客語言"
             }
           },
           "currency": {
@@ -806,10 +1163,17 @@ export const manifest = [
             "pattern": "^[A-Z]{3}$",
             "title": {
               "en": "Currency",
-              "zh-TW": "幣別",
+              "de": "Währung",
+              "es": "Moneda",
+              "fr": "Devise",
+              "id": "Mata uang",
+              "it": "Valuta",
               "ja": "通貨",
               "ko": "통화",
-              "fr": "Devise"
+              "pt-BR": "Moeda",
+              "ru": "Валюта",
+              "zh-CN": "币种",
+              "zh-TW": "幣別"
             }
           },
           "subtotalMinor": {
@@ -817,10 +1181,17 @@ export const manifest = [
             "minimum": 0,
             "title": {
               "en": "Subtotal (minor units)",
-              "zh-TW": "小計（最小貨幣單位）",
+              "de": "Zwischensumme (kleinste Währungseinheit)",
+              "es": "Subtotal (unidad monetaria mínima)",
+              "fr": "Sous-total (unité monétaire minimale)",
+              "id": "Subtotal (unit mata uang terkecil)",
+              "it": "Subtotale (unità monetaria minima)",
               "ja": "小計（最小通貨単位）",
               "ko": "소계(최소 통화 단위)",
-              "fr": "Sous-total (unité monétaire minimale)"
+              "pt-BR": "Subtotal (unidade monetária mínima)",
+              "ru": "Промежуточная сумма (минимальные единицы валюты)",
+              "zh-CN": "小计（最小货币单位）",
+              "zh-TW": "小計（最小貨幣單位）"
             }
           },
           "totalMinor": {
@@ -828,10 +1199,17 @@ export const manifest = [
             "minimum": 0,
             "title": {
               "en": "Total (minor units)",
-              "zh-TW": "總計（最小貨幣單位）",
+              "de": "Gesamtsumme (kleinste Währungseinheit)",
+              "es": "Total (unidad monetaria mínima)",
+              "fr": "Total (unité monétaire minimale)",
+              "id": "Total (unit mata uang terkecil)",
+              "it": "Totale (unità monetaria minima)",
               "ja": "合計（最小通貨単位）",
               "ko": "합계(최소 통화 단위)",
-              "fr": "Total (unité monétaire minimale)"
+              "pt-BR": "Total (unidade monetária mínima)",
+              "ru": "Итого (минимальные единицы валюты)",
+              "zh-CN": "总计（最小货币单位）",
+              "zh-TW": "總計（最小貨幣單位）"
             }
           },
           "customerName": {
@@ -840,10 +1218,17 @@ export const manifest = [
             "maxLength": 120,
             "title": {
               "en": "Customer name",
-              "zh-TW": "顧客姓名",
+              "de": "Kundenname",
+              "es": "Nombre del cliente",
+              "fr": "Nom du client",
+              "id": "Nama pelanggan",
+              "it": "Nome del cliente",
               "ja": "顧客名",
               "ko": "고객 이름",
-              "fr": "Nom du client"
+              "pt-BR": "Nome do cliente",
+              "ru": "Имя клиента",
+              "zh-CN": "客户姓名",
+              "zh-TW": "顧客姓名"
             }
           },
           "customerEmail": {
@@ -851,10 +1236,17 @@ export const manifest = [
             "format": "email",
             "title": {
               "en": "Customer email",
-              "zh-TW": "顧客 Email",
+              "de": "E-Mail des Kunden",
+              "es": "Correo del cliente",
+              "fr": "E-mail du client",
+              "id": "Email pelanggan",
+              "it": "Email del cliente",
               "ja": "顧客メール",
               "ko": "고객 이메일",
-              "fr": "E-mail du client"
+              "pt-BR": "E-mail do cliente",
+              "ru": "Электронная почта клиента",
+              "zh-CN": "客户邮箱",
+              "zh-TW": "顧客 Email"
             }
           },
           "shippingAddress": {
@@ -863,10 +1255,17 @@ export const manifest = [
             "maxLength": 500,
             "title": {
               "en": "Shipping address",
-              "zh-TW": "收件地址",
+              "de": "Lieferadresse",
+              "es": "Dirección de envío",
+              "fr": "Adresse de livraison",
+              "id": "Alamat pengiriman",
+              "it": "Indirizzo di spedizione",
               "ja": "配送先住所",
               "ko": "배송 주소",
-              "fr": "Adresse de livraison"
+              "pt-BR": "Endereço de entrega",
+              "ru": "Адрес доставки",
+              "zh-CN": "收货地址",
+              "zh-TW": "收件地址"
             }
           },
           "items": {
@@ -875,10 +1274,17 @@ export const manifest = [
             "maxItems": 20,
             "title": {
               "en": "Items",
-              "zh-TW": "訂單項目",
+              "de": "Positionen",
+              "es": "Artículos",
+              "fr": "Articles",
+              "id": "Item",
+              "it": "Articoli",
               "ja": "注文明細",
               "ko": "주문 항목",
-              "fr": "Articles"
+              "pt-BR": "Itens",
+              "ru": "Позиции",
+              "zh-CN": "项目",
+              "zh-TW": "訂單項目"
             },
             "items": {
               "type": "object",
@@ -894,20 +1300,34 @@ export const manifest = [
                   "type": "string",
                   "title": {
                     "en": "Product slug",
-                    "zh-TW": "商品代稱",
+                    "de": "Produkt-Slug",
+                    "es": "Slug del producto",
+                    "fr": "Slug du produit",
+                    "id": "Slug produk",
+                    "it": "Slug prodotto",
                     "ja": "商品スラッグ",
                     "ko": "상품 슬러그",
-                    "fr": "Slug du produit"
+                    "pt-BR": "Slug do produto",
+                    "ru": "Slug товара",
+                    "zh-CN": "商品代称",
+                    "zh-TW": "商品代稱"
                   }
                 },
                 "title": {
                   "type": "string",
                   "title": {
                     "en": "Product",
-                    "zh-TW": "商品",
+                    "de": "Produkt",
+                    "es": "Producto",
+                    "fr": "Produit",
+                    "id": "Produk",
+                    "it": "Prodotto",
                     "ja": "商品",
                     "ko": "상품",
-                    "fr": "Produit"
+                    "pt-BR": "Produto",
+                    "ru": "Товар",
+                    "zh-CN": "商品",
+                    "zh-TW": "商品"
                   }
                 },
                 "quantity": {
@@ -916,10 +1336,17 @@ export const manifest = [
                   "maximum": 99,
                   "title": {
                     "en": "Quantity",
-                    "zh-TW": "數量",
+                    "de": "Menge",
+                    "es": "Cantidad",
+                    "fr": "Quantité",
+                    "id": "Jumlah",
+                    "it": "Quantità",
                     "ja": "数量",
                     "ko": "수량",
-                    "fr": "Quantité"
+                    "pt-BR": "Quantidade",
+                    "ru": "Количество",
+                    "zh-CN": "数量",
+                    "zh-TW": "數量"
                   }
                 },
                 "unitPriceMinor": {
@@ -927,10 +1354,17 @@ export const manifest = [
                   "minimum": 0,
                   "title": {
                     "en": "Unit price (minor units)",
-                    "zh-TW": "單價（最小貨幣單位）",
+                    "de": "Stückpreis (kleinste Währungseinheit)",
+                    "es": "Precio unitario (unidad monetaria mínima)",
+                    "fr": "Prix unitaire (unité monétaire minimale)",
+                    "id": "Harga satuan (unit mata uang terkecil)",
+                    "it": "Prezzo unitario (unità monetaria minima)",
                     "ja": "単価（最小通貨単位）",
                     "ko": "단가(최소 통화 단위)",
-                    "fr": "Prix unitaire (unité monétaire minimale)"
+                    "pt-BR": "Preço unitário (unidade monetária mínima)",
+                    "ru": "Цена за единицу (минимальные единицы валюты)",
+                    "zh-CN": "单价（最小货币单位）",
+                    "zh-TW": "單價（最小貨幣單位）"
                   }
                 },
                 "lineTotalMinor": {
@@ -938,10 +1372,17 @@ export const manifest = [
                   "minimum": 0,
                   "title": {
                     "en": "Line total (minor units)",
-                    "zh-TW": "項目小計（最小貨幣單位）",
+                    "de": "Positionssumme (kleinste Währungseinheit)",
+                    "es": "Total de línea (unidad monetaria mínima)",
+                    "fr": "Total de la ligne (unité monétaire minimale)",
+                    "id": "Total baris (unit mata uang terkecil)",
+                    "it": "Totale riga (unità monetaria minima)",
                     "ja": "明細合計（最小通貨単位）",
                     "ko": "항목 합계(최소 통화 단위)",
-                    "fr": "Total de la ligne (unité monétaire minimale)"
+                    "pt-BR": "Total do item (unidade monetária mínima)",
+                    "ru": "Сумма позиции (минимальные единицы валюты)",
+                    "zh-CN": "项目小计（最小货币单位）",
+                    "zh-TW": "項目小計（最小貨幣單位）"
                   }
                 }
               }
@@ -952,10 +1393,17 @@ export const manifest = [
             "x-mcp-hint": "timestamp-ms",
             "title": {
               "en": "Expires at",
-              "zh-TW": "到期時間",
+              "de": "Läuft ab am",
+              "es": "Caduca el",
+              "fr": "Expire le",
+              "id": "Kedaluwarsa pada",
+              "it": "Scade il",
               "ja": "有効期限",
               "ko": "만료 시간",
-              "fr": "Expire le"
+              "pt-BR": "Expira em",
+              "ru": "Истекает",
+              "zh-CN": "到期时间",
+              "zh-TW": "到期時間"
             }
           },
           "paidAt": {
@@ -963,10 +1411,17 @@ export const manifest = [
             "x-mcp-hint": "timestamp-ms",
             "title": {
               "en": "Paid at",
-              "zh-TW": "付款時間",
+              "de": "Bezahlt am",
+              "es": "Pagado el",
+              "fr": "Payée le",
+              "id": "Dibayar pada",
+              "it": "Pagato il",
               "ja": "支払日時",
               "ko": "결제 시간",
-              "fr": "Payée le"
+              "pt-BR": "Pago em",
+              "ru": "Оплачен",
+              "zh-CN": "付款时间",
+              "zh-TW": "付款時間"
             }
           },
           "fulfilledAt": {
@@ -974,10 +1429,17 @@ export const manifest = [
             "x-mcp-hint": "timestamp-ms",
             "title": {
               "en": "Fulfilled at",
-              "zh-TW": "出貨完成時間",
+              "de": "Ausgeführt am",
+              "es": "Completado el",
+              "fr": "Traitée le",
+              "id": "Diselesaikan pada",
+              "it": "Evaso il",
               "ja": "発送完了日時",
               "ko": "처리 완료 시간",
-              "fr": "Traitée le"
+              "pt-BR": "Concluído em",
+              "ru": "Выполнен",
+              "zh-CN": "发货完成时间",
+              "zh-TW": "出貨完成時間"
             }
           },
           "cancelledAt": {
@@ -985,30 +1447,51 @@ export const manifest = [
             "x-mcp-hint": "timestamp-ms",
             "title": {
               "en": "Cancelled at",
-              "zh-TW": "取消時間",
+              "de": "Storniert am",
+              "es": "Cancelado el",
+              "fr": "Annulée le",
+              "id": "Dibatalkan pada",
+              "it": "Annullato il",
               "ja": "キャンセル日時",
               "ko": "취소 시간",
-              "fr": "Annulée le"
+              "pt-BR": "Cancelado em",
+              "ru": "Отменён",
+              "zh-CN": "取消时间",
+              "zh-TW": "取消時間"
             }
           },
           "trackingNumber": {
             "type": "string",
             "title": {
               "en": "Tracking number",
-              "zh-TW": "物流追蹤編號",
+              "de": "Sendungsverfolgungsnummer",
+              "es": "Número de seguimiento",
+              "fr": "Numéro de suivi",
+              "id": "Nomor pelacakan",
+              "it": "Numero di tracciamento",
               "ja": "追跡番号",
               "ko": "운송장 번호",
-              "fr": "Numéro de suivi"
+              "pt-BR": "Código de rastreamento",
+              "ru": "Номер отслеживания",
+              "zh-CN": "物流追踪编号",
+              "zh-TW": "物流追蹤編號"
             }
           },
           "cancelReason": {
             "type": "string",
             "title": {
               "en": "Cancellation reason",
-              "zh-TW": "取消原因",
+              "de": "Stornierungsgrund",
+              "es": "Motivo de cancelación",
+              "fr": "Motif d’annulation",
+              "id": "Alasan pembatalan",
+              "it": "Motivo dell’annullamento",
               "ja": "キャンセル理由",
               "ko": "취소 사유",
-              "fr": "Motif d’annulation"
+              "pt-BR": "Motivo do cancelamento",
+              "ru": "Причина отмены",
+              "zh-CN": "取消原因",
+              "zh-TW": "取消原因"
             }
           },
           "createdAt": {
@@ -1017,10 +1500,17 @@ export const manifest = [
             "x-mantle-bind": "now",
             "title": {
               "en": "Created at",
-              "zh-TW": "建立時間",
+              "de": "Erstellt am",
+              "es": "Creado el",
+              "fr": "Créée le",
+              "id": "Dibuat pada",
+              "it": "Creato il",
               "ja": "作成日時",
               "ko": "생성 시간",
-              "fr": "Créée le"
+              "pt-BR": "Criado em",
+              "ru": "Создан",
+              "zh-CN": "创建时间",
+              "zh-TW": "建立時間"
             }
           }
         }
@@ -1066,17 +1556,31 @@ export const manifest = [
     "spec": {
       "title": {
         "en": "Inventory",
-        "zh-TW": "庫存",
+        "de": "Bestand",
+        "es": "Inventario",
+        "fr": "Stock",
+        "id": "Stok",
+        "it": "Inventario",
         "ja": "在庫",
         "ko": "재고",
-        "fr": "Stock"
+        "pt-BR": "Estoque",
+        "ru": "Запасы",
+        "zh-CN": "库存",
+        "zh-TW": "庫存"
       },
       "description": {
         "en": "Query mirror of the InventoryCoordinator Durable Object, which is the stock authority.",
-        "zh-TW": "庫存權威來源 InventoryCoordinator Durable Object 的查詢鏡像。",
+        "de": "Abfragespiegel des InventoryCoordinator Durable Object, das die maßgebliche Bestandsquelle ist.",
+        "es": "Espejo de consulta del objeto duradero InventoryCoordinator, que es la fuente autorizada del inventario.",
+        "fr": "Miroir de consultation de l’objet durable InventoryCoordinator, source d’autorité du stock.",
+        "id": "Cermin kueri dari Durable Object InventoryCoordinator, yang menjadi sumber otoritatif stok.",
+        "it": "Mirror di consultazione del Durable Object InventoryCoordinator, fonte autorevole dell’inventario.",
         "ja": "在庫の正本である InventoryCoordinator Durable Object の参照用ミラーです。",
         "ko": "재고의 원본인 InventoryCoordinator Durable Object의 조회용 미러입니다.",
-        "fr": "Miroir de consultation de l’objet durable InventoryCoordinator, source d’autorité du stock."
+        "pt-BR": "Espelho de consulta do Durable Object InventoryCoordinator, que é a fonte oficial do estoque.",
+        "ru": "Зеркало для запросов Durable Object InventoryCoordinator, являющегося источником истины для запасов.",
+        "zh-CN": "库存权威来源 InventoryCoordinator Durable Object 的查询镜像。",
+        "zh-TW": "庫存權威來源 InventoryCoordinator Durable Object 的查詢鏡像。"
       },
       "schema": {
         "readOnly": true,
@@ -1093,10 +1597,17 @@ export const manifest = [
             "type": "string",
             "title": {
               "en": "Product slug",
-              "zh-TW": "商品代稱",
+              "de": "Produkt-Slug",
+              "es": "Slug del producto",
+              "fr": "Slug du produit",
+              "id": "Slug produk",
+              "it": "Slug prodotto",
               "ja": "商品スラッグ",
               "ko": "상품 슬러그",
-              "fr": "Slug du produit"
+              "pt-BR": "Slug do produto",
+              "ru": "Slug товара",
+              "zh-CN": "商品代称",
+              "zh-TW": "商品代稱"
             }
           },
           "available": {
@@ -1104,10 +1615,17 @@ export const manifest = [
             "minimum": 0,
             "title": {
               "en": "Available",
-              "zh-TW": "可售數量",
+              "de": "Verfügbar",
+              "es": "Disponible",
+              "fr": "Disponible",
+              "id": "Tersedia",
+              "it": "Disponibile",
               "ja": "販売可能数",
               "ko": "판매 가능 수량",
-              "fr": "Disponible"
+              "pt-BR": "Disponível",
+              "ru": "Доступно",
+              "zh-CN": "可售数量",
+              "zh-TW": "可售數量"
             }
           },
           "reserved": {
@@ -1115,10 +1633,17 @@ export const manifest = [
             "minimum": 0,
             "title": {
               "en": "Reserved",
-              "zh-TW": "保留數量",
+              "de": "Reserviert",
+              "es": "Reservado",
+              "fr": "Réservé",
+              "id": "Dipesan",
+              "it": "Riservato",
               "ja": "予約済み数",
               "ko": "예약 수량",
-              "fr": "Réservé"
+              "pt-BR": "Reservado",
+              "ru": "Зарезервировано",
+              "zh-CN": "预留数量",
+              "zh-TW": "保留數量"
             }
           },
           "revision": {
@@ -1126,10 +1651,17 @@ export const manifest = [
             "minimum": 0,
             "title": {
               "en": "Revision",
-              "zh-TW": "修訂版號",
+              "de": "Revision",
+              "es": "Revisión",
+              "fr": "Révision",
+              "id": "Revisi",
+              "it": "Revisione",
               "ja": "リビジョン",
               "ko": "리비전",
-              "fr": "Révision"
+              "pt-BR": "Revisão",
+              "ru": "Ревизия",
+              "zh-CN": "修订版本",
+              "zh-TW": "修訂版號"
             }
           },
           "updatedAt": {
@@ -1137,10 +1669,17 @@ export const manifest = [
             "x-mcp-hint": "timestamp-ms",
             "title": {
               "en": "Updated at",
-              "zh-TW": "更新時間",
+              "de": "Aktualisiert am",
+              "es": "Actualizado el",
+              "fr": "Mis à jour le",
+              "id": "Diperbarui pada",
+              "it": "Aggiornato il",
               "ja": "更新日時",
               "ko": "업데이트 시간",
-              "fr": "Mis à jour le"
+              "pt-BR": "Atualizado em",
+              "ru": "Обновлён",
+              "zh-CN": "更新时间",
+              "zh-TW": "更新時間"
             }
           }
         }
@@ -1178,17 +1717,31 @@ export const manifest = [
     "spec": {
       "title": {
         "en": "Inventory movements",
-        "zh-TW": "庫存異動",
+        "de": "Bestandsbewegungen",
+        "es": "Movimientos de inventario",
+        "fr": "Mouvements de stock",
+        "id": "Pergerakan stok",
+        "it": "Movimenti di inventario",
         "ja": "在庫履歴",
         "ko": "재고 변동",
-        "fr": "Mouvements de stock"
+        "pt-BR": "Movimentações de estoque",
+        "ru": "Движения запасов",
+        "zh-CN": "库存变动",
+        "zh-TW": "庫存異動"
       },
       "description": {
         "en": "Append-only audit trail for stock changes caused by checkout and staff operations.",
-        "zh-TW": "結帳與後台操作造成的庫存變更，只能新增的稽核紀錄。",
+        "de": "Unveränderlicher Prüfpfad für Bestandsänderungen durch Checkout und Mitarbeitervorgänge.",
+        "es": "Registro de auditoría de solo adición para cambios de inventario causados por el pago y las operaciones del personal.",
+        "fr": "Journal d’audit en ajout seul des changements de stock dus au paiement et aux opérations du personnel.",
+        "id": "Jejak audit hanya-tambah untuk perubahan stok akibat checkout dan operasi staf.",
+        "it": "Registro di audit di sola aggiunta per le variazioni di inventario causate dal checkout e dalle operazioni del personale.",
         "ja": "チェックアウトと管理操作による在庫変更を記録する追記専用の監査履歴です。",
         "ko": "결제와 관리자 작업으로 발생한 재고 변경을 기록하는 추가 전용 감사 로그입니다.",
-        "fr": "Journal d’audit en ajout seul des changements de stock dus au paiement et aux opérations du personnel."
+        "pt-BR": "Trilha de auditoria somente para acréscimos das alterações de estoque causadas pelo checkout e pelas operações da equipe.",
+        "ru": "Добавляемый только в конец журнал аудита изменений запасов, вызванных оформлением заказа и операциями сотрудников.",
+        "zh-CN": "结账和后台操作造成的库存变更，仅追加的审计记录。",
+        "zh-TW": "結帳與後台操作造成的庫存變更，只能新增的稽核紀錄。"
       },
       "schema": {
         "readOnly": true,
@@ -1206,30 +1759,51 @@ export const manifest = [
             "type": "string",
             "title": {
               "en": "Movement key",
-              "zh-TW": "異動識別碼",
+              "de": "Bewegungsschlüssel",
+              "es": "Clave de movimiento",
+              "fr": "Clé du mouvement",
+              "id": "Kunci pergerakan",
+              "it": "Chiave movimento",
               "ja": "履歴キー",
               "ko": "변동 키",
-              "fr": "Clé du mouvement"
+              "pt-BR": "Chave da movimentação",
+              "ru": "Ключ движения",
+              "zh-CN": "变动标识",
+              "zh-TW": "異動識別碼"
             }
           },
           "productSlug": {
             "type": "string",
             "title": {
               "en": "Product slug",
-              "zh-TW": "商品代稱",
+              "de": "Produkt-Slug",
+              "es": "Slug del producto",
+              "fr": "Slug du produit",
+              "id": "Slug produk",
+              "it": "Slug prodotto",
               "ja": "商品スラッグ",
               "ko": "상품 슬러그",
-              "fr": "Slug du produit"
+              "pt-BR": "Slug do produto",
+              "ru": "Slug товара",
+              "zh-CN": "商品代称",
+              "zh-TW": "商品代稱"
             }
           },
           "orderToken": {
             "type": "string",
             "title": {
               "en": "Order token",
-              "zh-TW": "訂單識別碼",
+              "de": "Bestell-Token",
+              "es": "Token del pedido",
+              "fr": "Jeton de commande",
+              "id": "Token pesanan",
+              "it": "Token ordine",
               "ja": "注文トークン",
               "ko": "주문 토큰",
-              "fr": "Jeton de commande"
+              "pt-BR": "Token do pedido",
+              "ru": "Токен заказа",
+              "zh-CN": "订单标识",
+              "zh-TW": "訂單識別碼"
             }
           },
           "kind": {
@@ -1243,40 +1817,68 @@ export const manifest = [
             ],
             "title": {
               "en": "Movement type",
-              "zh-TW": "異動類型",
+              "de": "Bewegungstyp",
+              "es": "Tipo de movimiento",
+              "fr": "Type de mouvement",
+              "id": "Jenis pergerakan",
+              "it": "Tipo di movimento",
               "ja": "履歴種別",
               "ko": "변동 유형",
-              "fr": "Type de mouvement"
+              "pt-BR": "Tipo de movimentação",
+              "ru": "Тип движения",
+              "zh-CN": "变动类型",
+              "zh-TW": "異動類型"
             }
           },
           "availableDelta": {
             "type": "integer",
             "title": {
               "en": "Available change",
-              "zh-TW": "可售數量變化",
+              "de": "Änderung der verfügbaren Menge",
+              "es": "Cambio de cantidad disponible",
+              "fr": "Variation disponible",
+              "id": "Perubahan jumlah tersedia",
+              "it": "Variazione della quantità disponibile",
               "ja": "販売可能数の変化",
               "ko": "판매 가능 수량 변경",
-              "fr": "Variation disponible"
+              "pt-BR": "Alteração da quantidade disponível",
+              "ru": "Изменение доступного количества",
+              "zh-CN": "可售数量变化",
+              "zh-TW": "可售數量變化"
             }
           },
           "reservedDelta": {
             "type": "integer",
             "title": {
               "en": "Reserved change",
-              "zh-TW": "保留數量變化",
+              "de": "Änderung der reservierten Menge",
+              "es": "Cambio de cantidad reservada",
+              "fr": "Variation réservée",
+              "id": "Perubahan jumlah yang dipesan",
+              "it": "Variazione della quantità riservata",
               "ja": "予約済み数の変化",
               "ko": "예약 수량 변경",
-              "fr": "Variation réservée"
+              "pt-BR": "Alteração da quantidade reservada",
+              "ru": "Изменение зарезервированного количества",
+              "zh-CN": "预留数量变化",
+              "zh-TW": "保留數量變化"
             }
           },
           "note": {
             "type": "string",
             "title": {
               "en": "Note",
-              "zh-TW": "備註",
+              "de": "Notiz",
+              "es": "Nota",
+              "fr": "Note",
+              "id": "Catatan",
+              "it": "Nota",
               "ja": "メモ",
               "ko": "메모",
-              "fr": "Note"
+              "pt-BR": "Observação",
+              "ru": "Примечание",
+              "zh-CN": "备注",
+              "zh-TW": "備註"
             }
           },
           "occurredAt": {
@@ -1284,10 +1886,17 @@ export const manifest = [
             "x-mcp-hint": "timestamp-ms",
             "title": {
               "en": "Occurred at",
-              "zh-TW": "發生時間",
+              "de": "Aufgetreten am",
+              "es": "Ocurrió el",
+              "fr": "Survenu le",
+              "id": "Terjadi pada",
+              "it": "Avvenuto il",
               "ja": "発生日時",
               "ko": "발생 시간",
-              "fr": "Survenu le"
+              "pt-BR": "Ocorrido em",
+              "ru": "Произошло",
+              "zh-CN": "发生时间",
+              "zh-TW": "發生時間"
             }
           }
         }
@@ -1391,10 +2000,17 @@ export const manifest = [
     "spec": {
       "title": {
         "en": "Picking list",
-        "zh-TW": "揀貨單",
+        "de": "Kommissionierliste",
+        "es": "Lista de preparación",
+        "fr": "Liste de préparation",
+        "id": "Daftar pengambilan",
+        "it": "Lista di prelievo",
         "ja": "ピッキングリスト",
         "ko": "피킹 목록",
-        "fr": "Liste de préparation"
+        "pt-BR": "Lista de separação",
+        "ru": "Лист комплектации",
+        "zh-CN": "拣货单",
+        "zh-TW": "揀貨單"
       },
       "surface": "staff",
       "sql": "SELECT\n  o.orderNumber,\n  o.customerName,\n  o.shippingAddress,\n  json_extract(item.value, '$.productSlug') AS productSlug,\n  json_extract(item.value, '$.title') AS productTitle,\n  json_extract(item.value, '$.quantity') AS quantity\nFROM orders AS o\nJOIN json_each(o.items) AS item\nWHERE o.orderStatus = 'paid'\nORDER BY o.createdAt ASC, o.orderNumber ASC, item.key ASC\n",
@@ -1529,10 +2145,17 @@ export const manifest = [
     "spec": {
       "title": {
         "en": "Create order",
-        "zh-TW": "新增訂單",
+        "de": "Bestellung erstellen",
+        "es": "Crear pedido",
+        "fr": "Créer une commande",
+        "id": "Buat pesanan",
+        "it": "Crea ordine",
         "ja": "注文を作成",
         "ko": "주문 만들기",
-        "fr": "Créer une commande"
+        "pt-BR": "Criar pedido",
+        "ru": "Создать заказ",
+        "zh-CN": "创建订单",
+        "zh-TW": "新增訂單"
       },
       "input": {
         "type": "object",
@@ -1552,27 +2175,48 @@ export const manifest = [
             "x-mcp-hint": "idempotency-key",
             "title": {
               "en": "Operation ID",
-              "zh-TW": "操作識別碼",
+              "de": "Vorgangs-ID",
+              "es": "ID de operación",
+              "fr": "ID d’opération",
+              "id": "ID operasi",
+              "it": "ID operazione",
               "ja": "操作 ID",
               "ko": "작업 ID",
-              "fr": "ID d’opération"
+              "pt-BR": "ID da operação",
+              "ru": "ID операции",
+              "zh-CN": "操作标识",
+              "zh-TW": "操作識別碼"
             }
           },
           "locale": {
             "type": "string",
             "enum": [
               "en",
-              "zh-TW",
+              "de",
+              "es",
+              "fr",
+              "id",
+              "it",
               "ja",
               "ko",
-              "fr"
+              "pt-BR",
+              "ru",
+              "zh-CN",
+              "zh-TW"
             ],
             "title": {
               "en": "Customer language",
-              "zh-TW": "顧客語言",
+              "de": "Kundensprache",
+              "es": "Idioma del cliente",
+              "fr": "Langue du client",
+              "id": "Bahasa pelanggan",
+              "it": "Lingua del cliente",
               "ja": "顧客の言語",
               "ko": "고객 언어",
-              "fr": "Langue du client"
+              "pt-BR": "Idioma do cliente",
+              "ru": "Язык клиента",
+              "zh-CN": "客户语言",
+              "zh-TW": "顧客語言"
             }
           },
           "customerName": {
@@ -1581,10 +2225,17 @@ export const manifest = [
             "maxLength": 120,
             "title": {
               "en": "Customer name",
-              "zh-TW": "顧客姓名",
+              "de": "Kundenname",
+              "es": "Nombre del cliente",
+              "fr": "Nom du client",
+              "id": "Nama pelanggan",
+              "it": "Nome del cliente",
               "ja": "顧客名",
               "ko": "고객 이름",
-              "fr": "Nom du client"
+              "pt-BR": "Nome do cliente",
+              "ru": "Имя клиента",
+              "zh-CN": "客户姓名",
+              "zh-TW": "顧客姓名"
             }
           },
           "customerEmail": {
@@ -1592,10 +2243,17 @@ export const manifest = [
             "format": "email",
             "title": {
               "en": "Customer email",
-              "zh-TW": "顧客 Email",
+              "de": "E-Mail des Kunden",
+              "es": "Correo del cliente",
+              "fr": "E-mail du client",
+              "id": "Email pelanggan",
+              "it": "Email del cliente",
               "ja": "顧客メール",
               "ko": "고객 이메일",
-              "fr": "E-mail du client"
+              "pt-BR": "E-mail do cliente",
+              "ru": "Электронная почта клиента",
+              "zh-CN": "客户邮箱",
+              "zh-TW": "顧客 Email"
             }
           },
           "shippingAddress": {
@@ -1604,10 +2262,17 @@ export const manifest = [
             "maxLength": 500,
             "title": {
               "en": "Shipping address",
-              "zh-TW": "收件地址",
+              "de": "Lieferadresse",
+              "es": "Dirección de envío",
+              "fr": "Adresse de livraison",
+              "id": "Alamat pengiriman",
+              "it": "Indirizzo di spedizione",
               "ja": "配送先住所",
               "ko": "배송 주소",
-              "fr": "Adresse de livraison"
+              "pt-BR": "Endereço de entrega",
+              "ru": "Адрес доставки",
+              "zh-CN": "收货地址",
+              "zh-TW": "收件地址"
             }
           },
           "items": {
@@ -1616,10 +2281,17 @@ export const manifest = [
             "maxItems": 20,
             "title": {
               "en": "Items",
-              "zh-TW": "訂單項目",
+              "de": "Positionen",
+              "es": "Artículos",
+              "fr": "Articles",
+              "id": "Item",
+              "it": "Articoli",
               "ja": "注文明細",
               "ko": "주문 항목",
-              "fr": "Articles"
+              "pt-BR": "Itens",
+              "ru": "Позиции",
+              "zh-CN": "项目",
+              "zh-TW": "訂單項目"
             },
             "items": {
               "type": "object",
@@ -1634,10 +2306,17 @@ export const manifest = [
                   "pattern": "^[a-z0-9-]+$",
                   "title": {
                     "en": "Product",
-                    "zh-TW": "商品",
+                    "de": "Produkt",
+                    "es": "Producto",
+                    "fr": "Produit",
+                    "id": "Produk",
+                    "it": "Prodotto",
                     "ja": "商品",
                     "ko": "상품",
-                    "fr": "Produit"
+                    "pt-BR": "Produto",
+                    "ru": "Товар",
+                    "zh-CN": "商品",
+                    "zh-TW": "商品"
                   }
                 },
                 "quantity": {
@@ -1646,10 +2325,17 @@ export const manifest = [
                   "maximum": 99,
                   "title": {
                     "en": "Quantity",
-                    "zh-TW": "數量",
+                    "de": "Menge",
+                    "es": "Cantidad",
+                    "fr": "Quantité",
+                    "id": "Jumlah",
+                    "it": "Quantità",
                     "ja": "数量",
                     "ko": "수량",
-                    "fr": "Quantité"
+                    "pt-BR": "Quantidade",
+                    "ru": "Количество",
+                    "zh-CN": "数量",
+                    "zh-TW": "數量"
                   }
                 }
               }
@@ -1854,10 +2540,17 @@ export const manifest = [
     "spec": {
       "title": {
         "en": "Adjust inventory",
-        "zh-TW": "調整庫存",
+        "de": "Bestand anpassen",
+        "es": "Ajustar inventario",
+        "fr": "Ajuster le stock",
+        "id": "Sesuaikan stok",
+        "it": "Modifica inventario",
         "ja": "在庫を調整",
         "ko": "재고 조정",
-        "fr": "Ajuster le stock"
+        "pt-BR": "Ajustar estoque",
+        "ru": "Скорректировать запас",
+        "zh-CN": "调整库存",
+        "zh-TW": "調整庫存"
       },
       "input": {
         "type": "object",
@@ -1875,10 +2568,17 @@ export const manifest = [
             "x-mcp-hint": "idempotency-key",
             "title": {
               "en": "Operation ID",
-              "zh-TW": "操作識別碼",
+              "de": "Vorgangs-ID",
+              "es": "ID de operación",
+              "fr": "ID d’opération",
+              "id": "ID operasi",
+              "it": "ID operazione",
               "ja": "操作 ID",
               "ko": "작업 ID",
-              "fr": "ID d’opération"
+              "pt-BR": "ID da operação",
+              "ru": "ID операции",
+              "zh-CN": "操作标识",
+              "zh-TW": "操作識別碼"
             }
           },
           "productSlug": {
@@ -1887,10 +2587,17 @@ export const manifest = [
             "x-mantle-ref": "products",
             "title": {
               "en": "Product",
-              "zh-TW": "商品",
+              "de": "Produkt",
+              "es": "Producto",
+              "fr": "Produit",
+              "id": "Produk",
+              "it": "Prodotto",
               "ja": "商品",
               "ko": "상품",
-              "fr": "Produit"
+              "pt-BR": "Produto",
+              "ru": "Товар",
+              "zh-CN": "商品",
+              "zh-TW": "商品"
             }
           },
           "delta": {
@@ -1899,10 +2606,17 @@ export const manifest = [
             "maximum": 100000,
             "title": {
               "en": "Quantity change",
-              "zh-TW": "數量變化",
+              "de": "Mengenänderung",
+              "es": "Cambio de cantidad",
+              "fr": "Variation de quantité",
+              "id": "Perubahan jumlah",
+              "it": "Variazione quantità",
               "ja": "数量の変更",
               "ko": "수량 변경",
-              "fr": "Variation de quantité"
+              "pt-BR": "Alteração de quantidade",
+              "ru": "Изменение количества",
+              "zh-CN": "数量变化",
+              "zh-TW": "數量變化"
             }
           },
           "reason": {
@@ -1911,10 +2625,17 @@ export const manifest = [
             "maxLength": 500,
             "title": {
               "en": "Reason",
-              "zh-TW": "原因",
+              "de": "Grund",
+              "es": "Motivo",
+              "fr": "Motif",
+              "id": "Alasan",
+              "it": "Motivo",
               "ja": "理由",
               "ko": "사유",
-              "fr": "Motif"
+              "pt-BR": "Motivo",
+              "ru": "Причина",
+              "zh-CN": "原因",
+              "zh-TW": "原因"
             }
           }
         }
@@ -1976,10 +2697,17 @@ export const manifest = [
     "spec": {
       "title": {
         "en": "Fulfill order",
-        "zh-TW": "完成出貨",
+        "de": "Bestellung ausführen",
+        "es": "Completar pedido",
+        "fr": "Traiter la commande",
+        "id": "Selesaikan pesanan",
+        "it": "Evadi ordine",
         "ja": "注文を発送完了にする",
         "ko": "주문 처리 완료",
-        "fr": "Traiter la commande"
+        "pt-BR": "Concluir pedido",
+        "ru": "Выполнить заказ",
+        "zh-CN": "完成发货",
+        "zh-TW": "完成出貨"
       },
       "input": {
         "type": "object",
@@ -1994,10 +2722,17 @@ export const manifest = [
             "x-mantle-ref": "orders",
             "title": {
               "en": "Order",
-              "zh-TW": "訂單",
+              "de": "Bestellung",
+              "es": "Pedido",
+              "fr": "Commande",
+              "id": "Pesanan",
+              "it": "Ordine",
               "ja": "注文",
               "ko": "주문",
-              "fr": "Commande"
+              "pt-BR": "Pedido",
+              "ru": "Заказ",
+              "zh-CN": "订单",
+              "zh-TW": "訂單"
             }
           },
           "trackingNumber": {
@@ -2005,10 +2740,17 @@ export const manifest = [
             "maxLength": 120,
             "title": {
               "en": "Tracking number",
-              "zh-TW": "物流追蹤編號",
+              "de": "Sendungsverfolgungsnummer",
+              "es": "Número de seguimiento",
+              "fr": "Numéro de suivi",
+              "id": "Nomor pelacakan",
+              "it": "Numero di tracciamento",
               "ja": "追跡番号",
               "ko": "운송장 번호",
-              "fr": "Numéro de suivi"
+              "pt-BR": "Código de rastreamento",
+              "ru": "Номер отслеживания",
+              "zh-CN": "物流追踪编号",
+              "zh-TW": "物流追蹤編號"
             }
           }
         }
@@ -2061,10 +2803,17 @@ export const manifest = [
     "spec": {
       "title": {
         "en": "Cancel order",
-        "zh-TW": "取消訂單",
+        "de": "Bestellung stornieren",
+        "es": "Cancelar pedido",
+        "fr": "Annuler la commande",
+        "id": "Batalkan pesanan",
+        "it": "Annulla ordine",
         "ja": "注文をキャンセル",
         "ko": "주문 취소",
-        "fr": "Annuler la commande"
+        "pt-BR": "Cancelar pedido",
+        "ru": "Отменить заказ",
+        "zh-CN": "取消订单",
+        "zh-TW": "取消訂單"
       },
       "input": {
         "type": "object",
@@ -2080,10 +2829,17 @@ export const manifest = [
             "x-mantle-ref": "orders",
             "title": {
               "en": "Order",
-              "zh-TW": "訂單",
+              "de": "Bestellung",
+              "es": "Pedido",
+              "fr": "Commande",
+              "id": "Pesanan",
+              "it": "Ordine",
               "ja": "注文",
               "ko": "주문",
-              "fr": "Commande"
+              "pt-BR": "Pedido",
+              "ru": "Заказ",
+              "zh-CN": "订单",
+              "zh-TW": "訂單"
             }
           },
           "reason": {
@@ -2092,10 +2848,17 @@ export const manifest = [
             "maxLength": 500,
             "title": {
               "en": "Reason",
-              "zh-TW": "原因",
+              "de": "Grund",
+              "es": "Motivo",
+              "fr": "Motif",
+              "id": "Alasan",
+              "it": "Motivo",
               "ja": "理由",
               "ko": "사유",
-              "fr": "Motif"
+              "pt-BR": "Motivo",
+              "ru": "Причина",
+              "zh-CN": "原因",
+              "zh-TW": "原因"
             }
           }
         }
