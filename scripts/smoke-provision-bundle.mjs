@@ -805,6 +805,15 @@ function assertTransactionSeed(root) {
     }
   }
   const orders = schemas.find((schema) => schema.metadata?.name === "orders");
+  const products = schemas.find((schema) => schema.metadata?.name === "products");
+  if (
+    products?.spec?.schema?.properties?.coverAssetId?.["x-mantle-ref"] !== "media_assets"
+    || products.spec.schema.properties.coverAssetId["x-mcp-hint"] !== "media-image"
+    || products.spec.schema.required?.includes("coverAssetId")
+    || products.spec.schema.required?.includes("coverUrl")
+  ) {
+    throw new Error("transaction product cover must keep optional URL and media-asset sources");
+  }
   if (!orders?.spec?.schema?.properties?.orderLocale || orders.spec.schema.properties.locale) {
     throw new Error("transaction orders must store orderLocale without using the reserved entry locale field");
   }
@@ -886,12 +895,23 @@ function assertTransactionPublicSurface(root) {
   const initialSeed = readFileSync(join(root, "src", "mantle", "initialSeed.ts"), "utf8");
   const types = readFileSync(join(root, "src", "web", "content", "types.ts"), "utf8");
   const helpers = readFileSync(join(root, "src", "web", "sections", "helpers.tsx"), "utf8");
+  const config = readFileSync(join(root, "src", "mantle", "config.ts"), "utf8");
   const handoff = readFileSync(join(root, ".mantle", "overlays", "transaction", "handoff.md"), "utf8");
   const nav = readFileSync(join(root, "components", "blocks", "marketing", "nav-02.tsx"), "utf8");
   const features = readFileSync(join(root, "components", "blocks", "marketing", "features-02.tsx"), "utf8");
   const wrangler = readFileSync(join(root, "wrangler.toml"), "utf8");
   if (!composition.includes("mountPublicRoutes") || !composition.includes("publicPathResolver")) {
     throw new Error("transaction Worker does not mount the Core public route surface");
+  }
+  if (
+    !composition.includes("mediaStorage: buildMediaStorage(env)")
+    || !config.includes("new R2MediaStorage(")
+    || !config.includes("if (!env.MEDIA_BUCKET) return null")
+    || !surface.includes("pickPrimaryVariant")
+    || !surface.includes("fallbackUrl")
+    || !handoff.includes("initial shop needs no R2")
+  ) {
+    throw new Error("transaction media does not keep URL fallback while making R2 uploads optional");
   }
   for (const required of [
     'registerEntryTemplate("product-translations"',

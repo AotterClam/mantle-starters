@@ -1,4 +1,10 @@
 
+# Optional product media. Leave commented for the zero-R2 first run;
+# follow .mantle/overlays/transaction/handoff.md when enabling uploads.
+# [[r2_buckets]]
+# binding = "MEDIA_BUCKET"
+# bucket_name = "{{PROJECT_NAME}}-media"
+
 # Transaction inventory authority and abandoned-checkout cleanup.
 [[durable_objects.bindings]]
 name = "INVENTORY_COORDINATOR"

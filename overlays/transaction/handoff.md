@@ -30,6 +30,28 @@ Do not add an `editorial` starter example yet. Core accepts the grammar, but
 `request_publish` still blocks the approval runtime needed for a working
 review flow.
 
+## Optional R2 product images
+
+The initial shop needs no R2: seeded `products.coverUrl` values and relative
+static asset paths render immediately. `products.coverAssetId` is optional;
+when it resolves, the storefront emits its variants before falling back to
+`coverUrl`.
+
+To enable Admin uploads later:
+
+1. Create a public R2 bucket named `{{PROJECT_NAME}}-media`.
+2. Uncomment the `MEDIA_BUCKET` block in `wrangler.toml`.
+3. Set public `R2_ACCOUNT_ID` and `MEDIA_PUBLIC_URL_BASE` vars.
+4. Store `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY` with Worker secrets
+   (and in `.dev.vars` for local development).
+
+The generated Worker already wires `R2MediaStorage` and declares the
+`product-cover` purpose. A bound bucket with any missing value fails at boot;
+an unbound bucket keeps uploads disabled and URL images working. Follow the
+installed `node_modules/@aotter/mantle/docs/media-uploads.md` for Cloudflare
+bucket access, CORS, public URL, and verification details. Never commit R2
+credentials.
+
 ## Replacing the demo payment
 
 Choose one provider first. Do not add a generic payment-provider interface

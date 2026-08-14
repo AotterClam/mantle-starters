@@ -192,7 +192,7 @@ spec:
     zh-TW: 所有語言版本共用的商品識別、價格與媒體資料。
   schema:
     type: object
-    required: [slug, priceMinor, currency, coverUrl]
+    required: [slug, priceMinor, currency]
     properties:
       slug:
         type: string
@@ -222,6 +222,24 @@ spec:
           ru: Публичный URL изображения товара. Поддерживаются относительные пути к статическим ресурсам.
           zh-CN: 公开商品图片网址，也支持相对静态资源路径。
           zh-TW: 公開商品圖片網址，也支援相對的靜態資產路徑。
+      coverAssetId:
+        type: string
+        x-mantle-ref: media_assets
+        x-mcp-hint: media-image
+        title: { en: Uploaded cover image, de: Hochgeladenes Titelbild, es: Imagen de portada subida, fr: Image de couverture importée, id: Gambar sampul unggahan, it: Immagine di copertina caricata, ja: アップロードしたカバー画像, ko: 업로드된 표지 이미지, pt-BR: Imagem de capa enviada, ru: Загруженная обложка, zh-CN: 已上传封面图片, zh-TW: 已上傳封面圖片 }
+        description:
+          en: Optional Mantle media asset. When present, the storefront uses it before the external cover URL.
+          de: Optionales Mantle-Medienobjekt. Wenn vorhanden, verwendet der Shop es vor der externen Titelbild-URL.
+          es: Recurso multimedia opcional de Mantle. Si existe, la tienda lo usa antes que la URL externa de portada.
+          fr: Ressource média Mantle facultative. Si elle existe, la boutique l’utilise avant l’URL de couverture externe.
+          id: Aset media Mantle opsional. Jika ada, etalase menggunakannya sebelum URL sampul eksternal.
+          it: Risorsa multimediale Mantle facoltativa. Se presente, il negozio la usa prima dell’URL di copertina esterno.
+          ja: 任意の Mantle メディアアセットです。設定時は外部カバー URL より優先して表示します。
+          ko: 선택적 Mantle 미디어 자산입니다. 설정하면 외부 표지 URL보다 우선 표시합니다.
+          pt-BR: Recurso de mídia Mantle opcional. Quando presente, a loja o usa antes da URL externa da capa.
+          ru: Необязательный медиафайл Mantle. Если он задан, витрина использует его вместо внешнего URL обложки.
+          zh-CN: 可选的 Mantle 媒体资源；设定后，商店会优先于外部封面网址使用它。
+          zh-TW: 可選的 Mantle 媒體資源；設定後，商店會優先於外部封面網址使用它。
   uniqueIndexes:
     - [slug]
   localized: false

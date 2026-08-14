@@ -2,8 +2,10 @@ import type { CollectionRouteConfig, PublicContentContext, PublicRouteContext } 
 import {
   TemplateRegistry,
   createPublicPathResolver,
+  pickPrimaryVariant,
   serializeEntryAsMarkdown,
   toUrlLocale,
+  type MediaAsset,
 } from "@aotter/mantle/runtime";
 import type { Entry } from "@aotter/mantle/spec";
 import { renderToString } from "hono/jsx/dom/server";
@@ -27,7 +29,7 @@ export const publicPathResolver = createPublicPathResolver({
 
 export const templates = new TemplateRegistry();
 
-templates.registerEntryTemplate("product-translations", ({ entry, site, seo }) => {
+templates.registerEntryTemplate("product-translations", ({ entry, site, seo, mediaAssets }) => {
   const locale = entry.locale ?? site.canonicalLocale ?? site.locales[0] ?? "en";
   const copy = commerceCopy(locale);
   const slug = text(entry.data["slug"], entry.id);
@@ -35,14 +37,15 @@ templates.registerEntryTemplate("product-translations", ({ entry, site, seo }) =
   const summary = text(entry.data["summary"]);
   const description = text(entry.data["description"]);
   const coverUrl = text(entry.data["coverUrl"]);
+  const coverAssetId = text(entry.data["coverAssetId"]);
   const productPrice = rawPrice(entry);
   return renderToString(
     <PageDocument locale={locale} title={`${title} · ${site.brand}`} description={summary} seo={seo} icons={site.icons}>
       <SitePage locale={locale} locales={site.locales} localePath={`/:locale/products/${slug}`} brand={site.brand}>
         <article class="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24 lg:px-8">
           <div class="grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
-            {coverUrl && <div class="overflow-hidden rounded-2xl border border-border bg-muted">
-              <img src={coverUrl} alt={title} class="aspect-[4/3] h-full w-full object-cover" />
+            {(coverAssetId || coverUrl) && <div class="overflow-hidden rounded-2xl border border-border bg-muted">
+              <ProductImage assetId={coverAssetId} fallbackUrl={coverUrl} alt={title} mediaAssets={mediaAssets} className="aspect-[4/3] h-full w-full object-cover" loading="eager" />
             </div>}
             <div class="lg:py-4">
               <p class="text-xs font-medium uppercase tracking-wide text-primary">{copy.product}</p>
@@ -72,14 +75,14 @@ templates.registerEntryTemplate("product-translations", ({ entry, site, seo }) =
   );
 });
 
-templates.registerListTemplate("product-translations", ({ entries, locale, site, seo }) => renderToString(
+templates.registerListTemplate("product-translations", ({ entries, locale, site, seo, mediaAssets }) => renderToString(
   <PageDocument locale={locale} title={`${commerceCopy(locale).products} · ${site.brand}`} description={site.description} seo={seo} icons={site.icons}>
     <SitePage locale={locale} locales={site.locales} localePath="/:locale/products" brand={site.brand}>
       <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 md:py-24 lg:px-8">
         <p class="text-xs font-medium uppercase tracking-wide text-primary">{commerceCopy(locale).shop}</p>
         <h1 class="mt-3 text-4xl tracking-tight sm:text-5xl">{commerceCopy(locale).products}</h1>
         <div class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {entries.map((entry) => <ProductCard entry={entry} locale={locale} />)}
+          {entries.map((entry) => <ProductCard entry={entry} locale={locale} mediaAssets={mediaAssets} />)}
         </div>
         {entries.length === 0 && <p class="mt-8 text-foreground-muted">{commerceCopy(locale).noProducts}</p>}
       </section>
@@ -163,16 +166,17 @@ export async function renderNotFound(ctx: PublicRouteContext): Promise<Response>
   ), { status: 404, headers: { "content-type": "text/html; charset=utf-8" } });
 }
 
-function ProductCard({ entry, locale }: { readonly entry: Entry; readonly locale: string }) {
+function ProductCard({ entry, locale, mediaAssets }: { readonly entry: Entry; readonly locale: string; readonly mediaAssets?: ReadonlyMap<string, MediaAsset> }) {
   const slug = text(entry.data["slug"], entry.id);
   const copy = commerceCopy(locale);
   const title = text(entry.data["title"], messagesForLocale(locale)["product.untitled"]);
   const coverUrl = text(entry.data["coverUrl"]);
+  const coverAssetId = text(entry.data["coverAssetId"]);
   return (
     <article class="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition hover:border-border-strong hover:shadow">
       <a href={`/${toUrlLocale(locale)}/products/${slug}`} class="group block">
-        {coverUrl && <div class="overflow-hidden bg-muted">
-          <img src={coverUrl} alt={title} class="aspect-[4/3] h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]" />
+        {(coverAssetId || coverUrl) && <div class="overflow-hidden bg-muted">
+          <ProductImage assetId={coverAssetId} fallbackUrl={coverUrl} alt={title} mediaAssets={mediaAssets} className="aspect-[4/3] h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]" loading="lazy" />
         </div>}
         <div class="p-5 pb-0">
           <h2 class="text-xl tracking-tight group-hover:text-primary">{title}</h2>
@@ -191,6 +195,25 @@ function ProductCard({ entry, locale }: { readonly entry: Entry; readonly locale
       </div>
     </article>
   );
+}
+
+function ProductImage({ assetId, fallbackUrl, alt, mediaAssets, className, loading }: {
+  readonly assetId: string;
+  readonly fallbackUrl: string;
+  readonly alt: string;
+  readonly mediaAssets?: ReadonlyMap<string, MediaAsset>;
+  readonly className: string;
+  readonly loading: "eager" | "lazy";
+}) {
+  const asset = assetId ? mediaAssets?.get(assetId) : undefined;
+  if (!asset) return fallbackUrl ? <img src={fallbackUrl} alt={alt} class={className} loading={loading} /> : null;
+  const primary = pickPrimaryVariant(asset);
+  return <picture>
+    {asset.variants.filter((variant) => variant !== primary).map((variant) => (
+      <source type={variant.mimeType} srcset={variant.publicUrl} />
+    ))}
+    <img src={primary.publicUrl} alt={alt} class={className} loading={loading} />
+  </picture>;
 }
 
 function price(entry: Entry, locale: string): string {
