@@ -44,12 +44,15 @@ for (const archetype of archetypes) {
     const bundle = JSON.parse(readFileSync(join(root, "provision-bundles", `${archetype}.json`), "utf8"));
     materializeBundle(tempRoot, bundle, { ...replacements, ARCHETYPE: archetype });
     assertNoLeftovers(tempRoot, bundle.files);
+    assertGeneratedOutputsAbsent(tempRoot, archetype);
+    prepareProject(tempRoot, archetype);
     assertProjectScripts(tempRoot, archetype);
     assertStaticAssets(tempRoot, archetype);
     if (archetype === "blank") {
       assertHeadlessBlank(tempRoot);
     } else {
       assertGeneratedStylesCurrent(tempRoot, archetype);
+      assertGeneratedStylesMatchStarterLock(tempRoot);
       assertPublicHomeIsNotHandoff(tempRoot);
       assertMantleSiteSignature(tempRoot, archetype);
       assertStylesheetMounted(tempRoot, archetype);
@@ -112,9 +115,52 @@ function assertProjectScripts(root, archetype) {
   if (manifest.scripts?.["check:indexes"] !== expected) {
     throw new Error(`${archetype} missing the required index-coverage script`);
   }
-  const check = manifest.scripts?.check ?? "";
-  if (!check.includes("check:generated") || check.indexOf("check:generated") > check.indexOf("typecheck")) {
-    throw new Error(`${archetype} check must detect generated drift before typecheck can rewrite it`);
+  if (manifest.scripts?.build !== "pnpm check") {
+    throw new Error(`${archetype} build must run the complete check lifecycle`);
+  }
+  const expectedPrepare = archetype === "blank" ? "pnpm generate" : "pnpm generate && pnpm build:styles";
+  if (manifest.scripts?.prepare !== expectedPrepare) {
+    throw new Error(`${archetype} prepare must materialize generated outputs`);
+  }
+  if (archetype !== "blank") {
+    const check = manifest.scripts?.check ?? "";
+    const stages = ["pnpm generate", "pnpm build:styles", "pnpm typecheck", "pnpm check:worker"];
+    if (stages.some((stage, index) => check.indexOf(stage) === -1
+      || (index > 0 && check.indexOf(stage) < check.indexOf(stages[index - 1])))) {
+      throw new Error(`${archetype} check must generate, build assets, typecheck, then dry-run the Worker`);
+    }
+  }
+}
+
+function assertGeneratedOutputsAbsent(root, archetype) {
+  const outputs = [
+    ".mantle/generated/site.ts",
+    ".mantle/generated/types.d.ts",
+    ...(archetype === "blank" ? [] : [
+      "public/assets/styles.css",
+      "public/assets/kiwa-home.js",
+      "public/assets/mantle-ocean-hero-light.svg",
+      "public/assets/mantle-ocean-hero-dark.svg",
+    ]),
+  ];
+  for (const path of outputs) {
+    if (existsSync(join(root, path))) throw new Error(`${archetype} materialized generated output: ${path}`);
+  }
+  const enhance = join(root, "public", "enhance");
+  if (existsSync(enhance) && readdirSync(enhance).some((name) => name.endsWith(".js"))) {
+    throw new Error(`${archetype} materialized generated public/enhance JavaScript`);
+  }
+}
+
+function prepareProject(targetRoot, archetype) {
+  const nodeModules = archetype === "blank"
+    ? join(root, "blank", "node_modules")
+    : join(root, "recipes", "typed-web", "node_modules");
+  symlinkSync(nodeModules, join(targetRoot, "node_modules"), "dir");
+  const result = spawnSync("pnpm", ["prepare"], { cwd: targetRoot, encoding: "utf8" });
+  if (result.status !== 0) throw new Error(`${archetype} prepare failed: ${result.stderr || result.stdout}`);
+  for (const path of [".mantle/generated/site.ts", ".mantle/generated/types.d.ts"]) {
+    if (!existsSync(join(targetRoot, path))) throw new Error(`${archetype} prepare did not create ${path}`);
   }
 }
 
@@ -149,7 +195,7 @@ function smokeLocalMaterializer() {
     if (!wrangler.includes('name = "northstar"')) throw new Error("local Worker name mismatch");
     if (!wrangler.includes('database_name = "northstar-db"')) throw new Error("local D1 name mismatch");
     if (!wrangler.includes('PUBLIC_ORIGIN = "http://localhost:8787"')) throw new Error("local origin missing");
-    assertGeneratedStylesMatchStarterLock(output);
+    assertGeneratedOutputsAbsent(output, "presence");
     const shop = spawnSync(process.execPath, [
       "scripts/dev-provision-bundle.mjs",
       "transaction",
@@ -214,7 +260,6 @@ function assertGeneratedStylesMatchStarterLock(root) {
 }
 
 function assertGeneratedStylesCurrent(targetRoot, archetype) {
-  symlinkSync(join(root, "recipes", "typed-web", "node_modules"), join(targetRoot, "node_modules"), "dir");
   const result = spawnSync(process.execPath, [
     join(root, "recipes", "typed-web", "scripts", "build-styles.mjs"),
     "--root",
@@ -229,7 +274,6 @@ function assertGeneratedStylesCurrent(targetRoot, archetype) {
 function assertHeadlessBlank(root) {
   const files = [
     "manifests/site.yaml",
-    "src/auth.ts",
     "src/index.ts",
     ".mantle/generated/site.ts",
     ".mantle/generated/types.d.ts",
@@ -239,7 +283,9 @@ function assertHeadlessBlank(root) {
   if (!worker.includes("createMantleWorker") || !worker.includes(".mantle/generated/site.js")) {
     throw new Error("blank Worker does not use the generated manifest and Core facade");
   }
-  if (!worker.includes("auth: buildAuth")) throw new Error("blank Worker does not own its auth composition");
+  if (existsSync(join(root, "src", "auth.ts")) || worker.includes("auth: buildAuth")) {
+    throw new Error("blank Worker does not use Core conventional Auth");
+  }
   const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
   if (JSON.stringify(Object.keys(manifest.dependencies ?? {})) !== '["@aotter/mantle"]') {
     throw new Error("blank production dependency must be @aotter/mantle only");
@@ -818,6 +864,9 @@ function assertTransactionPublicSurface(root) {
   const commerceHandlers = readFileSync(join(root, "src", "commerce", "handlers.ts"), "utf8");
   const inventoryCoordinator = readFileSync(join(root, "src", "commerce", "InventoryCoordinator.ts"), "utf8");
   const initialSeed = readFileSync(join(root, "src", "mantle", "initialSeed.ts"), "utf8");
+  const types = readFileSync(join(root, "src", "web", "content", "types.ts"), "utf8");
+  const helpers = readFileSync(join(root, "src", "web", "sections", "helpers.tsx"), "utf8");
+  const handoff = readFileSync(join(root, ".mantle", "overlays", "transaction", "handoff.md"), "utf8");
   const nav = readFileSync(join(root, "components", "blocks", "marketing", "nav-02.tsx"), "utf8");
   const features = readFileSync(join(root, "components", "blocks", "marketing", "features-02.tsx"), "utf8");
   const wrangler = readFileSync(join(root, "wrangler.toml"), "utf8");
@@ -897,6 +946,13 @@ function assertTransactionPublicSurface(root) {
     || !inventoryCoordinator.includes('if (order.status === "paid") return { outcome: "already_paid"')
   ) {
     throw new Error("transaction payment retries can repeat stock deduction or overwrite the first paidAt");
+  }
+  if (!handoff.includes("concurrent pay/cancel callbacks") || !handoff.includes("late pay")) {
+    throw new Error("transaction real-payment handoff omits the pay/cancel consistency prerequisite");
+  }
+  if (["socialProof", "bento", "metrics", "testimonials", "contact", "form", "intake"]
+    .some((section) => types.includes(`\"${section}\"`)) || helpers.includes("contactIcon")) {
+    throw new Error("transaction provision includes unsupported homepage section surface");
   }
   if (content.includes('message["nav.home"]') || !page.includes('value === "/"')) {
     throw new Error("transaction navigation must use the brand as home without generating /:locale/");

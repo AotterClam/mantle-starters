@@ -1,17 +1,12 @@
 #!/usr/bin/env node
-import { spawnSync } from "node:child_process";
 import {
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readdirSync,
   readFileSync,
-  rmSync,
   statSync,
-  symlinkSync,
   writeFileSync,
 } from "node:fs";
-import { tmpdir } from "node:os";
 import { dirname, join, posix } from "node:path";
 import { parse as parseYaml, parseAllDocuments, stringify as stringifyYaml } from "yaml";
 
@@ -20,8 +15,6 @@ const version = JSON.parse(readFileSync(join(root, "package.json"), "utf8")).ver
 const checkOnly = process.argv.includes("--check");
 const archetypes = ["blank", "presence", "intake", "publication", "transaction", "reservation", "community"];
 const dependencySectionKeys = ["dependencies", "devDependencies", "peerDependencies", "optionalDependencies"];
-
-ensureTypedAssets();
 
 for (const archetype of archetypes) {
   const files = buildBundleFiles(archetype);
@@ -54,12 +47,7 @@ function buildBundleFiles(archetype) {
   walk(files, "blank", "");
   if (archetype !== "blank") {
     walk(files, "recipes/typed-web", "");
-    delete files[".mantle/generated/site.ts"];
-    delete files[".mantle/generated/types.d.ts"];
     delete files["manifests/site.yaml"];
-  }
-  for (const path of Object.keys(files)) {
-    if (path.startsWith("public/_mantle/")) delete files[path];
   }
   resolveCatalogPackageJson(files);
   applyProvisionedPackageMetadata(files);
@@ -68,7 +56,9 @@ function buildBundleFiles(archetype) {
     applyOverlay(files, archetype);
     selectTypedSurface(files, archetype);
     pruneRuntimeSource(files);
-    compileBundleAssets(files, archetype);
+  }
+  for (const path of Object.keys(files)) {
+    if (isGeneratedOutput(path)) delete files[path];
   }
 
   files[".mantle/launch-state.json.template"] = [
@@ -166,35 +156,22 @@ function findLocalizedFiles(files, archetype) {
   }).sort();
 }
 
-function compileBundleAssets(files, archetype) {
-  const tempRoot = mkdtempSync(join(tmpdir(), `mantle-${archetype}-styles-`));
-  try {
-    for (const [path, content] of Object.entries(files)) {
-      if (!["components/", "src/", "styles/"].some((prefix) => path.startsWith(prefix))) {
-        continue;
-      }
-      const target = join(tempRoot, path);
-      mkdirSync(dirname(target), { recursive: true });
-      writeFileSync(target, content);
-    }
-    symlinkSync(join(root, "recipes", "typed-web", "node_modules"), join(tempRoot, "node_modules"), "dir");
-    const result = spawnSync(process.execPath, [
-      join(root, "recipes", "typed-web", "scripts", "build-styles.mjs"),
-      "--root",
-      tempRoot,
-    ], { stdio: "inherit" });
-    if (result.status !== 0) throw new Error(`failed to build ${archetype} styles`);
-    for (const path of listFilesFrom(tempRoot, "public")) {
-      files[`public/${path}`] = readFileSync(join(tempRoot, "public", path), "utf8");
-    }
-  } finally {
-    rmSync(tempRoot, { recursive: true, force: true });
-  }
+function isGeneratedOutput(path) {
+  return path.startsWith(".mantle/generated/")
+    || path.startsWith("public/_mantle/")
+    || [
+      "public/assets/styles.css",
+      "public/assets/kiwa-home.js",
+      "public/assets/mantle-ocean-hero-light.svg",
+      "public/assets/mantle-ocean-hero-dark.svg",
+    ].includes(path)
+    || /^public\/enhance\/[^/]+\.js$/.test(path);
 }
 
 function assertBundle(bundle, archetype) {
   for (const required of [
     "package.json",
+    ".gitignore",
     "wrangler.toml",
     ".dev.vars.example",
     ".mantle/launch-state.json.template",
@@ -225,8 +202,8 @@ function assertBundle(bundle, archetype) {
     throw new Error(`${archetype} bundle must use Cloudflare Static Assets`);
   }
   const worker = archetype === "blank" ? bundle.files["src/index.ts"] : bundle.files["src/mantle/worker.ts"];
-  if (!bundle.files["src/auth.ts"] || !worker?.includes("auth: buildAuth")) {
-    throw new Error(`${archetype} bundle must use the shared site-owned auth switch`);
+  if (bundle.files["src/auth.ts"] || worker?.includes("auth: buildAuth")) {
+    throw new Error(`${archetype} bundle must use Core conventional Auth`);
   }
   if (bundle.files["wrangler.toml"]?.includes("MANTLE_PLATFORM_AUTH")) {
     throw new Error(`${archetype} bundle still contains preview Hosted Auth variables`);
@@ -234,8 +211,31 @@ function assertBundle(bundle, archetype) {
   if (!bundle.files["manifests/site.yaml"]) {
     throw new Error(`${archetype} bundle missing applied manifest`);
   }
-  if (Object.keys(bundle.files).some((path) => path.startsWith("public/_mantle/"))) {
-    throw new Error(`${archetype} bundle includes generated Admin assets`);
+  const manifest = JSON.parse(bundle.files["package.json"]);
+  if (manifest.scripts?.build !== "pnpm check") {
+    throw new Error(`${archetype} bundle build must run the complete check lifecycle`);
+  }
+  if (!manifest.scripts?.typecheck?.startsWith("pnpm generate && ")) {
+    throw new Error(`${archetype} bundle typecheck must work without committed generated files`);
+  }
+  const expectedPrepare = archetype === "blank" ? "pnpm generate" : "pnpm generate && pnpm build:styles";
+  if (manifest.scripts?.prepare !== expectedPrepare) {
+    throw new Error(`${archetype} bundle prepare must materialize generated outputs`);
+  }
+  if (Object.keys(bundle.files).some(isGeneratedOutput)) {
+    throw new Error(`${archetype} bundle includes generated output`);
+  }
+  const ignores = new Set(bundle.files[".gitignore"].split(/\r?\n/));
+  for (const output of [
+    ".mantle/generated/",
+    "public/_mantle/",
+    "public/assets/styles.css",
+    "public/assets/kiwa-home.js",
+    "public/assets/mantle-ocean-hero-light.svg",
+    "public/assets/mantle-ocean-hero-dark.svg",
+    "public/enhance/*.js",
+  ]) {
+    if (!ignores.has(output)) throw new Error(`${archetype} bundle must ignore ${output}`);
   }
   for (const path of bundle.localizedFiles ?? []) {
     if (!bundle.files[path]) throw new Error(`${archetype} localized file is absent from bundle: ${path}`);
@@ -249,11 +249,9 @@ function assertBundle(bundle, archetype) {
   }
   if (archetype !== "blank") {
     for (const required of [
-      ".mantle/generated/site.ts",
-      ".mantle/generated/types.d.ts",
       "src/web/content/types.ts",
-      "public/assets/styles.css",
-      "public/assets/kiwa-home.js",
+      "scripts/build-styles.mjs",
+      "styles/globals.css",
       "public/site-icon.svg",
     ]) {
       if (!bundle.files[required]) throw new Error(`${archetype} bundle missing ${required}`);
@@ -289,10 +287,7 @@ function assertBundle(bundle, archetype) {
 function assertHeadlessBlank(bundle) {
   for (const required of [
     "manifests/site.yaml",
-    "src/auth.ts",
     "src/index.ts",
-    ".mantle/generated/site.ts",
-    ".mantle/generated/types.d.ts",
   ]) {
     if (!bundle.files[required]) throw new Error(`blank bundle missing ${required}`);
   }
@@ -393,17 +388,6 @@ function assertProvisionedReadme(bundle, archetype) {
   }
 }
 
-function ensureTypedAssets() {
-  const args = [
-    join(root, "recipes", "typed-web", "scripts", "build-styles.mjs"),
-    "--root",
-    join(root, "recipes", "typed-web"),
-  ];
-  if (checkOnly) args.push("--check");
-  const result = spawnSync(process.execPath, args, { stdio: "inherit" });
-  if (result.status !== 0) process.exit(result.status ?? 1);
-}
-
 function walk(files, from, to) {
   for (const name of readdirSync(join(root, from))) {
     if (skip(name)) continue;
@@ -439,7 +423,6 @@ function applyOverlay(files, archetype) {
   }
   if (seedText) applyOverlaySeedContent(files, archetype, seedText);
   walkIfExists(files, `overlays/${archetype}/src`, "src");
-  walk(files, `overlays/${archetype}/generated`, ".mantle/generated");
 }
 
 function applyOverlaySeedContent(files, archetype, seedText) {
@@ -628,18 +611,6 @@ function listFiles(from, prefix = "") {
     const relative = posix.join(prefix, name);
     const stat = statSync(source);
     if (stat.isDirectory()) found.push(...listFiles(posix.join(from, name), relative));
-    else if (stat.isFile()) found.push(relative);
-  }
-  return found;
-}
-
-function listFilesFrom(base, from, prefix = "") {
-  const found = [];
-  for (const name of readdirSync(join(base, from))) {
-    const source = join(base, from, name);
-    const relative = posix.join(prefix, name);
-    const stat = statSync(source);
-    if (stat.isDirectory()) found.push(...listFilesFrom(base, posix.join(from, name), relative));
     else if (stat.isFile()) found.push(relative);
   }
   return found;

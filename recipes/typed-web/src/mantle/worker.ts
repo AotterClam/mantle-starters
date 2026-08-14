@@ -1,6 +1,5 @@
 import { createMantleWorker, mountPublicRoutes } from "@aotter/mantle/cloudflare";
 import { manifest } from "../../.mantle/generated/site.js";
-import { buildAuth } from "../auth.js";
 import {
   publicCollectionRoutes,
   publicPathResolver,
@@ -16,7 +15,6 @@ import { createSeededRuntime } from "./seed.js";
 
 export const mantle = createMantleWorker<Env>({
   manifest,
-  auth: buildAuth,
   siteDefaults: buildSiteDefaults,
   templates,
   publicPathResolver,

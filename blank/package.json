@@ -5,6 +5,8 @@
   "description": "Minimal Mantle site for Cloudflare Workers.",
   "type": "module",
   "scripts": {
+    "prepare": "pnpm generate",
+    "build": "pnpm check",
     "generate": "mantle generate",
     "check:generated": "mantle generate --check",
     "validate": "mantle validate",
@@ -16,7 +18,7 @@
     "emit-openapi": "mantle emit-openapi --output openapi.json",
     "emit-types": "mantle emit-types --namespace MantleSite --output .mantle/generated/types.d.ts",
     "dev": "pnpm generate && wrangler dev --ip localhost --port 8787 --inspector-port 0 --persist-to .wrangler",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "typecheck": "pnpm generate && tsc --noEmit -p tsconfig.json",
     "check:worker": "wrangler deploy --dry-run --outdir .wrangler/dry-run",
     "check": "pnpm generate && pnpm validate && pnpm validate:deploy && pnpm check:generated && pnpm typecheck && pnpm check:indexes && pnpm check:worker",
     "deploy": "pnpm check && wrangler deploy"

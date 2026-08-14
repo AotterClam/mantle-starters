@@ -52,6 +52,10 @@ until this shop actually needs two providers.
 - Treat callbacks as retries: preserve the first `paidAt`, store the selected
   provider's transaction/event reference when adding its fields, and prove a
   duplicate callback cannot deduct inventory twice.
+- Before enabling a real provider, make the Durable Object transition and D1
+  order projection converge under concurrent pay/cancel callbacks. A late pay
+  persistence must not overwrite a cancellation that already restored stock;
+  leave the provider disabled until that race has a runnable regression check.
 - Provider return/success URLs are customer navigation only. Only the verified
   server callback may confirm payment.
 

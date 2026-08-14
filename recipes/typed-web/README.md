@@ -31,8 +31,7 @@ what they run. Follow `mantle:theme` when replacing the UI implementation.
 src/
   index.ts                    # Worker fetch entrypoint
   renderer.tsx                # Hono JSX document renderer
-  worker/
-    features/                 # type overlays add server behavior here
+  worker/features/            # optional type-specific server behavior
   web/
     pages/HomePage.tsx        # public page body
     content/                  # runtime-backed site/home content modules
@@ -55,6 +54,11 @@ to `.mantle/generated/`; `src/mantle/worker.ts` passes that output to
 Cloudflare's `public/` asset directory. In this revision, runtime components stay at root
 because `kiwa-ui.json` uses Kiwa's `@/components` and `@/lib/utils`
 convention.
+
+`src/web/client/kiwaEnhanceAssets.ts` is the pinned Kiwa browser-runtime input
+needed to rebuild the selected accordion/collapsible assets offline. Treat it
+as vendored source; edit the page clients and components around it, or refresh
+the pinned Kiwa snapshot from `mantle-starters` instead of hand-editing it.
 
 ## URL surface
 
@@ -128,6 +132,21 @@ auth or self-hosted GitHub OAuth. The public homepage does not.
 3. Register only ref Procedure handlers in `src/mantle/handlers/index.ts`;
    builtin handlers come from Core.
 4. Validate with `pnpm validate` (runs the spec CLI in preview phase — grammar + cross-Schema only). Before deploying, run `pnpm validate:deploy` (= `mantle validate --phase deploy`) for production-only checks. `pnpm run deploy` chains it in front of `wrangler deploy` automatically.
+
+### Where to edit
+
+| Goal | Start here |
+| --- | --- |
+| Brand, locales, description | `src/mantle/config.ts`, then the selected overlay seed |
+| Site icon and theme | `public/site-icon.svg`, `styles/globals.css` |
+| Homepage sections | overlay `seed.json` → `src/web/pages/HomePage.tsx` → `src/web/sections/` |
+| Public list/detail pages | `src/web/publicSite.tsx` |
+| Browser interactions | `src/web/client/` |
+| Schema, View, Procedure, Trigger | `manifests/site.yaml` |
+| Bindings and secrets | `src/mantle/config.ts`, `.dev.vars`, `wrangler.toml` |
+
+Type-specific handoff notes under `.mantle/overlays/{{ARCHETYPE}}/` point to
+the business handlers and any replacement prerequisites for that launch type.
 
 ## What you get from the npm packages
 

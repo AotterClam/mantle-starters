@@ -52,7 +52,7 @@ if (existsSync(nodeModules) && !existsSync(join(targetRoot, "node_modules"))) {
 console.log(`generated ${archetype} bundle at ${targetRoot}`);
 console.log(`local URL: http://localhost:${port}`);
 
-if (archetype !== "blank") run(process.execPath, ["scripts/build-styles.mjs"], targetRoot);
+run("pnpm", ["prepare"], targetRoot);
 if (!prepareOnly) {
   run("pnpm", [
     "exec",

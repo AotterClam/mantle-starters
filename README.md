@@ -39,7 +39,7 @@ Typed bundles additionally own their Hono JSX UI and selected behavior:
 ```txt
 src/index.ts          Worker fetch entrypoint
 src/renderer.tsx      Hono JSX document renderer
-src/worker/           typed UI routes and selected feature code
+src/worker/           optional type-specific server behavior
 src/web/              public JSX page, seed-driven content, browser client JS
 src/mantle/           site defaults and selected handler registry
 manifests/site.yaml   4 atoms: Schema, View, Procedure, Trigger
@@ -54,8 +54,8 @@ public/               Cloudflare Static Assets: site icon, CSS, JS, SVG
 
 The 4 atoms stay in root `manifests/site.yaml` because they are project config,
 not Worker route code. Type overlays may add server behavior under
-`src/worker/features/<feature>` and register Mantle Procedure handlers
-from `src/mantle/handlers/index.ts`.
+`src/worker/features/<feature>` and register Mantle Procedure handlers through
+the typed recipe's handler registry.
 
 Kiwa source is MIT licensed; keep `kiwa/LICENSE` and `kiwa/manifest.json`
 while this implementation is present. Runtime code must not import from the

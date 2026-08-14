@@ -84,9 +84,8 @@ jobs:
       - name: Check provision bundle is current
         run: pnpm check:provision-bundle
 
-      - name: Smoke provision bundle
-        run: pnpm smoke:provision-bundle
-
+      # Runtime cold smoke uses the pinned unreleased Core in exact-packed-Core;
+      # the registry version may not understand the next Starter grammar yet.
       - name: Check Kiwa vendor source is current
         run: pnpm check:kiwa
 

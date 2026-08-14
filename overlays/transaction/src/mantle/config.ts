@@ -1,8 +1,8 @@
 import type { SiteDefaults } from "@aotter/mantle/spec";
-import type { MantleSiteAuthEnv } from "../auth.js";
+import type { MantleCloudflareEnv } from "@aotter/mantle/cloudflare";
 import type { InventoryCoordinator } from "../commerce/InventoryCoordinator.js";
 
-export interface Env extends MantleSiteAuthEnv {
+export interface Env extends MantleCloudflareEnv {
   readonly TURNSTILE_SITE_KEY?: string;
   readonly TURNSTILE_SECRET_KEY?: string;
   readonly INVENTORY_COORDINATOR: DurableObjectNamespace<InventoryCoordinator>;
