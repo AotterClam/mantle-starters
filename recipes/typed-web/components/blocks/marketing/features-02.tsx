@@ -5,6 +5,7 @@ type Feature = {
   icon: FC<{ class?: string }>
   title: string
   description: string
+  href?: string
 }
 
 type Features02Props = {
@@ -46,22 +47,34 @@ export const Features02: FC<Features02Props> = ({
         </div>
       )}
       <div class={cn('grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3', showHeader && 'mt-16')}>
-        {features.map((feature) => (
-          <div key={feature.title}>
-            <div class="flex size-9 items-center justify-center rounded-lg bg-card shadow">
-              <feature.icon class="size-4 text-foreground" />
-            </div>
-            <h3 class="mt-4 tracking-tight">
-              {feature.title}
-            </h3>
-            <p class="mt-2 text-sm text-foreground-muted">
-              {feature.description}
-            </p>
-          </div>
+        {features.map((feature) => feature.href ? (
+          <a
+            key={feature.title}
+            href={feature.href}
+            class="group block rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <FeatureBody feature={feature} linked />
+          </a>
+        ) : (
+          <div key={feature.title}><FeatureBody feature={feature} /></div>
         ))}
       </div>
     </div>
   </section>
+)
+
+const FeatureBody: FC<{ feature: Feature; linked?: boolean }> = ({ feature, linked }) => (
+  <>
+    <div class="flex size-9 items-center justify-center rounded-lg bg-card shadow">
+      <feature.icon class="size-4 text-foreground" />
+    </div>
+    <h3 class={cn('mt-4 tracking-tight', linked && 'transition-colors group-hover:text-primary')}>
+      {feature.title}
+    </h3>
+    <p class="mt-2 text-sm text-foreground-muted">
+      {feature.description}
+    </p>
+  </>
 )
 
 export default Features02

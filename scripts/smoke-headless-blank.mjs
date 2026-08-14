@@ -218,6 +218,7 @@ function assertPublicDocument(response, html, path, locales) {
 }
 
 async function smokeBlank() {
+  prepareProject(join(root, "blank"), "blank");
   await withWorker({
     cwd: join(root, "blank"),
     command: "pnpm",
@@ -284,8 +285,9 @@ async function smokeTyped(archetype, check, replacementOverrides = {}) {
   const bundle = JSON.parse(readFileSync(join(root, "provision-bundles", `${archetype}.json`), "utf8"));
   materializeBundle(target, bundle, { ...replacements, ...replacementOverrides, ARCHETYPE: archetype });
   symlinkSync(join(root, "recipes", "typed-web", "node_modules"), join(target, "node_modules"), "dir");
+  prepareProject(target, archetype);
   const mantle = join(root, "recipes", "typed-web", "node_modules", ".bin", "mantle");
-  for (const args of [["validate", "--phase", "deploy"], ["generate"], ["generate", "--check"]]) {
+  for (const args of [["validate", "--phase", "deploy"], ["generate", "--check"]]) {
     const result = spawnSync(mantle, args, { cwd: target, encoding: "utf8" });
     if (result.status !== 0) throw new Error(`${archetype} mantle ${args.join(" ")} failed: ${result.stderr || result.stdout}`);
   }
@@ -310,6 +312,11 @@ async function smokeTyped(archetype, check, replacementOverrides = {}) {
       await check(origin);
     },
   });
+}
+
+function prepareProject(target, archetype) {
+  const result = spawnSync("pnpm", ["prepare"], { cwd: target, encoding: "utf8" });
+  if (result.status !== 0) throw new Error(`${archetype} prepare failed: ${result.stderr || result.stdout}`);
 }
 
 async function withWorker({ cwd, command, args, devArgs = [], probe, check, setupIncomplete = true }) {

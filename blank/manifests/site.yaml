@@ -20,6 +20,7 @@ kind: View
 metadata:
   name: published-notes
 spec:
+  surface: public
   from: notes
   fields: [id, slug, title, body, updatedAt]
   filter:

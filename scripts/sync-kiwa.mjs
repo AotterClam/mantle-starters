@@ -39,6 +39,7 @@ const mirrorRoots = ["kiwa", "typed-web"];
 // sync only verifies the canonical kiwa/ copy for these files.
 const typedRecipeOverridePaths = new Set([
   "components/ui/badge.tsx",
+  "components/ui/icon.tsx",
   "lib/placeholder-data.ts",
   "components/blocks/marketing/bento-02.tsx",
   "components/blocks/marketing/contact-02.tsx",

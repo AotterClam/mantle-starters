@@ -10,7 +10,10 @@
       { "slug": "about", "type": "page", "status": "published" }
     ],
     "products": [
-      { "slug": "sample-product", "priceMinor": 2900, "currency": "USD", "status": "published" }
+      { "slug": "sample-product", "priceMinor": 2900, "currency": "USD", "coverUrl": "/assets/mantle-ocean-hero-light.svg", "status": "published" }
+    ],
+    "inventory": [
+      { "productSlug": "sample-product", "available": 100, "reserved": 0, "revision": 0, "updatedAt": 0, "status": "draft" }
     ]
   },
   "locales": {
@@ -30,6 +33,12 @@
               "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
               "action": { "label": "View products", "href": "/products" },
               "secondaryAction": { "label": "About us", "href": "/pages/about" }
+            },
+            {
+              "type": "features",
+              "id": "products",
+              "title": "Featured product",
+              "items": [{ "icon": "sparkles", "title": "Sample product", "body": "A generic product ready to replace with your own. · $29.00", "href": "/products/sample-product" }]
             }
           ]
         },
@@ -43,7 +52,7 @@
         }
       ],
       "product-translations": [
-        { "slug": "sample-product", "locale": "en", "title": "Sample product", "summary": "A generic product ready to replace with your own.", "status": "published" }
+        { "slug": "sample-product", "locale": "en", "title": "Sample product", "summary": "A generic product ready to replace with your own.", "description": "A simple everyday product with a clear price, a single image, and enough description to demonstrate the storefront layout.", "status": "published" }
       ]
     },
     "zh-TW": {
@@ -62,6 +71,12 @@
               "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
               "action": { "label": "查看商品", "href": "/products" },
               "secondaryAction": { "label": "關於我們", "href": "/pages/about" }
+            },
+            {
+              "type": "features",
+              "id": "products",
+              "title": "精選商品",
+              "items": [{ "icon": "sparkles", "title": "範例商品", "body": "可直接替換成自家商品的通用範例。 · US$29.00", "href": "/products/sample-product" }]
             }
           ]
         },
@@ -75,7 +90,7 @@
         }
       ],
       "product-translations": [
-        { "slug": "sample-product", "locale": "zh-TW", "title": "範例商品", "summary": "可直接替換成自家商品的通用範例。", "status": "published" }
+        { "slug": "sample-product", "locale": "zh-TW", "title": "範例商品", "summary": "可直接替換成自家商品的通用範例。", "description": "這是一件簡單的日常商品，具備明確價格、單張圖片與足以示範商店版面的完整說明。", "status": "published" }
       ]
     },
     "zh-CN": {
@@ -94,6 +109,12 @@
               "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
               "action": { "label": "查看商品", "href": "/products" },
               "secondaryAction": { "label": "关于我们", "href": "/pages/about" }
+            },
+            {
+              "type": "features",
+              "id": "products",
+              "title": "精选商品",
+              "items": [{ "icon": "sparkles", "title": "示例商品", "body": "可直接替换为自家商品的通用示例。 · US$29.00", "href": "/products/sample-product" }]
             }
           ]
         },
@@ -107,7 +128,7 @@
         }
       ],
       "product-translations": [
-        { "slug": "sample-product", "locale": "zh-CN", "title": "示例商品", "summary": "可直接替换为自家商品的通用示例。", "status": "published" }
+        { "slug": "sample-product", "locale": "zh-CN", "title": "示例商品", "summary": "可直接替换为自家商品的通用示例。", "description": "这是一件简单的日常商品，具有明确价格、单张图片和足以展示商店版面的完整说明。", "status": "published" }
       ]
     },
     "ja": {
@@ -126,6 +147,12 @@
               "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
               "action": { "label": "商品を見る", "href": "/products" },
               "secondaryAction": { "label": "私たちについて", "href": "/pages/about" }
+            },
+            {
+              "type": "features",
+              "id": "products",
+              "title": "おすすめ商品",
+              "items": [{ "icon": "sparkles", "title": "サンプル商品", "body": "実際の商品に置き換えられる汎用サンプルです。 · US$29.00", "href": "/products/sample-product" }]
             }
           ]
         },
@@ -139,7 +166,7 @@
         }
       ],
       "product-translations": [
-        { "slug": "sample-product", "locale": "ja", "title": "サンプル商品", "summary": "実際の商品に置き換えられる汎用サンプルです。", "status": "published" }
+        { "slug": "sample-product", "locale": "ja", "title": "サンプル商品", "summary": "実際の商品に置き換えられる汎用サンプルです。", "description": "価格、1枚の商品画像、ストア画面を確認できる十分な説明を備えたシンプルな日用品です。", "status": "published" }
       ]
     },
     "ko": {
@@ -158,6 +185,12 @@
               "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
               "action": { "label": "상품 보기", "href": "/products" },
               "secondaryAction": { "label": "소개", "href": "/pages/about" }
+            },
+            {
+              "type": "features",
+              "id": "products",
+              "title": "추천 상품",
+              "items": [{ "icon": "sparkles", "title": "샘플 상품", "body": "실제 상품으로 교체할 수 있는 범용 샘플입니다. · US$29.00", "href": "/products/sample-product" }]
             }
           ]
         },
@@ -171,7 +204,7 @@
         }
       ],
       "product-translations": [
-        { "slug": "sample-product", "locale": "ko", "title": "샘플 상품", "summary": "실제 상품으로 교체할 수 있는 범용 샘플입니다.", "status": "published" }
+        { "slug": "sample-product", "locale": "ko", "title": "샘플 상품", "summary": "실제 상품으로 교체할 수 있는 범용 샘플입니다.", "description": "명확한 가격, 한 장의 상품 이미지, 스토어 레이아웃을 확인하기에 충분한 설명을 갖춘 간단한 일상용품입니다.", "status": "published" }
       ]
     },
     "es": {
@@ -190,6 +223,12 @@
               "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
               "action": { "label": "Ver productos", "href": "/products" },
               "secondaryAction": { "label": "Sobre nosotros", "href": "/pages/about" }
+            },
+            {
+              "type": "features",
+              "id": "products",
+              "title": "Producto destacado",
+              "items": [{ "icon": "sparkles", "title": "Producto de muestra", "body": "Un producto genérico listo para sustituir por el tuyo. · US$29.00", "href": "/products/sample-product" }]
             }
           ]
         },
@@ -203,7 +242,7 @@
         }
       ],
       "product-translations": [
-        { "slug": "sample-product", "locale": "es", "title": "Producto de muestra", "summary": "Un producto genérico listo para sustituir por el tuyo.", "status": "published" }
+        { "slug": "sample-product", "locale": "es", "title": "Producto de muestra", "summary": "Un producto genérico listo para sustituir por el tuyo.", "description": "Un producto cotidiano sencillo con un precio claro, una sola imagen y una descripción suficiente para mostrar el diseño de la tienda.", "status": "published" }
       ]
     },
     "fr": {
@@ -222,6 +261,12 @@
               "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
               "action": { "label": "Voir les produits", "href": "/products" },
               "secondaryAction": { "label": "À propos", "href": "/pages/about" }
+            },
+            {
+              "type": "features",
+              "id": "products",
+              "title": "Produit à la une",
+              "items": [{ "icon": "sparkles", "title": "Produit d’exemple", "body": "Un produit générique prêt à être remplacé par le vôtre. · 29,00 $US", "href": "/products/sample-product" }]
             }
           ]
         },
@@ -235,7 +280,7 @@
         }
       ],
       "product-translations": [
-        { "slug": "sample-product", "locale": "fr", "title": "Produit d’exemple", "summary": "Un produit générique prêt à être remplacé par le vôtre.", "status": "published" }
+        { "slug": "sample-product", "locale": "fr", "title": "Produit d’exemple", "summary": "Un produit générique prêt à être remplacé par le vôtre.", "description": "Un produit du quotidien simple, avec un prix clair, une image unique et une description suffisante pour présenter la mise en page de la boutique.", "status": "published" }
       ]
     },
     "de": {
@@ -254,6 +299,12 @@
               "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
               "action": { "label": "Produkte ansehen", "href": "/products" },
               "secondaryAction": { "label": "Über uns", "href": "/pages/about" }
+            },
+            {
+              "type": "features",
+              "id": "products",
+              "title": "Ausgewähltes Produkt",
+              "items": [{ "icon": "sparkles", "title": "Beispielprodukt", "body": "Ein allgemeines Produkt, das Sie durch Ihr eigenes ersetzen können. · 29,00 $", "href": "/products/sample-product" }]
             }
           ]
         },
@@ -267,7 +318,7 @@
         }
       ],
       "product-translations": [
-        { "slug": "sample-product", "locale": "de", "title": "Beispielprodukt", "summary": "Ein allgemeines Produkt, das Sie durch Ihr eigenes ersetzen können.", "status": "published" }
+        { "slug": "sample-product", "locale": "de", "title": "Beispielprodukt", "summary": "Ein allgemeines Produkt, das Sie durch Ihr eigenes ersetzen können.", "description": "Ein schlichtes Alltagsprodukt mit klarem Preis, einem einzelnen Bild und einer ausreichenden Beschreibung zur Darstellung des Shop-Layouts.", "status": "published" }
       ]
     },
     "it": {
@@ -286,6 +337,12 @@
               "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
               "action": { "label": "Vedi i prodotti", "href": "/products" },
               "secondaryAction": { "label": "Chi siamo", "href": "/pages/about" }
+            },
+            {
+              "type": "features",
+              "id": "products",
+              "title": "Prodotto in evidenza",
+              "items": [{ "icon": "sparkles", "title": "Prodotto di esempio", "body": "Un prodotto generico pronto per essere sostituito con il tuo. · 29,00 USD", "href": "/products/sample-product" }]
             }
           ]
         },
@@ -299,7 +356,7 @@
         }
       ],
       "product-translations": [
-        { "slug": "sample-product", "locale": "it", "title": "Prodotto di esempio", "summary": "Un prodotto generico pronto per essere sostituito con il tuo.", "status": "published" }
+        { "slug": "sample-product", "locale": "it", "title": "Prodotto di esempio", "summary": "Un prodotto generico pronto per essere sostituito con il tuo.", "description": "Un semplice prodotto di uso quotidiano con un prezzo chiaro, una sola immagine e una descrizione sufficiente a mostrare il layout del negozio.", "status": "published" }
       ]
     },
     "ru": {
@@ -318,6 +375,12 @@
               "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
               "action": { "label": "Посмотреть товары", "href": "/products" },
               "secondaryAction": { "label": "О нас", "href": "/pages/about" }
+            },
+            {
+              "type": "features",
+              "id": "products",
+              "title": "Рекомендуемый товар",
+              "items": [{ "icon": "sparkles", "title": "Пример товара", "body": "Универсальный пример, который можно заменить своим товаром. · 29,00 $", "href": "/products/sample-product" }]
             }
           ]
         },
@@ -331,7 +394,7 @@
         }
       ],
       "product-translations": [
-        { "slug": "sample-product", "locale": "ru", "title": "Пример товара", "summary": "Универсальный пример, который можно заменить своим товаром.", "status": "published" }
+        { "slug": "sample-product", "locale": "ru", "title": "Пример товара", "summary": "Универсальный пример, который можно заменить своим товаром.", "description": "Простой повседневный товар с понятной ценой, одним изображением и достаточным описанием для демонстрации макета магазина.", "status": "published" }
       ]
     },
     "id": {
@@ -350,6 +413,12 @@
               "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
               "action": { "label": "Lihat produk", "href": "/products" },
               "secondaryAction": { "label": "Tentang kami", "href": "/pages/about" }
+            },
+            {
+              "type": "features",
+              "id": "products",
+              "title": "Produk pilihan",
+              "items": [{ "icon": "sparkles", "title": "Produk contoh", "body": "Produk umum yang siap diganti dengan produk Anda. · US$29,00", "href": "/products/sample-product" }]
             }
           ]
         },
@@ -363,7 +432,7 @@
         }
       ],
       "product-translations": [
-        { "slug": "sample-product", "locale": "id", "title": "Produk contoh", "summary": "Produk umum yang siap diganti dengan produk Anda.", "status": "published" }
+        { "slug": "sample-product", "locale": "id", "title": "Produk contoh", "summary": "Produk umum yang siap diganti dengan produk Anda.", "description": "Produk sehari-hari sederhana dengan harga yang jelas, satu gambar, dan deskripsi yang cukup untuk memperagakan tata letak toko.", "status": "published" }
       ]
     },
     "pt-BR": {
@@ -382,6 +451,12 @@
               "image": { "src": "/assets/mantle-ocean-hero-light.svg", "alt": "" },
               "action": { "label": "Ver produtos", "href": "/products" },
               "secondaryAction": { "label": "Sobre nós", "href": "/pages/about" }
+            },
+            {
+              "type": "features",
+              "id": "products",
+              "title": "Produto em destaque",
+              "items": [{ "icon": "sparkles", "title": "Produto de exemplo", "body": "Um produto genérico pronto para ser substituído pelo seu. · US$ 29,00", "href": "/products/sample-product" }]
             }
           ]
         },
@@ -395,7 +470,7 @@
         }
       ],
       "product-translations": [
-        { "slug": "sample-product", "locale": "pt-BR", "title": "Produto de exemplo", "summary": "Um produto genérico pronto para ser substituído pelo seu.", "status": "published" }
+        { "slug": "sample-product", "locale": "pt-BR", "title": "Produto de exemplo", "summary": "Um produto genérico pronto para ser substituído pelo seu.", "description": "Um produto simples do dia a dia, com preço claro, uma única imagem e descrição suficiente para demonstrar o layout da loja.", "status": "published" }
       ]
     }
   }

@@ -44,12 +44,15 @@ for (const archetype of archetypes) {
     const bundle = JSON.parse(readFileSync(join(root, "provision-bundles", `${archetype}.json`), "utf8"));
     materializeBundle(tempRoot, bundle, { ...replacements, ARCHETYPE: archetype });
     assertNoLeftovers(tempRoot, bundle.files);
+    assertGeneratedOutputsAbsent(tempRoot, archetype);
+    prepareProject(tempRoot, archetype);
     assertProjectScripts(tempRoot, archetype);
     assertStaticAssets(tempRoot, archetype);
     if (archetype === "blank") {
       assertHeadlessBlank(tempRoot);
     } else {
       assertGeneratedStylesCurrent(tempRoot, archetype);
+      assertGeneratedStylesMatchStarterLock(tempRoot);
       assertPublicHomeIsNotHandoff(tempRoot);
       assertMantleSiteSignature(tempRoot, archetype);
       assertStylesheetMounted(tempRoot, archetype);
@@ -112,9 +115,52 @@ function assertProjectScripts(root, archetype) {
   if (manifest.scripts?.["check:indexes"] !== expected) {
     throw new Error(`${archetype} missing the required index-coverage script`);
   }
-  const check = manifest.scripts?.check ?? "";
-  if (!check.includes("check:generated") || check.indexOf("check:generated") > check.indexOf("typecheck")) {
-    throw new Error(`${archetype} check must detect generated drift before typecheck can rewrite it`);
+  if (manifest.scripts?.build !== "pnpm check") {
+    throw new Error(`${archetype} build must run the complete check lifecycle`);
+  }
+  const expectedPrepare = archetype === "blank" ? "pnpm generate" : "pnpm generate && pnpm build:styles";
+  if (manifest.scripts?.prepare !== expectedPrepare) {
+    throw new Error(`${archetype} prepare must materialize generated outputs`);
+  }
+  if (archetype !== "blank") {
+    const check = manifest.scripts?.check ?? "";
+    const stages = ["pnpm generate", "pnpm build:styles", "pnpm typecheck", "pnpm check:worker"];
+    if (stages.some((stage, index) => check.indexOf(stage) === -1
+      || (index > 0 && check.indexOf(stage) < check.indexOf(stages[index - 1])))) {
+      throw new Error(`${archetype} check must generate, build assets, typecheck, then dry-run the Worker`);
+    }
+  }
+}
+
+function assertGeneratedOutputsAbsent(root, archetype) {
+  const outputs = [
+    ".mantle/generated/site.ts",
+    ".mantle/generated/types.d.ts",
+    ...(archetype === "blank" ? [] : [
+      "public/assets/styles.css",
+      "public/assets/kiwa-home.js",
+      "public/assets/mantle-ocean-hero-light.svg",
+      "public/assets/mantle-ocean-hero-dark.svg",
+    ]),
+  ];
+  for (const path of outputs) {
+    if (existsSync(join(root, path))) throw new Error(`${archetype} materialized generated output: ${path}`);
+  }
+  const enhance = join(root, "public", "enhance");
+  if (existsSync(enhance) && readdirSync(enhance).some((name) => name.endsWith(".js"))) {
+    throw new Error(`${archetype} materialized generated public/enhance JavaScript`);
+  }
+}
+
+function prepareProject(targetRoot, archetype) {
+  const nodeModules = archetype === "blank"
+    ? join(root, "blank", "node_modules")
+    : join(root, "recipes", "typed-web", "node_modules");
+  symlinkSync(nodeModules, join(targetRoot, "node_modules"), "dir");
+  const result = spawnSync("pnpm", ["prepare"], { cwd: targetRoot, encoding: "utf8" });
+  if (result.status !== 0) throw new Error(`${archetype} prepare failed: ${result.stderr || result.stdout}`);
+  for (const path of [".mantle/generated/site.ts", ".mantle/generated/types.d.ts"]) {
+    if (!existsSync(join(targetRoot, path))) throw new Error(`${archetype} prepare did not create ${path}`);
   }
 }
 
@@ -133,7 +179,7 @@ function smokeLocalMaterializer() {
       "--description",
       "A local Mantle presence site.",
       "--locales",
-      "en,zh-TW",
+      "en",
     ], { cwd: root, encoding: "utf8" });
     if (result.status !== 0) {
       throw new Error(`local materializer failed: ${result.stderr || result.stdout}`);
@@ -142,14 +188,25 @@ function smokeLocalMaterializer() {
     const manifest = JSON.parse(readFileSync(join(output, "package.json"), "utf8"));
     if (launch.authMode !== "self-managed") throw new Error("local auth mode missing");
     if (launch.brand !== "Northstar Studio") throw new Error("local brand mismatch");
-    if (JSON.stringify(launch.locales) !== '["en","zh-TW"]') throw new Error("local locales mismatch");
+    if (JSON.stringify(launch.locales) !== '["en"]') throw new Error("local locales mismatch");
     if (manifest.name !== "northstar") throw new Error("local package name mismatch");
     if (manifest.description !== "A local Mantle presence site.") throw new Error("local package description mismatch");
     const wrangler = readFileSync(join(output, "wrangler.toml"), "utf8");
     if (!wrangler.includes('name = "northstar"')) throw new Error("local Worker name mismatch");
     if (!wrangler.includes('database_name = "northstar-db"')) throw new Error("local D1 name mismatch");
     if (!wrangler.includes('PUBLIC_ORIGIN = "http://localhost:8787"')) throw new Error("local origin missing");
-    assertGeneratedStylesMatchStarterLock(output);
+    assertGeneratedOutputsAbsent(output, "presence");
+    const unsupportedPresence = spawnSync(process.execPath, [
+      "scripts/dev-provision-bundle.mjs",
+      "presence",
+      "--out",
+      join(tempRoot, "unsupported-presence"),
+      "--locales",
+      "en,zh-TW",
+    ], { cwd: root, encoding: "utf8" });
+    if (unsupportedPresence.status === 0 || !`${unsupportedPresence.stderr}${unsupportedPresence.stdout}`.includes("presence does not support locales: zh-TW")) {
+      throw new Error("presence materializer accepted an unsupported locale");
+    }
     const shop = spawnSync(process.execPath, [
       "scripts/dev-provision-bundle.mjs",
       "transaction",
@@ -169,6 +226,17 @@ function smokeLocalMaterializer() {
         throw new Error(`transaction ${path} was not reduced to the selected locales`);
       }
     }
+    assertManifestLocaleSelection(shopOutput, ["en", "zh-TW", "ja", "ko", "fr"]);
+    const transactionLocales = Object.keys(JSON.parse(readFileSync(join(root, "overlays", "transaction", "seed.json"), "utf8")).locales);
+    const allLanguages = spawnSync(process.execPath, [
+      "scripts/dev-provision-bundle.mjs",
+      "transaction",
+      "--out",
+      join(tempRoot, "all-language-shop"),
+      "--locales",
+      transactionLocales.join(","),
+    ], { cwd: root, encoding: "utf8" });
+    if (allLanguages.status !== 0) throw new Error(`all-language materializer failed: ${allLanguages.stderr || allLanguages.stdout}`);
     const unsupported = spawnSync(process.execPath, [
       "scripts/dev-provision-bundle.mjs",
       "transaction",
@@ -180,6 +248,15 @@ function smokeLocalMaterializer() {
     if (unsupported.status === 0 || !`${unsupported.stderr}${unsupported.stdout}`.includes("does not support locales: nl")) {
       throw new Error("transaction materializer accepted an unsupported locale");
     }
+    const blankLocale = spawnSync(process.execPath, [
+      "scripts/dev-provision-bundle.mjs",
+      "blank",
+      "--out",
+      join(tempRoot, "blank-zh-tw"),
+      "--locales",
+      "zh-TW",
+    ], { cwd: root, encoding: "utf8" });
+    if (blankLocale.status !== 0) throw new Error(`blank locale materializer failed: ${blankLocale.stderr || blankLocale.stdout}`);
     const overwrite = spawnSync(process.execPath, [
       "scripts/dev-provision-bundle.mjs",
       "blank",
@@ -203,7 +280,6 @@ function assertGeneratedStylesMatchStarterLock(root) {
 }
 
 function assertGeneratedStylesCurrent(targetRoot, archetype) {
-  symlinkSync(join(root, "recipes", "typed-web", "node_modules"), join(targetRoot, "node_modules"), "dir");
   const result = spawnSync(process.execPath, [
     join(root, "recipes", "typed-web", "scripts", "build-styles.mjs"),
     "--root",
@@ -218,7 +294,6 @@ function assertGeneratedStylesCurrent(targetRoot, archetype) {
 function assertHeadlessBlank(root) {
   const files = [
     "manifests/site.yaml",
-    "src/auth.ts",
     "src/index.ts",
     ".mantle/generated/site.ts",
     ".mantle/generated/types.d.ts",
@@ -228,7 +303,9 @@ function assertHeadlessBlank(root) {
   if (!worker.includes("createMantleWorker") || !worker.includes(".mantle/generated/site.js")) {
     throw new Error("blank Worker does not use the generated manifest and Core facade");
   }
-  if (!worker.includes("auth: buildAuth")) throw new Error("blank Worker does not own its auth composition");
+  if (existsSync(join(root, "src", "auth.ts")) || worker.includes("auth: buildAuth")) {
+    throw new Error("blank Worker does not use Core conventional Auth");
+  }
   const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
   if (JSON.stringify(Object.keys(manifest.dependencies ?? {})) !== '["@aotter/mantle"]') {
     throw new Error("blank production dependency must be @aotter/mantle only");
@@ -678,6 +755,9 @@ function assertTransactionSeed(root) {
     !seed.includes('"type": "home"')
     || parsed.collections?.products?.length !== 1
     || parsed.collections.products[0]?.slug !== "sample-product"
+    || parsed.collections?.inventory?.[0]?.available !== 100
+    || parsed.collections.inventory[0]?.revision !== 0
+    || parsed.collections.inventory[0]?.productSlug !== "sample-product"
     || locales.length !== 1
     || parsed.locales[locales[0]]?.["product-translations"]?.length !== 1
     || parsed.locales[locales[0]]?.["page-translations"]?.length !== 2
@@ -688,13 +768,36 @@ function assertTransactionSeed(root) {
   if (JSON.stringify(Object.keys(messages.locales)) !== JSON.stringify(locales)) {
     throw new Error("transaction entry and message locale catalogs differ");
   }
+  if (locales.some((locale) => !messages.locales[locale]?.["checkout.insufficientStock"])) {
+    throw new Error("transaction checkout stock conflict copy is missing");
+  }
   const about = parsed.locales[locales[0]]?.["page-translations"]?.find((entry) => entry.slug === "about");
   if (about?.sections?.[0]?.image?.src !== "/assets/mantle-ocean-hero-light.svg") {
     throw new Error("transaction About seed is missing its image");
   }
-  const schemas = parseAllDocuments(readFileSync(join(root, "manifests", "site.yaml"), "utf8"))
-    .map((document) => document.toJSON())
-    .filter((atom) => atom?.kind === "Schema");
+  const home = parsed.locales[locales[0]]?.["page-translations"]?.find((entry) => entry.slug === "home");
+  const featuredProduct = home?.sections?.find((section) => section.id === "products")?.items?.[0];
+  const product = parsed.locales[locales[0]]?.["product-translations"]?.[0];
+  if (
+    parsed.collections.products[0]?.coverUrl !== "/assets/mantle-ocean-hero-light.svg"
+    || featuredProduct?.href !== "/products/sample-product"
+    || !product?.description
+  ) {
+    throw new Error("transaction sample product must include a cover, description, and seeded homepage link");
+  }
+  const atoms = parseAllDocuments(readFileSync(join(root, "manifests", "site.yaml"), "utf8"))
+    .map((document) => document.toJSON());
+  const schemas = atoms.filter((atom) => atom?.kind === "Schema");
+  const pickingList = atoms.find((atom) => atom?.kind === "View" && atom.metadata?.name === "picking-list");
+  if (
+    pickingList?.spec?.surface !== "staff"
+    || !pickingList.spec.sql?.includes("json_each(o.items)")
+    || JSON.stringify(pickingList.spec.uiSchema?.list?.columns) !== '["orderNumber","customerName","shippingAddress","productSlug","productTitle","quantity"]'
+    || JSON.stringify(pickingList.spec.uiSchema?.list?.searchFields) !== '["orderNumber","customerName","shippingAddress","productSlug","productTitle"]'
+    || pickingList.spec.uiSchema?.list?.filterFields !== undefined
+  ) {
+    throw new Error("transaction picking list must flatten paid order items through a staff SQL View");
+  }
   for (const [childName, parentName] of [["page-translations", "page"], ["product-translations", "products"]]) {
     const child = schemas.find((schema) => schema.metadata?.name === childName);
     if (child?.spec?.localized !== true || child.spec?.translates?.parent !== parentName || child.spec.translates.on !== "slug") {
@@ -702,9 +805,80 @@ function assertTransactionSeed(root) {
     }
   }
   const orders = schemas.find((schema) => schema.metadata?.name === "orders");
+  const products = schemas.find((schema) => schema.metadata?.name === "products");
+  if (
+    products?.spec?.schema?.properties?.coverAssetId?.["x-mantle-ref"] !== "media_assets"
+    || products.spec.schema.properties.coverAssetId["x-mcp-hint"] !== "media-image"
+    || products.spec.schema.required?.includes("coverAssetId")
+    || products.spec.schema.required?.includes("coverUrl")
+  ) {
+    throw new Error("transaction product cover must keep optional URL and media-asset sources");
+  }
   if (!orders?.spec?.schema?.properties?.orderLocale || orders.spec.schema.properties.locale) {
     throw new Error("transaction orders must store orderLocale without using the reserved entry locale field");
   }
+  const inventory = schemas.find((schema) => schema.metadata?.name === "inventory");
+  const movements = schemas.find((schema) => schema.metadata?.name === "inventory-movements");
+  const procedures = atoms.filter((atom) => atom?.kind === "Procedure");
+  const createOrder = procedures.find((procedure) => procedure.metadata?.name === "create-manual-order");
+  const adjust = procedures.find((procedure) => procedure.metadata?.name === "adjust-inventory");
+  const fulfill = procedures.find((procedure) => procedure.metadata?.name === "fulfill-order");
+  const cancel = procedures.find((procedure) => procedure.metadata?.name === "cancel-order");
+  for (const atom of [...schemas, pickingList, createOrder, adjust, fulfill, cancel]) {
+    if (!hasTransactionLocales(atom?.spec?.title, locales)) {
+      throw new Error(`transaction ${atom?.metadata?.name ?? "manifest"} title is not available in every selected language`);
+    }
+  }
+  for (const schema of schemas) {
+    if (!hasTransactionLocales(schema.spec.description, locales)) {
+      throw new Error(`transaction ${schema.metadata.name} description is not available in every selected language`);
+    }
+    assertLocalizedProperties(schema.spec.schema, schema.metadata.name, locales);
+  }
+  for (const procedure of [createOrder, adjust, fulfill, cancel]) {
+    assertLocalizedProperties(procedure.spec.input, procedure.metadata.name, locales);
+  }
+  if (
+    procedures.some((procedure) => ["inspect-inventory", "restock-product"].includes(procedure.metadata?.name))
+    || inventory?.spec?.schema?.properties?.revision?.type !== "integer"
+    || [orders, inventory, movements].some((schema) => schema?.spec?.schema?.readOnly !== true)
+    || createOrder?.spec?.uiSchema?.collectionAction !== "orders"
+    || adjust?.spec?.input?.properties?.operationId?.["x-mcp-hint"] !== "idempotency-key"
+    || adjust?.spec?.input?.properties?.productSlug?.["x-mantle-ref"] !== "products"
+    || adjust?.spec?.uiSchema?.fields?.reason?.widget !== "textarea"
+    || fulfill?.spec?.input?.properties?.orderToken?.["x-mantle-ref"] !== "orders"
+    || cancel?.spec?.input?.properties?.orderToken?.["x-mantle-ref"] !== "orders"
+  ) {
+    throw new Error("transaction staff operations are not explicit, read-only, and idempotent");
+  }
+}
+
+function hasTransactionLocales(value, locales) {
+  return locales.every((locale) => typeof value?.[locale] === "string");
+}
+
+function assertLocalizedProperties(schema, path, locales) {
+  for (const [name, property] of Object.entries(schema?.properties ?? {})) {
+    if (!hasTransactionLocales(property.title, locales)) throw new Error(`transaction ${path}.${name} title is not available in every selected language`);
+    assertLocalizedProperties(property, `${path}.${name}`, locales);
+    if (property.items) assertLocalizedProperties(property.items, `${path}.${name}[]`, locales);
+  }
+}
+
+function assertManifestLocaleSelection(root, locales) {
+  const expected = [...locales].sort().join(",");
+  const atoms = parseAllDocuments(readFileSync(join(root, "manifests", "site.yaml"), "utf8")).map((document) => document.toJSON());
+  const visit = (value) => {
+    if (!value || typeof value !== "object") return;
+    for (const [key, child] of Object.entries(value)) {
+      if ((key === "title" || key === "description") && child && typeof child === "object" && typeof child.en === "string") {
+        if (Object.keys(child).sort().join(",") !== expected) throw new Error(`transaction manifest ${key} was not reduced to the selected locales`);
+      } else {
+        visit(child);
+      }
+    }
+  };
+  atoms.forEach(visit);
 }
 
 function assertTransactionPublicSurface(root) {
@@ -714,10 +888,30 @@ function assertTransactionPublicSurface(root) {
   const page = readFileSync(join(root, "src", "web", "pages", "HomePage.tsx"), "utf8");
   const content = readFileSync(join(root, "src", "web", "content", "siteContent.ts"), "utf8");
   const client = readFileSync(join(root, "src", "web", "client", "homeClient.ts"), "utf8");
+  const commerce = readFileSync(join(root, "src", "web", "commerceRoutes.tsx"), "utf8");
+  const commerceClient = readFileSync(join(root, "src", "web", "client", "commerceClient.ts"), "utf8");
+  const commerceHandlers = readFileSync(join(root, "src", "commerce", "handlers.ts"), "utf8");
+  const inventoryCoordinator = readFileSync(join(root, "src", "commerce", "InventoryCoordinator.ts"), "utf8");
+  const initialSeed = readFileSync(join(root, "src", "mantle", "initialSeed.ts"), "utf8");
+  const types = readFileSync(join(root, "src", "web", "content", "types.ts"), "utf8");
+  const helpers = readFileSync(join(root, "src", "web", "sections", "helpers.tsx"), "utf8");
+  const config = readFileSync(join(root, "src", "mantle", "config.ts"), "utf8");
+  const handoff = readFileSync(join(root, ".mantle", "overlays", "transaction", "handoff.md"), "utf8");
   const nav = readFileSync(join(root, "components", "blocks", "marketing", "nav-02.tsx"), "utf8");
+  const features = readFileSync(join(root, "components", "blocks", "marketing", "features-02.tsx"), "utf8");
   const wrangler = readFileSync(join(root, "wrangler.toml"), "utf8");
   if (!composition.includes("mountPublicRoutes") || !composition.includes("publicPathResolver")) {
     throw new Error("transaction Worker does not mount the Core public route surface");
+  }
+  if (
+    !composition.includes("mediaStorage: buildMediaStorage(env)")
+    || !config.includes("new R2MediaStorage(")
+    || !config.includes("if (!env.MEDIA_BUCKET) return null")
+    || !surface.includes("pickPrimaryVariant")
+    || !surface.includes("fallbackUrl")
+    || !handoff.includes("initial shop needs no R2")
+  ) {
+    throw new Error("transaction media does not keep URL fallback while making R2 uploads optional");
   }
   for (const required of [
     'registerEntryTemplate("product-translations"',
@@ -754,6 +948,51 @@ function assertTransactionPublicSurface(root) {
   if (!client.includes("commerceClientJs")) throw new Error("transaction client bundle is missing cart behavior");
   if (!nav.includes("ShoppingCartIcon") || !nav.includes("data-cart-count")) {
     throw new Error("transaction navigation is missing the cart icon/count surface");
+  }
+  if (!features.includes("href={feature.href}")) {
+    throw new Error("transaction homepage feature cards do not link to their seeded href");
+  }
+  if (!commerce.includes("data-cart-layout") || !commerce.includes("data-checkout-layout") || !commerce.includes("data-cover-url={item.coverUrl}")) {
+    throw new Error("transaction cart or checkout is missing its responsive layout or product images");
+  }
+  if (!commerceClient.includes("layout.hidden = !hasItems") || !commerceClient.includes("product.coverUrl") || !commerceClient.includes("[data-checkout-total]")) {
+    throw new Error("transaction commerce client does not render its responsive product rows or checkout total");
+  }
+  if (!commerceHandlers.includes("await initializeInventory") || !inventoryCoordinator.includes("async initializeProduct") || !initialSeed.includes("data.productSlug")) {
+    throw new Error("transaction checkout does not initialize seeded inventory before reserving stock");
+  }
+  if (
+    !commerceHandlers.includes("currentRevision >= value.revision")
+    || !commerceHandlers.includes("`adjust:${operationId}`")
+    || commerceHandlers.includes("restockProduct:")
+    || commerceHandlers.includes("inspectInventory:")
+    || !inventoryCoordinator.includes("adjustmentKey(operationId)")
+    || !inventoryCoordinator.includes("revision: value.revision + 1")
+    || !inventoryCoordinator.includes('outcome: "idempotency_conflict"')
+    || !commerceHandlers.includes('getByName("site")')
+  ) {
+    throw new Error("transaction inventory authority lacks idempotency, ordered projections, or shop-level coordination");
+  }
+  if (
+    !commerceHandlers.includes('code: "CONFLICT"')
+    || commerceHandlers.includes('invalid("/items", reserved.insufficient')
+    || !commerce.includes("data-stock-insufficient-label")
+    || !commerceClient.includes("diagnostic?.code === 'CONFLICT' && diagnostic.path === '/items'")
+  ) {
+    throw new Error("transaction checkout does not surface stock conflicts through Core semantics");
+  }
+  if (
+    !commerceHandlers.includes("orderData(order).paidAt ?? Date.now()")
+    || !inventoryCoordinator.includes('if (order.status === "paid") return { outcome: "already_paid"')
+  ) {
+    throw new Error("transaction payment retries can repeat stock deduction or overwrite the first paidAt");
+  }
+  if (!handoff.includes("concurrent pay/cancel callbacks") || !handoff.includes("late pay")) {
+    throw new Error("transaction real-payment handoff omits the pay/cancel consistency prerequisite");
+  }
+  if (["socialProof", "bento", "metrics", "testimonials", "contact", "form", "intake"]
+    .some((section) => types.includes(`\"${section}\"`)) || helpers.includes("contactIcon")) {
+    throw new Error("transaction provision includes unsupported homepage section surface");
   }
   if (content.includes('message["nav.home"]') || !page.includes('value === "/"')) {
     throw new Error("transaction navigation must use the brand as home without generating /:locale/");

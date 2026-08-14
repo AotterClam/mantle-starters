@@ -9,6 +9,7 @@ export type StockSnapshot = {
   readonly productSlug: string;
   readonly available: number;
   readonly reserved: number;
+  readonly revision: number;
 };
 
 type OrderState = {
@@ -18,6 +19,18 @@ type OrderState = {
 };
 
 type InventoryRecord = Omit<StockSnapshot, "productSlug">;
+
+type AdjustmentRecord = {
+  readonly productSlug: string;
+  readonly delta: number;
+  readonly reason: string;
+  readonly snapshot: StockSnapshot;
+};
+
+export type AdjustResult =
+  | { readonly outcome: "adjusted" | "already_adjusted"; readonly snapshot: StockSnapshot }
+  | { readonly outcome: "insufficient_stock"; readonly snapshot: StockSnapshot }
+  | { readonly outcome: "idempotency_conflict" };
 
 export type ReserveResult =
   | { readonly outcome: "reserved" | "already_reserved"; readonly snapshots: readonly StockSnapshot[] }
@@ -41,6 +54,17 @@ export type TransitionResult = {
 };
 
 export class InventoryCoordinator extends DurableObject {
+  async initializeProduct(productSlug: string, available: number, reserved: number, revision: number): Promise<StockSnapshot> {
+    return this.ctx.storage.transaction(async (txn) => {
+      const key = inventoryKey(productSlug);
+      const existing = await txn.get<InventoryRecord>(key);
+      if (existing) return snapshot(productSlug, existing);
+      const initial = { available, reserved, revision };
+      await txn.put(key, initial);
+      return snapshot(productSlug, initial);
+    });
+  }
+
   async reserve(orderId: string, items: readonly StockItem[], expiresAt: number): Promise<ReserveResult> {
     return this.ctx.storage.transaction(async (txn) => {
       const existing = await txn.get<OrderState>(orderKey(orderId));
@@ -58,10 +82,7 @@ export class InventoryCoordinator extends DurableObject {
 
       for (const item of items) {
         const value = current.get(item.productSlug)!;
-        await txn.put(inventoryKey(item.productSlug), {
-          available: value.available - item.quantity,
-          reserved: value.reserved + item.quantity,
-        });
+        await txn.put(inventoryKey(item.productSlug), revise(value, -item.quantity, item.quantity));
       }
       await txn.put(orderKey(orderId), { items, expiresAt, status: "pending_payment" } satisfies OrderState);
       return { outcome: "reserved", snapshots: await snapshots(txn, items) };
@@ -79,10 +100,7 @@ export class InventoryCoordinator extends DurableObject {
       const current = await inventory(txn, order.items);
       for (const item of order.items) {
         const value = current.get(item.productSlug)!;
-        await txn.put(inventoryKey(item.productSlug), {
-          available: value.available,
-          reserved: value.reserved - item.quantity,
-        });
+        await txn.put(inventoryKey(item.productSlug), revise(value, 0, -item.quantity));
       }
       await txn.put(orderKey(orderId), { ...order, status: "paid" } satisfies OrderState);
       return { outcome: "paid", items: order.items, snapshots: await snapshots(txn, order.items) };
@@ -113,10 +131,7 @@ export class InventoryCoordinator extends DurableObject {
       const current = await inventory(txn, order.items);
       for (const item of order.items) {
         const value = current.get(item.productSlug)!;
-        await txn.put(inventoryKey(item.productSlug), {
-          available: value.available + item.quantity,
-          reserved: value.reserved,
-        });
+        await txn.put(inventoryKey(item.productSlug), revise(value, item.quantity, 0));
       }
       await txn.put(orderKey(orderId), { ...order, status: "cancelled" } satisfies OrderState);
       return { outcome: "cancelled", items: order.items, snapshots: await snapshots(txn, order.items) };
@@ -134,17 +149,28 @@ export class InventoryCoordinator extends DurableObject {
     });
   }
 
-  async restock(productSlug: string, quantity: number): Promise<StockSnapshot> {
-    return this.adjust(productSlug, quantity);
-  }
-
-  async adjust(productSlug: string, delta: number): Promise<StockSnapshot> {
+  async adjust(
+    operationId: string,
+    productSlug: string,
+    delta: number,
+    reason: string,
+  ): Promise<AdjustResult> {
     return this.ctx.storage.transaction(async (txn) => {
-      const current = await txn.get<InventoryRecord>(inventoryKey(productSlug)) ?? { available: 0, reserved: 0 };
-      if (current.available + delta < 0) throw new Error("inventory adjustment would make available stock negative");
-      const next = { available: current.available + delta, reserved: current.reserved };
+      const applied = await txn.get<AdjustmentRecord>(adjustmentKey(operationId));
+      if (applied) {
+        return applied.productSlug === productSlug && applied.delta === delta && applied.reason === reason
+          ? { outcome: "already_adjusted", snapshot: applied.snapshot }
+          : { outcome: "idempotency_conflict" };
+      }
+      const current = normalizeInventory(await txn.get<InventoryRecord>(inventoryKey(productSlug)));
+      if (current.available + delta < 0) {
+        return { outcome: "insufficient_stock", snapshot: snapshot(productSlug, current) };
+      }
+      const next = revise(current, delta, 0);
+      const result = snapshot(productSlug, next);
       await txn.put(inventoryKey(productSlug), next);
-      return snapshot(productSlug, next);
+      await txn.put(adjustmentKey(operationId), { productSlug, delta, reason, snapshot: result } satisfies AdjustmentRecord);
+      return { outcome: "adjusted", snapshot: result };
     });
   }
 
@@ -162,10 +188,7 @@ async function release(
   const current = await inventory(txn, order.items);
   for (const item of order.items) {
     const value = current.get(item.productSlug)!;
-    await txn.put(inventoryKey(item.productSlug), {
-      available: value.available + item.quantity,
-      reserved: value.reserved - item.quantity,
-    });
+    await txn.put(inventoryKey(item.productSlug), revise(value, item.quantity, -item.quantity));
   }
   await txn.put(orderKey(orderId), { ...order, status } satisfies OrderState);
   return { outcome: status, items: order.items, snapshots: await snapshots(txn, order.items) };
@@ -178,10 +201,7 @@ async function inventory(
   const result = new Map<string, InventoryRecord>();
   for (const item of items) {
     if (!result.has(item.productSlug)) {
-      result.set(item.productSlug, await txn.get<InventoryRecord>(inventoryKey(item.productSlug)) ?? {
-        available: 0,
-        reserved: 0,
-      });
+      result.set(item.productSlug, normalizeInventory(await txn.get<InventoryRecord>(inventoryKey(item.productSlug))));
     }
   }
   return result;
@@ -196,7 +216,23 @@ async function snapshots(
 }
 
 function snapshot(productSlug: string, value?: InventoryRecord): StockSnapshot {
-  return { productSlug, available: value?.available ?? 0, reserved: value?.reserved ?? 0 };
+  return { productSlug, ...normalizeInventory(value) };
+}
+
+function normalizeInventory(value?: Partial<InventoryRecord>): InventoryRecord {
+  return {
+    available: value?.available ?? 0,
+    reserved: value?.reserved ?? 0,
+    revision: value?.revision ?? 0,
+  };
+}
+
+function revise(value: InventoryRecord, availableDelta: number, reservedDelta: number): InventoryRecord {
+  return {
+    available: value.available + availableDelta,
+    reserved: value.reserved + reservedDelta,
+    revision: value.revision + 1,
+  };
 }
 
 function inventoryKey(productSlug: string): string {
@@ -205,4 +241,8 @@ function inventoryKey(productSlug: string): string {
 
 function orderKey(orderId: string): string {
   return `order:${orderId}`;
+}
+
+function adjustmentKey(operationId: string): string {
+  return `adjustment:${operationId}`;
 }

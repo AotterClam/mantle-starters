@@ -84,7 +84,7 @@ export const Nav02: FC<Nav02Props> = ({
             >
               {ctaIcon === 'cart' && <ShoppingCartIcon class="size-4" />}
               {ctaText}
-              {ctaIcon === 'cart' && <Badge data-cart-count hidden class="min-w-5 px-1.5">0</Badge>}
+              {ctaIcon === 'cart' && <Badge data-cart-count hidden class="min-w-5 border-transparent bg-destructive px-1.5 text-destructive-foreground">0</Badge>}
             </a>
           )}
           <LocaleSwitch locale={locale} locales={locales} path={localePath} languageLabel={labels.language} />
@@ -169,7 +169,7 @@ export const Nav02: FC<Nav02Props> = ({
             >
               {ctaIcon === 'cart' && <ShoppingCartIcon class="size-4" />}
               {ctaText}
-              {ctaIcon === 'cart' && <Badge data-cart-count hidden class="ml-auto min-w-5 px-1.5">0</Badge>}
+              {ctaIcon === 'cart' && <Badge data-cart-count hidden class="ml-auto min-w-5 border-transparent bg-destructive px-1.5 text-destructive-foreground">0</Badge>}
             </a>
           )}
         </div>

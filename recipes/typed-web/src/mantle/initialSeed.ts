@@ -71,5 +71,8 @@ async function findSeedEntry(
   if (typeof data.type === "string") {
     return runtime.entryReader.readByDataField({ collection, field: "type", value: data.type, locale });
   }
-  throw new Error(`Initial seed ${collection} entry needs a stable slug or type.`);
+  if (typeof data.productSlug === "string") {
+    return runtime.entryReader.readByDataField({ collection, field: "productSlug", value: data.productSlug, locale });
+  }
+  throw new Error(`Initial seed ${collection} entry needs a stable slug, type, or productSlug.`);
 }

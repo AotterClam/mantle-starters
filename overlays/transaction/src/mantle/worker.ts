@@ -9,13 +9,14 @@ import {
   templates,
 } from "../web/publicSite.js";
 import { mountTypeRoutes } from "../web/typeRoutes.js";
-import { buildSiteDefaults, type Env } from "./config.js";
+import { buildMediaStorage, buildSiteDefaults, type Env } from "./config.js";
 import { buildHandlers } from "./handlers/index.js";
 import { createSeededRuntime } from "./seed.js";
 
 export const mantle = createMantleWorker<Env>({
   manifest,
   siteDefaults: buildSiteDefaults,
+  bindings: (env, conventional) => ({ ...conventional, mediaStorage: buildMediaStorage(env) }),
   templates,
   publicPathResolver,
   extend: ({ getRuntime }) => ({

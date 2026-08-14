@@ -3,7 +3,7 @@
 {{DESCRIPTION}}
 
 This is the headless Mantle base: one authored manifest, one generated manifest
-module, one explicit site-owned auth switch, and one Worker entry using Core's
+module, Core's explicit-mode conventional Auth, and one Worker entry using the
 Cloudflare facade. It contains no visitor UI or component tree.
 
 Launch facts live in `.mantle/launch-state.json`; the coding-agent handoff is
@@ -24,7 +24,7 @@ is configured; public View routes do not require auth.
 ## Project-owned files
 
 - `manifests/site.yaml` — Schema and View source of truth.
-- `src/auth.ts` — explicit hosted/self-managed auth composition.
+- Hosted/self-managed Auth is selected from environment variables by Mantle Core.
 - `src/index.ts` — Worker entry and site defaults.
 - `wrangler.toml` — Cloudflare bindings and deployment identity.
 
