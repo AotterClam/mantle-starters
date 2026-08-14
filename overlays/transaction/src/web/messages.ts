@@ -1,6 +1,6 @@
 import catalog from "../../.mantle/overlays/transaction/messages.json";
 
-type Messages = typeof catalog.locales.en;
+type Messages = (typeof catalog.locales)[keyof typeof catalog.locales];
 
 export function messagesForLocale(locale: string): Messages {
   const locales = catalog.locales as unknown as Record<string, Messages>;

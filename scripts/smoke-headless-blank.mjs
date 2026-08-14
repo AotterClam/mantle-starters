@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { spawn, spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, symlinkSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
@@ -282,6 +282,7 @@ async function smokeBlank() {
 
 async function smokeTyped(archetype, check, replacementOverrides = {}) {
   const target = join(tempRoot, archetype);
+  const state = mkdtempSync(join(tempRoot, "wrangler-"));
   const bundle = JSON.parse(readFileSync(join(root, "provision-bundles", `${archetype}.json`), "utf8"));
   materializeBundle(target, bundle, { ...replacements, ...replacementOverrides, ARCHETYPE: archetype });
   symlinkSync(join(root, "recipes", "typed-web", "node_modules"), join(target, "node_modules"), "dir");
@@ -302,6 +303,7 @@ async function smokeTyped(archetype, check, replacementOverrides = {}) {
     cwd: target,
     command: join(root, "recipes", "typed-web", "node_modules", ".bin", "wrangler"),
     args: [],
+    persistTo: state,
     probe: "/",
     async check(origin) {
       for (const path of ["/site-icon.svg", "/assets/styles.css"]) {
@@ -312,6 +314,25 @@ async function smokeTyped(archetype, check, replacementOverrides = {}) {
       await check(origin);
     },
   });
+  if (archetype === "transaction") {
+    const seedPath = join(target, ".mantle", "overlays", "transaction", "seed.json");
+    const seed = JSON.parse(readFileSync(seedPath, "utf8"));
+    seed.collections.products.push({ status: "invalid", slug: "must-not-run" });
+    writeFileSync(seedPath, JSON.stringify(seed));
+    await withWorker({
+      cwd: target,
+      command: join(root, "recipes", "typed-web", "node_modules", ".bin", "wrangler"),
+      args: [],
+      persistTo: state,
+      probe: "/",
+      async check(origin) {
+        const home = await fetch(`${origin}/`);
+        if (home.status !== 200 || !(await home.text()).includes("Sample product")) {
+          throw new Error("transaction cold restart repeated its completed seed");
+        }
+      },
+    });
+  }
 }
 
 function prepareProject(target, archetype) {
@@ -319,8 +340,8 @@ function prepareProject(target, archetype) {
   if (result.status !== 0) throw new Error(`${archetype} prepare failed: ${result.stderr || result.stdout}`);
 }
 
-async function withWorker({ cwd, command, args, devArgs = [], probe, check, setupIncomplete = true }) {
-  const state = mkdtempSync(join(tempRoot, "wrangler-"));
+async function withWorker({ cwd, command, args, devArgs = [], persistTo, probe, check, setupIncomplete = true }) {
+  const state = persistTo ?? mkdtempSync(join(tempRoot, "wrangler-"));
   const port = await freePort();
   const child = spawn(command, [
     ...args,

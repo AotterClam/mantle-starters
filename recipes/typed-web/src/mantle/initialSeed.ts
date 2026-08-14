@@ -7,17 +7,20 @@ type SeedFile = {
   readonly locales?: Readonly<Record<string, Readonly<Record<string, readonly SeedEntry[]>>>>;
 };
 
-export function createInitialSeedRuntime<Env>(
+const SEED_MARKER = "initial-v1";
+
+export function createInitialSeedRuntime<Env extends { readonly DB: D1Database }>(
   seed: SeedFile,
   getRuntime: (env: Env) => Promise<CmsRuntime>,
 ): (env: Env) => Promise<CmsRuntime> {
-  // ponytail: entry identity is the seed marker; add durable metadata only if hard-deleted starter rows must stay deleted.
   let seeded: Promise<CmsRuntime> | null = null;
   return (env) => {
     if (seeded) return seeded;
     seeded = getRuntime(env)
       .then(async (runtime) => {
+        if (await hasInitialSeed(env.DB)) return runtime;
         await seedInitialContent(runtime, seed);
+        await markInitialSeed(env.DB);
         return runtime;
       })
       .catch((error) => {
@@ -26,6 +29,18 @@ export function createInitialSeedRuntime<Env>(
       });
     return seeded;
   };
+}
+
+async function hasInitialSeed(db: D1Database): Promise<boolean> {
+  const [, marker] = await db.batch([
+    db.prepare("CREATE TABLE IF NOT EXISTS _mantle_starter_seed (id TEXT PRIMARY KEY)"),
+    db.prepare("SELECT 1 FROM _mantle_starter_seed WHERE id = ? LIMIT 1").bind(SEED_MARKER),
+  ]);
+  return (marker?.results.length ?? 0) > 0;
+}
+
+async function markInitialSeed(db: D1Database): Promise<void> {
+  await db.prepare("INSERT OR IGNORE INTO _mantle_starter_seed (id) VALUES (?)").bind(SEED_MARKER).run();
 }
 
 async function seedInitialContent(runtime: CmsRuntime, seed: SeedFile): Promise<void> {

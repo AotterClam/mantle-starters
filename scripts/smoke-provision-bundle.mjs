@@ -168,6 +168,7 @@ function smokeLocalMaterializer() {
   const tempRoot = mkdtempSync(join(tmpdir(), "mantle-materialize-"));
   const output = join(tempRoot, "northstar");
   const shopOutput = join(tempRoot, "five-language-shop");
+  const nonEnglishShopOutput = join(tempRoot, "non-english-shop");
   try {
     const result = spawnSync(process.execPath, [
       "scripts/dev-provision-bundle.mjs",
@@ -227,6 +228,18 @@ function smokeLocalMaterializer() {
       }
     }
     assertManifestLocaleSelection(shopOutput, ["en", "zh-TW", "ja", "ko", "fr"]);
+    const nonEnglishShop = spawnSync(process.execPath, [
+      "scripts/dev-provision-bundle.mjs",
+      "transaction",
+      "--out",
+      nonEnglishShopOutput,
+      "--locales",
+      "zh-TW,ja",
+    ], { cwd: root, encoding: "utf8" });
+    if (nonEnglishShop.status !== 0) throw new Error(`non-English materializer failed: ${nonEnglishShop.stderr || nonEnglishShop.stdout}`);
+    symlinkSync(join(root, "recipes", "typed-web", "node_modules"), join(nonEnglishShopOutput, "node_modules"), "dir");
+    const nonEnglishTypecheck = spawnSync("pnpm", ["typecheck"], { cwd: nonEnglishShopOutput, encoding: "utf8" });
+    if (nonEnglishTypecheck.status !== 0) throw new Error(`non-English transaction typecheck failed: ${nonEnglishTypecheck.stderr || nonEnglishTypecheck.stdout}`);
     const transactionLocales = Object.keys(JSON.parse(readFileSync(join(root, "overlays", "transaction", "seed.json"), "utf8")).locales);
     const allLanguages = spawnSync(process.execPath, [
       "scripts/dev-provision-bundle.mjs",
@@ -741,6 +754,10 @@ function assertSeedDrivenHome(root, archetype) {
   const seedImport = `../../.mantle/overlays/${archetype}/seed.json`;
   if (!seedRuntime.includes(seedImport) || !worker.includes("createSeededRuntime")) {
     throw new Error(`${archetype} does not initialize D1 from the overlay seed`);
+  }
+  const initialSeed = readFileSync(join(root, "src", "mantle", "initialSeed.ts"), "utf8");
+  if (!initialSeed.includes("_mantle_starter_seed") || !initialSeed.includes("if (await hasInitialSeed(env.DB)) return runtime")) {
+    throw new Error(`${archetype} repeats the full seed scan on every cold Worker isolate`);
   }
   if (homeContent.includes(seedImport) || homeContent.includes("fallback")) {
     throw new Error(`${archetype} homepage still has a seed fallback`);
