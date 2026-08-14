@@ -15,7 +15,7 @@ First useful workflow:
 - show published `product-translations` joined to shared `products` fields;
 - keep the cart in browser storage and verify price/currency again on the server;
 - reserve and mutate stock through `InventoryCoordinator`;
-- create operational orders, simulate payment, and expose staff operations through `/mcp/staff`;
+- create operational orders, simulate payment, and expose row-bound inventory/order actions in Admin and through `/mcp/staff`;
 - expire abandoned orders through Queue, with Cron as recovery.
 
 Lifecycle references in `manifests/site.yaml`:
@@ -32,3 +32,7 @@ review flow.
 
 Replace the fake payment action only when a real provider and its webhook
 verification contract are selected. Customer accounts remain out of scope.
+
+Keep one `InventoryCoordinator` per provisioned shop so a multi-product cart
+reserves atomically. Split by SKU only after measured single-shop throughput
+requires a distributed reservation workflow.

@@ -11,100 +11,29 @@ type Context = HandlerContext<Env>;
 type OrderData = MantleSite.Entry_orders;
 type OrderItem = OrderData["items"][number];
 type MovementKind = MantleSite.Entry_inventory_movements["kind"];
+type PlaceOrderInput = {
+  readonly locale: string;
+  readonly customerName: string;
+  readonly customerEmail: string;
+  readonly shippingAddress: string;
+  readonly items: readonly StockItem[];
+};
+type PendingOrder = {
+  readonly outcome: "pending_payment";
+  readonly orderToken: string;
+  readonly orderNumber: string;
+  readonly expiresAt: number;
+  readonly totalMinor: number;
+  readonly currency: string;
+};
 
 export function buildCommerceHandlers(getRuntime: RuntimeGetter): MantleHandlers<Env> {
   return {
-    placeOrder: async (input, ctx) => {
-      const runtime = await getRuntime();
-      const locales = await runtime.siteConfig.readLocales();
-      if (!locales.includes(input.locale)) invalid("/locale", input.locale, "a configured site locale");
+    placeOrder: (input, ctx) => placePendingOrder(getRuntime, input, ctx),
 
-      const requested = combineItems(input.items);
-      const priced = await Promise.all(requested.map(async (item): Promise<OrderItem & { currency: string }> => {
-        const product = await runtime.entryReader.readBySlug({
-          collection: "products",
-          slug: item.productSlug,
-          status: "published",
-        });
-        const translation = await runtime.entryReader.readBySlug({
-          collection: "product-translations",
-          slug: item.productSlug,
-          locale: input.locale,
-          status: "published",
-        });
-        const priceMinor = product?.data["priceMinor"];
-        const currency = product?.data["currency"];
-        if (!product || typeof priceMinor !== "number" || typeof currency !== "string") {
-          invalid(`/items/${item.productSlug}`, item.productSlug, "a published product");
-        }
-        const title = translation?.data["title"];
-        return {
-          productSlug: item.productSlug,
-          title: typeof title === "string" ? title : item.productSlug,
-          quantity: item.quantity,
-          unitPriceMinor: priceMinor,
-          lineTotalMinor: priceMinor * item.quantity,
-          currency,
-        };
-      }));
-      const currencies = new Set(priced.map((item) => item.currency));
-      if (currencies.size !== 1) invalid("/items", input.items, "products sharing one currency");
-
-      const now = Date.now();
-      const orderToken = crypto.randomUUID();
-      const orderNumber = `MNT-${new Date(now).toISOString().slice(0, 10).replaceAll("-", "")}-${orderToken.slice(0, 8).toUpperCase()}`;
-      const expiresAt = now + CHECKOUT_TTL_MS;
-      const stockItems = priced.map(({ productSlug, quantity }) => ({ productSlug, quantity }));
-      await initializeInventory(runtime, ctx.env, stockItems);
-      const reserved = await inventory(ctx.env).reserve(orderToken, stockItems, expiresAt);
-      if (reserved.outcome === "insufficient_stock") {
-        throw new DiagnosticError(runtimeDiagnostic({
-          code: "CONFLICT",
-          severity: "error",
-          path: "/items",
-          value: reserved.insufficient,
-          expected: "quantities currently in stock",
-        }));
-      }
-      if (reserved.outcome !== "reserved") throw new Error(`unexpected reservation outcome: ${reserved.outcome}`);
-
-      const items = priced.map(({ currency: _currency, ...item }) => item);
-      const totalMinor = items.reduce((sum, item) => sum + item.lineTotalMinor, 0);
-      let created: Entry | null = null;
-      try {
-        created = await runtime.createDraft.execute({
-          collection: "orders",
-          authorId: null,
-          ctx,
-          data: {
-            orderToken,
-            orderNumber,
-            orderStatus: "pending_payment",
-            orderLocale: input.locale,
-            currency: [...currencies][0],
-            subtotalMinor: totalMinor,
-            totalMinor,
-            customerName: input.customerName,
-            customerEmail: input.customerEmail,
-            shippingAddress: input.shippingAddress,
-            items,
-            expiresAt,
-          },
-        });
-        await recordStockChange(runtime, reserved.snapshots, stockItems, "reserve", orderToken, ctx);
-      } catch (error) {
-        await inventory(ctx.env).cancel(orderToken);
-        if (created) await runtime.deleteEntry.execute({ id: created.id, collection: "orders", ctx });
-        throw error;
-      }
-
-      const enqueue = ctx.env.ORDER_EXPIRY_QUEUE.send(
-        { type: "expire-order", orderToken },
-        { contentType: "json", delaySeconds: CHECKOUT_TTL_MS / 1000 },
-      ).catch((error) => console.error(`[transaction] could not enqueue expiry for ${orderToken}`, error));
-      if (ctx.waitUntil) ctx.waitUntil(enqueue);
-      else await enqueue;
-      return { outcome: "pending_payment", orderToken, orderNumber, expiresAt, totalMinor, currency: [...currencies][0]! };
+    createManualOrder: async ({ operationId, ...input }, ctx) => {
+      const order = await placePendingOrder(getRuntime, input, ctx, operationId);
+      return { orderToken: order.orderToken, orderNumber: order.orderNumber };
     },
 
     payOrder: async ({ orderToken }, ctx) => {
@@ -136,36 +65,38 @@ export function buildCommerceHandlers(getRuntime: RuntimeGetter): MantleHandlers
       return { outcome: cancelOutcome(result.outcome), orderToken };
     },
 
-    inspectInventory: async ({ productSlug }, ctx) => inventory(ctx.env).inspect(productSlug),
-
-    restockProduct: async ({ productSlug, quantity, note }, ctx) => {
+    adjustInventory: async ({ operationId, productSlug, delta, reason }, ctx) => {
       const runtime = await getRuntime();
       await requireProduct(runtime, productSlug);
-      const result = await inventory(ctx.env).restock(productSlug, quantity);
-      await persistSnapshots(runtime, [result], ctx);
-      await ensureMovement(runtime, `restock:${crypto.randomUUID()}`, {
-        productSlug,
-        kind: "restock",
-        availableDelta: quantity,
-        reservedDelta: 0,
-        ...(note ? { note } : {}),
-      }, ctx);
-      return result;
-    },
-
-    adjustInventory: async ({ productSlug, delta, reason }, ctx) => {
-      const runtime = await getRuntime();
-      await requireProduct(runtime, productSlug);
-      const result = await inventory(ctx.env).adjust(productSlug, delta);
-      await persistSnapshots(runtime, [result], ctx);
-      await ensureMovement(runtime, `adjust:${crypto.randomUUID()}`, {
+      if (delta === 0) invalid("/delta", delta, "a non-zero stock adjustment");
+      const result = await inventory(ctx.env).adjust(operationId, productSlug, delta, reason);
+      if (result.outcome === "idempotency_conflict") {
+        throw new DiagnosticError(runtimeDiagnostic({
+          code: "CONFLICT",
+          severity: "error",
+          path: "/operationId",
+          value: operationId,
+          expected: "an idempotency key used with the same adjustment input",
+        }));
+      }
+      if (result.outcome === "insufficient_stock") {
+        throw new DiagnosticError(runtimeDiagnostic({
+          code: "CONFLICT",
+          severity: "error",
+          path: "/delta",
+          value: delta,
+          expected: "an adjustment that keeps available stock non-negative",
+        }));
+      }
+      await persistSnapshots(runtime, [result.snapshot], ctx);
+      await ensureMovement(runtime, `adjust:${operationId}`, {
         productSlug,
         kind: "adjust",
         availableDelta: delta,
         reservedDelta: 0,
         note: reason,
       }, ctx);
-      return result;
+      return result.snapshot;
     },
 
     fulfillOrder: async ({ orderToken, trackingNumber }, ctx) => {
@@ -217,6 +148,116 @@ export function buildCommerceHandlers(getRuntime: RuntimeGetter): MantleHandlers
       return { checked: pending.length, expired };
     },
   };
+}
+
+async function placePendingOrder(
+  getRuntime: RuntimeGetter,
+  input: PlaceOrderInput,
+  ctx: Context,
+  orderToken = crypto.randomUUID(),
+): Promise<PendingOrder> {
+  const runtime = await getRuntime();
+  const existing = await orderByToken(runtime, orderToken);
+  if (existing) {
+    const order = orderData(existing);
+    return {
+      outcome: "pending_payment",
+      orderToken,
+      orderNumber: order.orderNumber,
+      expiresAt: order.expiresAt,
+      totalMinor: order.totalMinor,
+      currency: order.currency,
+    };
+  }
+
+  const locales = await runtime.siteConfig.readLocales();
+  if (!locales.includes(input.locale)) invalid("/locale", input.locale, "a configured site locale");
+
+  const requested = combineItems(input.items);
+  const priced = await Promise.all(requested.map(async (item): Promise<OrderItem & { currency: string }> => {
+    const product = await runtime.entryReader.readBySlug({
+      collection: "products",
+      slug: item.productSlug,
+      status: "published",
+    });
+    const translation = await runtime.entryReader.readBySlug({
+      collection: "product-translations",
+      slug: item.productSlug,
+      locale: input.locale,
+      status: "published",
+    });
+    const priceMinor = product?.data["priceMinor"];
+    const currency = product?.data["currency"];
+    if (!product || typeof priceMinor !== "number" || typeof currency !== "string") {
+      invalid(`/items/${item.productSlug}`, item.productSlug, "a published product");
+    }
+    const title = translation?.data["title"];
+    return {
+      productSlug: item.productSlug,
+      title: typeof title === "string" ? title : item.productSlug,
+      quantity: item.quantity,
+      unitPriceMinor: priceMinor,
+      lineTotalMinor: priceMinor * item.quantity,
+      currency,
+    };
+  }));
+  const currencies = new Set(priced.map((item) => item.currency));
+  if (currencies.size !== 1) invalid("/items", input.items, "products sharing one currency");
+
+  const now = Date.now();
+  const orderNumber = `MNT-${new Date(now).toISOString().slice(0, 10).replaceAll("-", "")}-${orderToken.slice(0, 8).toUpperCase()}`;
+  const expiresAt = now + CHECKOUT_TTL_MS;
+  const stockItems = priced.map(({ productSlug, quantity }) => ({ productSlug, quantity }));
+  await initializeInventory(runtime, ctx.env, stockItems);
+  const reserved = await inventory(ctx.env).reserve(orderToken, stockItems, expiresAt);
+  if (reserved.outcome === "insufficient_stock") {
+    throw new DiagnosticError(runtimeDiagnostic({
+      code: "CONFLICT",
+      severity: "error",
+      path: "/items",
+      value: reserved.insufficient,
+      expected: "quantities currently in stock",
+    }));
+  }
+  if (reserved.outcome !== "reserved") throw new Error(`unexpected reservation outcome: ${reserved.outcome}`);
+
+  const items = priced.map(({ currency: _currency, ...item }) => item);
+  const totalMinor = items.reduce((sum, item) => sum + item.lineTotalMinor, 0);
+  let created: Entry | null = null;
+  try {
+    created = await runtime.createDraft.execute({
+      collection: "orders",
+      authorId: null,
+      ctx,
+      data: {
+        orderToken,
+        orderNumber,
+        orderStatus: "pending_payment",
+        orderLocale: input.locale,
+        currency: [...currencies][0],
+        subtotalMinor: totalMinor,
+        totalMinor,
+        customerName: input.customerName,
+        customerEmail: input.customerEmail,
+        shippingAddress: input.shippingAddress,
+        items,
+        expiresAt,
+      },
+    });
+    await recordStockChange(runtime, reserved.snapshots, stockItems, "reserve", orderToken, ctx);
+  } catch (error) {
+    await inventory(ctx.env).cancel(orderToken);
+    if (created) await runtime.deleteEntry.execute({ id: created.id, collection: "orders", ctx });
+    throw error;
+  }
+
+  const enqueue = ctx.env.ORDER_EXPIRY_QUEUE.send(
+    { type: "expire-order", orderToken },
+    { contentType: "json", delaySeconds: CHECKOUT_TTL_MS / 1000 },
+  ).catch((error) => console.error(`[transaction] could not enqueue expiry for ${orderToken}`, error));
+  if (ctx.waitUntil) ctx.waitUntil(enqueue);
+  else await enqueue;
+  return { outcome: "pending_payment", orderToken, orderNumber, expiresAt, totalMinor, currency: [...currencies][0]! };
 }
 
 async function expireOrder(
@@ -284,14 +325,36 @@ async function recordStockChange(
 
 async function persistSnapshots(runtime: CmsRuntime, values: readonly StockSnapshot[], ctx: Context): Promise<void> {
   for (const value of values) {
-    const existing = await runtime.entryReader.readByDataField({
-      collection: "inventory",
-      field: "productSlug",
-      value: value.productSlug,
-    });
-    const data = { ...value, updatedAt: Date.now() };
-    if (existing) await runtime.updateDraft.execute({ id: existing.id, expectedVersion: existing.version, data, ctx });
-    else await runtime.createDraft.execute({ collection: "inventory", data, authorId: null, ctx });
+    for (;;) {
+      const existing = await runtime.entryReader.readByDataField({
+        collection: "inventory",
+        field: "productSlug",
+        value: value.productSlug,
+      });
+      const currentRevision = existing?.data["revision"];
+      if (typeof currentRevision === "number" && currentRevision >= value.revision) break;
+      const data = { ...value, updatedAt: Date.now() };
+      if (!existing) {
+        try {
+          await runtime.createDraft.execute({ collection: "inventory", data, authorId: null, ctx });
+          break;
+        } catch (error) {
+          const raced = await runtime.entryReader.readByDataField({
+            collection: "inventory",
+            field: "productSlug",
+            value: value.productSlug,
+          });
+          if (!raced) throw error;
+          continue;
+        }
+      }
+      try {
+        await runtime.updateDraft.execute({ id: existing.id, expectedVersion: existing.version, data, ctx });
+        break;
+      } catch (error) {
+        if (!(error instanceof Error) || error.name !== "EntryVersionConflict") throw error;
+      }
+    }
   }
 }
 
@@ -307,12 +370,21 @@ async function ensureMovement(
     value: movementKey,
   });
   if (!existing) {
-    await runtime.createDraft.execute({
-      collection: "inventory-movements",
-      authorId: null,
-      ctx,
-      data: { movementKey, occurredAt: Date.now(), ...data },
-    });
+    try {
+      await runtime.createDraft.execute({
+        collection: "inventory-movements",
+        authorId: null,
+        ctx,
+        data: { movementKey, occurredAt: Date.now(), ...data },
+      });
+    } catch (error) {
+      const raced = await runtime.entryReader.readByDataField({
+        collection: "inventory-movements",
+        field: "movementKey",
+        value: movementKey,
+      });
+      if (!raced) throw error;
+    }
   }
 }
 
@@ -331,8 +403,8 @@ async function orderByToken(runtime: CmsRuntime, orderToken: string): Promise<En
 }
 
 async function requireProduct(runtime: CmsRuntime, productSlug: string): Promise<void> {
-  if (!await runtime.entryReader.readBySlug({ collection: "products", slug: productSlug, status: "published" })) {
-    invalid("/productSlug", productSlug, "a published product slug");
+  if (!await runtime.entryReader.readByDataField({ collection: "products", field: "slug", value: productSlug })) {
+    invalid("/productSlug", productSlug, "an existing product slug");
   }
 }
 
@@ -350,13 +422,15 @@ async function initializeInventory(runtime: CmsRuntime, env: Env, items: readonl
     });
     const available = entry?.data["available"];
     const reserved = entry?.data["reserved"];
+    const revision = entry?.data["revision"];
     if (typeof available === "number" && typeof reserved === "number") {
-      await coordinator.initializeProduct(item.productSlug, available, reserved);
+      await coordinator.initializeProduct(item.productSlug, available, reserved, typeof revision === "number" ? revision : 0);
     }
   }
 }
 
 function inventory(env: Env) {
+  // ponytail: one coordinator per provisioned shop keeps multi-SKU reservations atomic; shard only after measured per-shop saturation.
   return env.INVENTORY_COORDINATOR.getByName("site");
 }
 

@@ -417,6 +417,7 @@ export const manifest = [
       "title": "Orders",
       "description": "Guest orders created by checkout and managed by staff operations.",
       "schema": {
+        "readOnly": true,
         "type": "object",
         "required": [
           "orderToken",
@@ -560,7 +561,13 @@ export const manifest = [
       ],
       "uiSchema": {
         "list": {
-          "filterField": "orderStatus"
+          "filterField": "orderStatus",
+          "primaryField": "orderNumber",
+          "columns": [
+            "orderStatus",
+            "customerEmail",
+            "totalMinor"
+          ]
         }
       }
     }
@@ -575,11 +582,13 @@ export const manifest = [
       "title": "Inventory",
       "description": "Query mirror of the InventoryCoordinator Durable Object, which is the stock authority.",
       "schema": {
+        "readOnly": true,
         "type": "object",
         "required": [
           "productSlug",
           "available",
           "reserved",
+          "revision",
           "updatedAt"
         ],
         "properties": {
@@ -591,6 +600,10 @@ export const manifest = [
             "minimum": 0
           },
           "reserved": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "revision": {
             "type": "integer",
             "minimum": 0
           },
@@ -611,7 +624,17 @@ export const manifest = [
           "available",
           "productSlug"
         ]
-      ]
+      ],
+      "uiSchema": {
+        "list": {
+          "primaryField": "productSlug",
+          "columns": [
+            "available",
+            "reserved",
+            "revision"
+          ]
+        }
+      }
     }
   },
   {
@@ -624,6 +647,7 @@ export const manifest = [
       "title": "Inventory movements",
       "description": "Append-only audit trail for stock changes caused by checkout and staff operations.",
       "schema": {
+        "readOnly": true,
         "type": "object",
         "required": [
           "movementKey",
@@ -646,7 +670,6 @@ export const manifest = [
           "kind": {
             "type": "string",
             "enum": [
-              "restock",
               "adjust",
               "reserve",
               "sale",
@@ -683,7 +706,18 @@ export const manifest = [
         [
           "orderToken"
         ]
-      ]
+      ],
+      "uiSchema": {
+        "list": {
+          "primaryField": "productSlug",
+          "columns": [
+            "kind",
+            "availableDelta",
+            "reservedDelta",
+            "occurredAt"
+          ]
+        }
+      }
     }
   },
   {
@@ -898,6 +932,151 @@ export const manifest = [
     "apiVersion": "cms.mantle.aotter.net/v1",
     "kind": "Procedure",
     "metadata": {
+      "name": "create-manual-order"
+    },
+    "spec": {
+      "title": {
+        "en": "Create order",
+        "zh-TW": "新增訂單",
+        "ja": "注文を作成",
+        "ko": "주문 만들기",
+        "fr": "Créer une commande"
+      },
+      "input": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "operationId",
+          "locale",
+          "customerName",
+          "customerEmail",
+          "shippingAddress",
+          "items"
+        ],
+        "properties": {
+          "operationId": {
+            "type": "string",
+            "format": "uuid",
+            "x-mcp-hint": "idempotency-key"
+          },
+          "locale": {
+            "type": "string",
+            "enum": [
+              "en",
+              "zh-TW",
+              "ja",
+              "ko",
+              "fr"
+            ],
+            "title": {
+              "en": "Customer language",
+              "zh-TW": "顧客語言",
+              "ja": "顧客の言語",
+              "ko": "고객 언어",
+              "fr": "Langue du client"
+            }
+          },
+          "customerName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "customerEmail": {
+            "type": "string",
+            "format": "email"
+          },
+          "shippingAddress": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "productSlug",
+                "quantity"
+              ],
+              "properties": {
+                "productSlug": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9-]+$"
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 99
+                }
+              }
+            }
+          }
+        }
+      },
+      "uiSchema": {
+        "collectionAction": "orders",
+        "fields": {
+          "shippingAddress": {
+            "widget": "textarea"
+          }
+        }
+      },
+      "output": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "orderToken",
+          "orderNumber"
+        ],
+        "properties": {
+          "orderToken": {
+            "type": "string"
+          },
+          "orderNumber": {
+            "type": "string"
+          }
+        }
+      },
+      "handler": {
+        "kind": "ref",
+        "ref": "createManualOrder"
+      },
+      "requires": {
+        "auth": {
+          "all": [
+            {
+              "ctx.staff": [
+                "owner"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Trigger",
+    "metadata": {
+      "name": "create-manual-order-mcp"
+    },
+    "spec": {
+      "source": {
+        "kind": "mcp",
+        "surface": "staff"
+      },
+      "target": {
+        "procedure": "create-manual-order"
+      }
+    }
+  },
+  {
+    "apiVersion": "cms.mantle.aotter.net/v1",
+    "kind": "Procedure",
+    "metadata": {
       "name": "pay-order"
     },
     "spec": {
@@ -1029,132 +1208,6 @@ export const manifest = [
     "apiVersion": "cms.mantle.aotter.net/v1",
     "kind": "Procedure",
     "metadata": {
-      "name": "inspect-inventory"
-    },
-    "spec": {
-      "title": "Inspect inventory",
-      "input": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "productSlug"
-        ],
-        "properties": {
-          "productSlug": {
-            "type": "string",
-            "pattern": "^[a-z0-9-]+$"
-          }
-        }
-      },
-      "output": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "productSlug",
-          "available",
-          "reserved"
-        ],
-        "properties": {
-          "productSlug": {
-            "type": "string"
-          },
-          "available": {
-            "type": "integer"
-          },
-          "reserved": {
-            "type": "integer"
-          }
-        }
-      },
-      "handler": {
-        "kind": "ref",
-        "ref": "inspectInventory"
-      },
-      "requires": {
-        "auth": {
-          "all": [
-            {
-              "ctx.staff": [
-                "owner"
-              ]
-            }
-          ]
-        }
-      }
-    }
-  },
-  {
-    "apiVersion": "cms.mantle.aotter.net/v1",
-    "kind": "Procedure",
-    "metadata": {
-      "name": "restock-product"
-    },
-    "spec": {
-      "title": "Restock product",
-      "input": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "productSlug",
-          "quantity"
-        ],
-        "properties": {
-          "productSlug": {
-            "type": "string",
-            "pattern": "^[a-z0-9-]+$"
-          },
-          "quantity": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 100000
-          },
-          "note": {
-            "type": "string",
-            "maxLength": 500
-          }
-        }
-      },
-      "output": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "productSlug",
-          "available",
-          "reserved"
-        ],
-        "properties": {
-          "productSlug": {
-            "type": "string"
-          },
-          "available": {
-            "type": "integer"
-          },
-          "reserved": {
-            "type": "integer"
-          }
-        }
-      },
-      "handler": {
-        "kind": "ref",
-        "ref": "restockProduct"
-      },
-      "requires": {
-        "auth": {
-          "all": [
-            {
-              "ctx.staff": [
-                "owner"
-              ]
-            }
-          ]
-        }
-      }
-    }
-  },
-  {
-    "apiVersion": "cms.mantle.aotter.net/v1",
-    "kind": "Procedure",
-    "metadata": {
       "name": "adjust-inventory"
     },
     "spec": {
@@ -1163,14 +1216,21 @@ export const manifest = [
         "type": "object",
         "additionalProperties": false,
         "required": [
+          "operationId",
           "productSlug",
           "delta",
           "reason"
         ],
         "properties": {
+          "operationId": {
+            "type": "string",
+            "format": "uuid",
+            "x-mcp-hint": "idempotency-key"
+          },
           "productSlug": {
             "type": "string",
-            "pattern": "^[a-z0-9-]+$"
+            "pattern": "^[a-z0-9-]+$",
+            "x-mantle-ref": "products"
           },
           "delta": {
             "type": "integer",
@@ -1184,13 +1244,21 @@ export const manifest = [
           }
         }
       },
+      "uiSchema": {
+        "fields": {
+          "reason": {
+            "widget": "textarea"
+          }
+        }
+      },
       "output": {
         "type": "object",
         "additionalProperties": false,
         "required": [
           "productSlug",
           "available",
-          "reserved"
+          "reserved",
+          "revision"
         ],
         "properties": {
           "productSlug": {
@@ -1200,6 +1268,9 @@ export const manifest = [
             "type": "integer"
           },
           "reserved": {
+            "type": "integer"
+          },
+          "revision": {
             "type": "integer"
           }
         }
@@ -1238,7 +1309,8 @@ export const manifest = [
         "properties": {
           "orderToken": {
             "type": "string",
-            "pattern": "^[0-9a-f-]{36}$"
+            "pattern": "^[0-9a-f-]{36}$",
+            "x-mantle-ref": "orders"
           },
           "trackingNumber": {
             "type": "string",
@@ -1303,7 +1375,8 @@ export const manifest = [
         "properties": {
           "orderToken": {
             "type": "string",
-            "pattern": "^[0-9a-f-]{36}$"
+            "pattern": "^[0-9a-f-]{36}$",
+            "x-mantle-ref": "orders"
           },
           "reason": {
             "type": "string",
@@ -1448,38 +1521,6 @@ export const manifest = [
     "apiVersion": "cms.mantle.aotter.net/v1",
     "kind": "Trigger",
     "metadata": {
-      "name": "inspect-inventory-mcp"
-    },
-    "spec": {
-      "source": {
-        "kind": "mcp",
-        "surface": "staff"
-      },
-      "target": {
-        "procedure": "inspect-inventory"
-      }
-    }
-  },
-  {
-    "apiVersion": "cms.mantle.aotter.net/v1",
-    "kind": "Trigger",
-    "metadata": {
-      "name": "restock-product-mcp"
-    },
-    "spec": {
-      "source": {
-        "kind": "mcp",
-        "surface": "staff"
-      },
-      "target": {
-        "procedure": "restock-product"
-      }
-    }
-  },
-  {
-    "apiVersion": "cms.mantle.aotter.net/v1",
-    "kind": "Trigger",
-    "metadata": {
       "name": "adjust-inventory-mcp"
     },
     "spec": {
@@ -1582,27 +1623,21 @@ export function bindMantleSite(runtime: CmsRuntime) {
           input,
           ctx,
         }),
+      "create-manual-order": (input: MantleGenerated.MantleSite.ProcInput_create_manual_order, ctx: HandlerContext) =>
+        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_create_manual_order>({
+          procedure: manifest[13],
+          input,
+          ctx,
+        }),
       "pay-order": (input: MantleGenerated.MantleSite.ProcInput_pay_order, ctx: HandlerContext) =>
         runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_pay_order>({
-          procedure: manifest[13],
+          procedure: manifest[15],
           input,
           ctx,
         }),
       "cancel-guest-order": (input: MantleGenerated.MantleSite.ProcInput_cancel_guest_order, ctx: HandlerContext) =>
         runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_cancel_guest_order>({
-          procedure: manifest[15],
-          input,
-          ctx,
-        }),
-      "inspect-inventory": (input: MantleGenerated.MantleSite.ProcInput_inspect_inventory, ctx: HandlerContext) =>
-        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_inspect_inventory>({
           procedure: manifest[17],
-          input,
-          ctx,
-        }),
-      "restock-product": (input: MantleGenerated.MantleSite.ProcInput_restock_product, ctx: HandlerContext) =>
-        runtime.invokeProcedure.execute<MantleGenerated.MantleSite.ProcOutput_restock_product>({
-          procedure: manifest[18],
           input,
           ctx,
         }),

@@ -679,6 +679,7 @@ function assertTransactionSeed(root) {
     || parsed.collections?.products?.length !== 1
     || parsed.collections.products[0]?.slug !== "sample-product"
     || parsed.collections?.inventory?.[0]?.available !== 100
+    || parsed.collections.inventory[0]?.revision !== 0
     || parsed.collections.inventory[0]?.productSlug !== "sample-product"
     || locales.length !== 1
     || parsed.locales[locales[0]]?.["product-translations"]?.length !== 1
@@ -707,9 +708,9 @@ function assertTransactionSeed(root) {
   ) {
     throw new Error("transaction sample product must include a cover, description, and seeded homepage link");
   }
-  const schemas = parseAllDocuments(readFileSync(join(root, "manifests", "site.yaml"), "utf8"))
-    .map((document) => document.toJSON())
-    .filter((atom) => atom?.kind === "Schema");
+  const atoms = parseAllDocuments(readFileSync(join(root, "manifests", "site.yaml"), "utf8"))
+    .map((document) => document.toJSON());
+  const schemas = atoms.filter((atom) => atom?.kind === "Schema");
   for (const [childName, parentName] of [["page-translations", "page"], ["product-translations", "products"]]) {
     const child = schemas.find((schema) => schema.metadata?.name === childName);
     if (child?.spec?.localized !== true || child.spec?.translates?.parent !== parentName || child.spec.translates.on !== "slug") {
@@ -719,6 +720,26 @@ function assertTransactionSeed(root) {
   const orders = schemas.find((schema) => schema.metadata?.name === "orders");
   if (!orders?.spec?.schema?.properties?.orderLocale || orders.spec.schema.properties.locale) {
     throw new Error("transaction orders must store orderLocale without using the reserved entry locale field");
+  }
+  const inventory = schemas.find((schema) => schema.metadata?.name === "inventory");
+  const movements = schemas.find((schema) => schema.metadata?.name === "inventory-movements");
+  const procedures = atoms.filter((atom) => atom?.kind === "Procedure");
+  const createOrder = procedures.find((procedure) => procedure.metadata?.name === "create-manual-order");
+  const adjust = procedures.find((procedure) => procedure.metadata?.name === "adjust-inventory");
+  const fulfill = procedures.find((procedure) => procedure.metadata?.name === "fulfill-order");
+  const cancel = procedures.find((procedure) => procedure.metadata?.name === "cancel-order");
+  if (
+    procedures.some((procedure) => ["inspect-inventory", "restock-product"].includes(procedure.metadata?.name))
+    || inventory?.spec?.schema?.properties?.revision?.type !== "integer"
+    || [orders, inventory, movements].some((schema) => schema?.spec?.schema?.readOnly !== true)
+    || createOrder?.spec?.uiSchema?.collectionAction !== "orders"
+    || adjust?.spec?.input?.properties?.operationId?.["x-mcp-hint"] !== "idempotency-key"
+    || adjust?.spec?.input?.properties?.productSlug?.["x-mantle-ref"] !== "products"
+    || adjust?.spec?.uiSchema?.fields?.reason?.widget !== "textarea"
+    || fulfill?.spec?.input?.properties?.orderToken?.["x-mantle-ref"] !== "orders"
+    || cancel?.spec?.input?.properties?.orderToken?.["x-mantle-ref"] !== "orders"
+  ) {
+    throw new Error("transaction staff operations are not explicit, read-only, and idempotent");
   }
 }
 
@@ -787,6 +808,18 @@ function assertTransactionPublicSurface(root) {
   }
   if (!commerceHandlers.includes("await initializeInventory") || !inventoryCoordinator.includes("async initializeProduct") || !initialSeed.includes("data.productSlug")) {
     throw new Error("transaction checkout does not initialize seeded inventory before reserving stock");
+  }
+  if (
+    !commerceHandlers.includes("currentRevision >= value.revision")
+    || !commerceHandlers.includes("`adjust:${operationId}`")
+    || commerceHandlers.includes("restockProduct:")
+    || commerceHandlers.includes("inspectInventory:")
+    || !inventoryCoordinator.includes("adjustmentKey(operationId)")
+    || !inventoryCoordinator.includes("revision: value.revision + 1")
+    || !inventoryCoordinator.includes('outcome: "idempotency_conflict"')
+    || !commerceHandlers.includes('getByName("site")')
+  ) {
+    throw new Error("transaction inventory authority lacks idempotency, ordered projections, or shop-level coordination");
   }
   if (
     !commerceHandlers.includes('code: "CONFLICT"')

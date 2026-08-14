@@ -94,6 +94,7 @@ export namespace MantleSite {
     productSlug: string;
     available: number;
     reserved: number;
+    revision: number;
     updatedAt: number;
   }
 
@@ -102,7 +103,7 @@ export namespace MantleSite {
     movementKey: string;
     productSlug: string;
     orderToken?: string;
-    kind: "restock" | "adjust" | "reserve" | "sale" | "release" | "cancellation";
+    kind: "adjust" | "reserve" | "sale" | "release" | "cancellation";
     availableDelta: number;
     reservedDelta: number;
     note?: string;
@@ -131,6 +132,25 @@ export namespace MantleSite {
     currency: string;
   }
 
+  /** Procedure 'create-manual-order' input */
+  export interface ProcInput_create_manual_order {
+    operationId: string;
+    locale: "en" | "zh-TW" | "ja" | "ko" | "fr";
+    customerName: string;
+    customerEmail: string;
+    shippingAddress: string;
+    items: {
+  productSlug: string;
+  quantity: number;
+}[];
+  }
+
+  /** Procedure 'create-manual-order' output */
+  export interface ProcOutput_create_manual_order {
+    orderToken: string;
+    orderNumber: string;
+  }
+
   /** Procedure 'pay-order' input */
   export interface ProcInput_pay_order {
     orderToken: string;
@@ -153,34 +173,9 @@ export namespace MantleSite {
     orderToken: string;
   }
 
-  /** Procedure 'inspect-inventory' input */
-  export interface ProcInput_inspect_inventory {
-    productSlug: string;
-  }
-
-  /** Procedure 'inspect-inventory' output */
-  export interface ProcOutput_inspect_inventory {
-    productSlug: string;
-    available: number;
-    reserved: number;
-  }
-
-  /** Procedure 'restock-product' input */
-  export interface ProcInput_restock_product {
-    productSlug: string;
-    quantity: number;
-    note?: string;
-  }
-
-  /** Procedure 'restock-product' output */
-  export interface ProcOutput_restock_product {
-    productSlug: string;
-    available: number;
-    reserved: number;
-  }
-
   /** Procedure 'adjust-inventory' input */
   export interface ProcInput_adjust_inventory {
+    operationId: string;
     productSlug: string;
     delta: number;
     reason: string;
@@ -191,6 +186,7 @@ export namespace MantleSite {
     productSlug: string;
     available: number;
     reserved: number;
+    revision: number;
   }
 
   /** Procedure 'fulfill-order' input */
@@ -351,10 +347,9 @@ export namespace MantleSite {
 
 export type MantleHandlers<Env = unknown> = {
   readonly "placeOrder": HandlerFn<MantleSite.ProcInput_place_order, MantleSite.ProcOutput_place_order, Env>;
+  readonly "createManualOrder": HandlerFn<MantleSite.ProcInput_create_manual_order, MantleSite.ProcOutput_create_manual_order, Env>;
   readonly "payOrder": HandlerFn<MantleSite.ProcInput_pay_order, MantleSite.ProcOutput_pay_order, Env>;
   readonly "cancelGuestOrder": HandlerFn<MantleSite.ProcInput_cancel_guest_order, MantleSite.ProcOutput_cancel_guest_order, Env>;
-  readonly "inspectInventory": HandlerFn<MantleSite.ProcInput_inspect_inventory, MantleSite.ProcOutput_inspect_inventory, Env>;
-  readonly "restockProduct": HandlerFn<MantleSite.ProcInput_restock_product, MantleSite.ProcOutput_restock_product, Env>;
   readonly "adjustInventory": HandlerFn<MantleSite.ProcInput_adjust_inventory, MantleSite.ProcOutput_adjust_inventory, Env>;
   readonly "fulfillOrder": HandlerFn<MantleSite.ProcInput_fulfill_order, MantleSite.ProcOutput_fulfill_order, Env>;
   readonly "cancelOrder": HandlerFn<MantleSite.ProcInput_cancel_order, MantleSite.ProcOutput_cancel_order, Env>;

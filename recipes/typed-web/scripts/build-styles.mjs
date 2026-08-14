@@ -70,6 +70,7 @@ async function compileBrowserAssets(root) {
     ];
     const result = spawnSync(process.execPath, [
       tsc,
+      "--ignoreConfig",
       "--pretty", "false",
       "--target", "ES2022",
       "--module", "ESNext",
