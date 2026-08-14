@@ -2029,9 +2029,6 @@ export const manifest = [
             "shippingAddress",
             "productSlug",
             "productTitle"
-          ],
-          "filterFields": [
-            "productSlug"
           ]
         }
       },

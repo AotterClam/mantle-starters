@@ -728,7 +728,7 @@ function assertTransactionSeed(root) {
     || !pickingList.spec.sql?.includes("json_each(o.items)")
     || JSON.stringify(pickingList.spec.uiSchema?.list?.columns) !== '["orderNumber","customerName","shippingAddress","productSlug","productTitle","quantity"]'
     || JSON.stringify(pickingList.spec.uiSchema?.list?.searchFields) !== '["orderNumber","customerName","shippingAddress","productSlug","productTitle"]'
-    || JSON.stringify(pickingList.spec.uiSchema?.list?.filterFields) !== '["productSlug"]'
+    || pickingList.spec.uiSchema?.list?.filterFields !== undefined
   ) {
     throw new Error("transaction picking list must flatten paid order items through a staff SQL View");
   }
