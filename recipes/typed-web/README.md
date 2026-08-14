@@ -21,10 +21,9 @@ project.
 ## Kiwa UI Credit
 
 `components/` and `lib/` contain this revision's selected runtime-facing
-[Kiwa UI](https://kiwaui.com/) surface. If `kiwa/` exists, it is this Starter
-revision's offline reference palette and provenance record, not a permanent
-typed-project contract or runtime source. Follow `mantle:theme` when adopting
-a palette item or replacing the UI implementation.
+[Kiwa UI](https://kiwaui.com/) surface. The full offline reference palette and
+provenance record stay in `mantle-starters`; provisioned projects only receive
+what they run. Follow `mantle:theme` when replacing the UI implementation.
 
 ## Project shape
 
@@ -45,7 +44,6 @@ src/
 manifests/site.yaml           # 4 atoms: Schema, View, Procedure, Trigger
 components/, lib/, styles/     # selected runtime-facing UI surface
 public/                        # Cloudflare Static Assets: site icon, CSS, JS, SVG
-kiwa/                         # current revision's optional offline UI palette
 .mantle/generated/            # generated manifest/types consumed by Worker
 public/_mantle/admin/          # generated Admin SPA (gitignored)
 .mantle/                      # launch state, overlay notes, handoff

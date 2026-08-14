@@ -177,8 +177,7 @@
     {
       "path": "components/ui/icon.tsx",
       "mirrors": [
-        "kiwa",
-        "typed-web"
+        "kiwa"
       ],
       "source": "https://registry.kiwaui.com/r/icon.json",
       "sha256": "3b0d28152083c27c3b41f08e12d4dc1229f224bf47355d882edf4438a16ee5a7"

@@ -66,8 +66,6 @@ function buildBundleFiles(archetype) {
     selectTypedSurface(files, archetype);
     pruneRuntimeSource(files);
     compileBundleAssets(files, archetype);
-    // This UI revision keeps its licensed snapshot as an offline agent palette.
-    walk(files, "kiwa", "kiwa");
   }
 
   files[".mantle/launch-state.json.template"] = [
@@ -248,8 +246,6 @@ function assertBundle(bundle, archetype) {
       ".mantle/generated/site.ts",
       ".mantle/generated/types.d.ts",
       "src/web/content/types.ts",
-      "kiwa/manifest.json",
-      "kiwa/LICENSE",
       "public/assets/styles.css",
       "public/assets/kiwa-home.js",
       "public/site-icon.svg",
@@ -276,10 +272,8 @@ function assertBundle(bundle, archetype) {
         }
       }
     }
-    const paletteFiles = Object.keys(bundle.files).filter((path) => path.startsWith("kiwa/"));
-    const sourcePaletteFiles = listFiles("kiwa").map((path) => `kiwa/${path}`);
-    if (JSON.stringify(paletteFiles.sort()) !== JSON.stringify(sourcePaletteFiles.sort())) {
-      throw new Error(`${archetype} bundle must retain this revision's complete offline Kiwa palette`);
+    if (Object.keys(bundle.files).some((path) => path.startsWith("kiwa/"))) {
+      throw new Error(`${archetype} bundle includes the offline Kiwa palette`);
     }
   }
   assertLockfileMatchesPackageJson(bundle, archetype);
