@@ -3,12 +3,19 @@ import { dirname, join } from "node:path";
 import { isMap, isSeq, parseAllDocuments } from "yaml";
 
 export function materializeBundle(root, bundle, values) {
+  const locales = selectedLocales(values);
+  const localizedSeed = `.mantle/overlays/${bundle.archetype}/seed.json`;
+  const unsupported = bundle.archetype === "blank" || bundle.localizedFiles?.includes(localizedSeed)
+    ? []
+    : locales.filter((locale) => locale !== "en");
+  if (unsupported.length) {
+    throw new Error(`${bundle.archetype} does not support locales: ${unsupported.join(", ")}`);
+  }
   for (const [path, raw] of Object.entries(bundle.files ?? {})) {
     const target = join(root, path.replace(/\.template$/, ""));
     mkdirSync(dirname(target), { recursive: true });
     writeFileSync(target, substitute(String(raw), values), "utf8");
   }
-  const locales = selectedLocales(values);
   selectLocalizedFiles(root, bundle.localizedFiles ?? [], locales);
   selectManifestLocales(root, locales);
   applyProjectIdentity(root, values.PROJECT_NAME, values.SITE_URL);

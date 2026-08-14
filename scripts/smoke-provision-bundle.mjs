@@ -179,7 +179,7 @@ function smokeLocalMaterializer() {
       "--description",
       "A local Mantle presence site.",
       "--locales",
-      "en,zh-TW",
+      "en",
     ], { cwd: root, encoding: "utf8" });
     if (result.status !== 0) {
       throw new Error(`local materializer failed: ${result.stderr || result.stdout}`);
@@ -188,7 +188,7 @@ function smokeLocalMaterializer() {
     const manifest = JSON.parse(readFileSync(join(output, "package.json"), "utf8"));
     if (launch.authMode !== "self-managed") throw new Error("local auth mode missing");
     if (launch.brand !== "Northstar Studio") throw new Error("local brand mismatch");
-    if (JSON.stringify(launch.locales) !== '["en","zh-TW"]') throw new Error("local locales mismatch");
+    if (JSON.stringify(launch.locales) !== '["en"]') throw new Error("local locales mismatch");
     if (manifest.name !== "northstar") throw new Error("local package name mismatch");
     if (manifest.description !== "A local Mantle presence site.") throw new Error("local package description mismatch");
     const wrangler = readFileSync(join(output, "wrangler.toml"), "utf8");
@@ -196,6 +196,17 @@ function smokeLocalMaterializer() {
     if (!wrangler.includes('database_name = "northstar-db"')) throw new Error("local D1 name mismatch");
     if (!wrangler.includes('PUBLIC_ORIGIN = "http://localhost:8787"')) throw new Error("local origin missing");
     assertGeneratedOutputsAbsent(output, "presence");
+    const unsupportedPresence = spawnSync(process.execPath, [
+      "scripts/dev-provision-bundle.mjs",
+      "presence",
+      "--out",
+      join(tempRoot, "unsupported-presence"),
+      "--locales",
+      "en,zh-TW",
+    ], { cwd: root, encoding: "utf8" });
+    if (unsupportedPresence.status === 0 || !`${unsupportedPresence.stderr}${unsupportedPresence.stdout}`.includes("presence does not support locales: zh-TW")) {
+      throw new Error("presence materializer accepted an unsupported locale");
+    }
     const shop = spawnSync(process.execPath, [
       "scripts/dev-provision-bundle.mjs",
       "transaction",
@@ -237,6 +248,15 @@ function smokeLocalMaterializer() {
     if (unsupported.status === 0 || !`${unsupported.stderr}${unsupported.stdout}`.includes("does not support locales: nl")) {
       throw new Error("transaction materializer accepted an unsupported locale");
     }
+    const blankLocale = spawnSync(process.execPath, [
+      "scripts/dev-provision-bundle.mjs",
+      "blank",
+      "--out",
+      join(tempRoot, "blank-zh-tw"),
+      "--locales",
+      "zh-TW",
+    ], { cwd: root, encoding: "utf8" });
+    if (blankLocale.status !== 0) throw new Error(`blank locale materializer failed: ${blankLocale.stderr || blankLocale.stdout}`);
     const overwrite = spawnSync(process.execPath, [
       "scripts/dev-provision-bundle.mjs",
       "blank",
