@@ -433,7 +433,7 @@ function applyOverlaySeedContent(files, archetype, seedText) {
     'import type { CmsRuntime } from "@aotter/mantle/runtime";',
     'import { createInitialSeedRuntime } from "./initialSeed.js";',
     "",
-    "export function createSeededRuntime<Env>(",
+    "export function createSeededRuntime<Env extends { readonly DB: D1Database }>(",
     "  getRuntime: (env: Env) => Promise<CmsRuntime>,",
     "): (env: Env) => Promise<CmsRuntime> {",
     "  return createInitialSeedRuntime(seed, getRuntime);",

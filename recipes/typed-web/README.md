@@ -113,9 +113,10 @@ pnpm dev      # safe wrangler dev — http://localhost:8787
 
 Open `http://localhost:8787/`, then inspect
 `manifests/site.yaml` for the selected View and Procedure names.
-On the first request, the starter writes missing entries from
+The provisioning readiness request writes missing entries from
 `.mantle/overlays/{{ARCHETYPE}}/seed.json` to D1 through Core authoring use
-cases. The homepage then reads only the published `page` through the `home` View.
+cases and records completion in D1. Later Worker isolates skip the seed scan.
+The homepage then reads only the published `page` through the `home` View.
 
 For production, push the generated repo and configure Cloudflare, or use
 Mantle landing to automate the GitHub and Cloudflare steps.
