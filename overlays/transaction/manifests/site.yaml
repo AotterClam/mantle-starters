@@ -97,6 +97,7 @@ kind: View
 metadata:
   name: home
 spec:
+  surface: public
   from: page-translations
   params:
     type: object
@@ -359,17 +360,28 @@ spec:
 apiVersion: cms.mantle.aotter.net/v1
 kind: View
 metadata:
-  name: low-stock
+  name: picking-list
 spec:
-  title: Low stock
+  title:
+    en: Picking list
+    zh-TW: 揀貨單
+    ja: ピッキングリスト
+    ko: 피킹 목록
+    fr: Liste de préparation
   surface: staff
-  from: inventory
-  fields: [id, productSlug, available, reserved, updatedAt]
-  filter:
-    lte: { field: available, value: 5 }
-  orderBy:
-    - { field: available, direction: asc }
-  limit: 100
+  sql: |
+    SELECT
+      o.orderNumber,
+      o.customerName,
+      o.shippingAddress,
+      json_extract(item.value, '$.productSlug') AS productSlug,
+      json_extract(item.value, '$.title') AS productTitle,
+      json_extract(item.value, '$.quantity') AS quantity
+    FROM orders AS o
+    JOIN json_each(o.items) AS item
+    WHERE o.orderStatus = 'paid'
+    ORDER BY o.createdAt ASC, o.orderNumber ASC, item.key ASC
+  limit: 200
 ---
 apiVersion: cms.mantle.aotter.net/v1
 kind: Procedure

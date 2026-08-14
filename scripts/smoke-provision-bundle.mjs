@@ -711,6 +711,10 @@ function assertTransactionSeed(root) {
   const atoms = parseAllDocuments(readFileSync(join(root, "manifests", "site.yaml"), "utf8"))
     .map((document) => document.toJSON());
   const schemas = atoms.filter((atom) => atom?.kind === "Schema");
+  const pickingList = atoms.find((atom) => atom?.kind === "View" && atom.metadata?.name === "picking-list");
+  if (pickingList?.spec?.surface !== "staff" || !pickingList.spec.sql?.includes("json_each(o.items)")) {
+    throw new Error("transaction picking list must flatten paid order items through a staff SQL View");
+  }
   for (const [childName, parentName] of [["page-translations", "page"], ["product-translations", "products"]]) {
     const child = schemas.find((schema) => schema.metadata?.name === childName);
     if (child?.spec?.localized !== true || child.spec?.translates?.parent !== parentName || child.spec.translates.on !== "slug") {

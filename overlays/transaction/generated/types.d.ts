@@ -334,14 +334,8 @@ export namespace MantleSite {
     updatedAt: number;
   }
 
-  /** Row shape returned by GET /api/views/low-stock */
-  export interface ViewRow_low_stock {
-    id: string;
-    productSlug?: string;
-    available?: number;
-    reserved?: number;
-    updatedAt: number;
-  }
+  /** Row shape returned by GET /api/views/picking-list */
+  export type ViewRow_picking_list = unknown;
 
 }
 

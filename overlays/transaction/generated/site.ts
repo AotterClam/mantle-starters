@@ -199,6 +199,7 @@ export const manifest = [
       "name": "home"
     },
     "spec": {
+      "surface": "public",
       "from": "page-translations",
       "params": {
         "type": "object",
@@ -781,32 +782,19 @@ export const manifest = [
     "apiVersion": "cms.mantle.aotter.net/v1",
     "kind": "View",
     "metadata": {
-      "name": "low-stock"
+      "name": "picking-list"
     },
     "spec": {
-      "title": "Low stock",
-      "surface": "staff",
-      "from": "inventory",
-      "fields": [
-        "id",
-        "productSlug",
-        "available",
-        "reserved",
-        "updatedAt"
-      ],
-      "filter": {
-        "lte": {
-          "field": "available",
-          "value": 5
-        }
+      "title": {
+        "en": "Picking list",
+        "zh-TW": "揀貨單",
+        "ja": "ピッキングリスト",
+        "ko": "피킹 목록",
+        "fr": "Liste de préparation"
       },
-      "orderBy": [
-        {
-          "field": "available",
-          "direction": "asc"
-        }
-      ],
-      "limit": 100
+      "surface": "staff",
+      "sql": "SELECT\n  o.orderNumber,\n  o.customerName,\n  o.shippingAddress,\n  json_extract(item.value, '$.productSlug') AS productSlug,\n  json_extract(item.value, '$.title') AS productTitle,\n  json_extract(item.value, '$.quantity') AS quantity\nFROM orders AS o\nJOIN json_each(o.items) AS item\nWHERE o.orderStatus = 'paid'\nORDER BY o.createdAt ASC, o.orderNumber ASC, item.key ASC\n",
+      "limit": 200
     }
   },
   {
@@ -1606,8 +1594,8 @@ export function bindMantleSite(runtime: CmsRuntime) {
             show: request.show,
           },
         }),
-      "low-stock": (request: MantleViewOptions = {}) =>
-        runtime.executeView.execute<MantleGenerated.MantleSite.ViewRow_low_stock>({
+      "picking-list": (request: MantleViewOptions = {}) =>
+        runtime.executeView.execute<MantleGenerated.MantleSite.ViewRow_picking_list>({
           view: manifest[10],
           ctx: request.ctx,
           options: {
