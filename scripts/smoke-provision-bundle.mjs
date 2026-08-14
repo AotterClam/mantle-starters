@@ -892,6 +892,12 @@ function assertTransactionPublicSurface(root) {
   ) {
     throw new Error("transaction checkout does not surface stock conflicts through Core semantics");
   }
+  if (
+    !commerceHandlers.includes("orderData(order).paidAt ?? Date.now()")
+    || !inventoryCoordinator.includes('if (order.status === "paid") return { outcome: "already_paid"')
+  ) {
+    throw new Error("transaction payment retries can repeat stock deduction or overwrite the first paidAt");
+  }
   if (content.includes('message["nav.home"]') || !page.includes('value === "/"')) {
     throw new Error("transaction navigation must use the brand as home without generating /:locale/");
   }

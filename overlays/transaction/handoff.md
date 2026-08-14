@@ -30,8 +30,32 @@ Do not add an `editorial` starter example yet. Core accepts the grammar, but
 `request_publish` still blocks the approval runtime needed for a working
 review flow.
 
-Replace the fake payment action only when a real provider and its webhook
-verification contract are selected. Customer accounts remain out of scope.
+## Replacing the demo payment
+
+Choose one provider first. Do not add a generic payment-provider interface
+until this shop actually needs two providers.
+
+- Keep `place-order` as the server-priced reservation boundary.
+- Remove the public `pay-order-http` Trigger and the browser's fake-pay action;
+  knowing an order token must never count as proof of payment.
+- Put provider API/signature code in `src/commerce/stripe.ts` or
+  `src/commerce/ecpay.ts`, and add its secret fields to `Env` in
+  `src/mantle/config.ts`. Store values only in `.dev.vars` and Worker secrets.
+- Mount the provider callback in `src/web/typeRoutes.ts`. Stripe needs the raw
+  request body and signature header; ECPay posts form data and expects its own
+  acknowledgement body, so neither callback belongs in Mantle's JSON HTTP
+  Trigger path.
+- Verify the provider callback before invoking the internal `pay-order`
+  Procedure. Keep the inventory/order transition in
+  `src/commerce/handlers.ts`; do not call its handler directly or write Mantle
+  tables from the callback route.
+- Treat callbacks as retries: preserve the first `paidAt`, store the selected
+  provider's transaction/event reference when adding its fields, and prove a
+  duplicate callback cannot deduct inventory twice.
+- Provider return/success URLs are customer navigation only. Only the verified
+  server callback may confirm payment.
+
+Customer accounts remain out of scope.
 
 Keep one `InventoryCoordinator` per provisioned shop so a multi-product cart
 reserves atomically. Split by SKU only after measured single-shop throughput

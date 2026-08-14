@@ -42,7 +42,9 @@ export function buildCommerceHandlers(getRuntime: RuntimeGetter): MantleHandlers
       if (!order) return { outcome: "missing", orderToken };
       const result = await inventory(ctx.env).pay(orderToken, Date.now());
       if (result.outcome === "paid" || result.outcome === "already_paid") {
-        await persistTransition(runtime, order, "paid", result, "sale", ctx, { paidAt: Date.now() });
+        await persistTransition(runtime, order, "paid", result, "sale", ctx, {
+          paidAt: orderData(order).paidAt ?? Date.now(),
+        });
       } else if (result.outcome === "expired") {
         await expirePersistedOrder(runtime, order, result, ctx);
       }
