@@ -11,6 +11,9 @@
     ],
     "products": [
       { "slug": "sample-product", "priceMinor": 2900, "currency": "USD", "coverUrl": "/assets/mantle-ocean-hero-light.svg", "status": "published" }
+    ],
+    "inventory": [
+      { "productSlug": "sample-product", "available": 100, "reserved": 0, "updatedAt": 0, "status": "draft" }
     ]
   },
   "locales": {

@@ -41,6 +41,17 @@ export type TransitionResult = {
 };
 
 export class InventoryCoordinator extends DurableObject {
+  async initializeProduct(productSlug: string, available: number, reserved: number): Promise<StockSnapshot> {
+    return this.ctx.storage.transaction(async (txn) => {
+      const key = inventoryKey(productSlug);
+      const existing = await txn.get<InventoryRecord>(key);
+      if (existing) return snapshot(productSlug, existing);
+      const initial = { available, reserved };
+      await txn.put(key, initial);
+      return snapshot(productSlug, initial);
+    });
+  }
+
   async reserve(orderId: string, items: readonly StockItem[], expiresAt: number): Promise<ReserveResult> {
     return this.ctx.storage.transaction(async (txn) => {
       const existing = await txn.get<OrderState>(orderKey(orderId));

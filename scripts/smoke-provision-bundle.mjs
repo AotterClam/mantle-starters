@@ -678,6 +678,8 @@ function assertTransactionSeed(root) {
     !seed.includes('"type": "home"')
     || parsed.collections?.products?.length !== 1
     || parsed.collections.products[0]?.slug !== "sample-product"
+    || parsed.collections?.inventory?.[0]?.available !== 100
+    || parsed.collections.inventory[0]?.productSlug !== "sample-product"
     || locales.length !== 1
     || parsed.locales[locales[0]]?.["product-translations"]?.length !== 1
     || parsed.locales[locales[0]]?.["page-translations"]?.length !== 2
@@ -726,6 +728,9 @@ function assertTransactionPublicSurface(root) {
   const client = readFileSync(join(root, "src", "web", "client", "homeClient.ts"), "utf8");
   const commerce = readFileSync(join(root, "src", "web", "commerceRoutes.tsx"), "utf8");
   const commerceClient = readFileSync(join(root, "src", "web", "client", "commerceClient.ts"), "utf8");
+  const commerceHandlers = readFileSync(join(root, "src", "commerce", "handlers.ts"), "utf8");
+  const inventoryCoordinator = readFileSync(join(root, "src", "commerce", "InventoryCoordinator.ts"), "utf8");
+  const initialSeed = readFileSync(join(root, "src", "mantle", "initialSeed.ts"), "utf8");
   const nav = readFileSync(join(root, "components", "blocks", "marketing", "nav-02.tsx"), "utf8");
   const features = readFileSync(join(root, "components", "blocks", "marketing", "features-02.tsx"), "utf8");
   const wrangler = readFileSync(join(root, "wrangler.toml"), "utf8");
@@ -776,6 +781,9 @@ function assertTransactionPublicSurface(root) {
   }
   if (!commerceClient.includes("layout.hidden = !hasItems") || !commerceClient.includes("product.coverUrl") || !commerceClient.includes("[data-checkout-total]")) {
     throw new Error("transaction commerce client does not render its responsive product rows or checkout total");
+  }
+  if (!commerceHandlers.includes("await initializeInventory") || !inventoryCoordinator.includes("async initializeProduct") || !initialSeed.includes("data.productSlug")) {
+    throw new Error("transaction checkout does not initialize seeded inventory before reserving stock");
   }
   if (content.includes('message["nav.home"]') || !page.includes('value === "/"')) {
     throw new Error("transaction navigation must use the brand as home without generating /:locale/");

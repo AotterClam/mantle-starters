@@ -55,6 +55,7 @@ export function buildCommerceHandlers(getRuntime: RuntimeGetter): MantleHandlers
       const orderNumber = `MNT-${new Date(now).toISOString().slice(0, 10).replaceAll("-", "")}-${orderToken.slice(0, 8).toUpperCase()}`;
       const expiresAt = now + CHECKOUT_TTL_MS;
       const stockItems = priced.map(({ productSlug, quantity }) => ({ productSlug, quantity }));
+      await initializeInventory(runtime, ctx.env, stockItems);
       const reserved = await inventory(ctx.env).reserve(orderToken, stockItems, expiresAt);
       if (reserved.outcome === "insufficient_stock") {
         invalid("/items", reserved.insufficient, "quantities currently in stock");
@@ -331,6 +332,22 @@ async function requireProduct(runtime: CmsRuntime, productSlug: string): Promise
 
 async function inspectItems(env: Env, items: readonly StockItem[]): Promise<readonly StockSnapshot[]> {
   return Promise.all(items.map((item) => inventory(env).inspect(item.productSlug)));
+}
+
+async function initializeInventory(runtime: CmsRuntime, env: Env, items: readonly StockItem[]): Promise<void> {
+  const coordinator = inventory(env);
+  for (const item of items) {
+    const entry = await runtime.entryReader.readByDataField({
+      collection: "inventory",
+      field: "productSlug",
+      value: item.productSlug,
+    });
+    const available = entry?.data["available"];
+    const reserved = entry?.data["reserved"];
+    if (typeof available === "number" && typeof reserved === "number") {
+      await coordinator.initializeProduct(item.productSlug, available, reserved);
+    }
+  }
 }
 
 function inventory(env: Env) {
