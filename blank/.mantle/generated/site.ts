@@ -48,6 +48,7 @@ export const manifest = [
       "name": "published-notes"
     },
     "spec": {
+      "surface": "public",
       "from": "notes",
       "fields": [
         "id",

@@ -58,6 +58,9 @@ function buildBundleFiles(archetype) {
     delete files[".mantle/generated/types.d.ts"];
     delete files["manifests/site.yaml"];
   }
+  for (const path of Object.keys(files)) {
+    if (path.startsWith("public/_mantle/")) delete files[path];
+  }
   resolveCatalogPackageJson(files);
   applyProvisionedPackageMetadata(files);
   resolveCatalogLockfile(files);
@@ -230,6 +233,9 @@ function assertBundle(bundle, archetype) {
   }
   if (!bundle.files["manifests/site.yaml"]) {
     throw new Error(`${archetype} bundle missing applied manifest`);
+  }
+  if (Object.keys(bundle.files).some((path) => path.startsWith("public/_mantle/"))) {
+    throw new Error(`${archetype} bundle includes generated Admin assets`);
   }
   for (const path of bundle.localizedFiles ?? []) {
     if (!bundle.files[path]) throw new Error(`${archetype} localized file is absent from bundle: ${path}`);
