@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parseAllDocuments } from "yaml";
 import { materializeBundle } from "./materialize-bundle.mjs";
+import { localeRootResponse } from "../recipes/typed-web/src/web/localeRoot.ts";
 
 const root = new URL("..", import.meta.url).pathname;
 const archetypes = ["blank", "presence", "intake", "publication", "transaction", "reservation", "community"];
@@ -37,6 +38,7 @@ const replacements = {
 if (isWorkersCacheEnabled("[observability]\nenabled = true\n\n[cache]\nenabled = false\n")) {
   throw new Error("Workers cache check accepted an unrelated enabled flag");
 }
+assertLocaleRootSelection();
 
 for (const archetype of archetypes) {
   const tempRoot = mkdtempSync(join(tmpdir(), `mantle-bundle-${archetype}-`));
@@ -476,13 +478,36 @@ function assertSectionImageContract(root, archetype) {
 
 function assertLocaleNavigation(root, archetype) {
   const nav = readFileSync(join(root, "components", "blocks", "marketing", "nav-02.tsx"), "utf8");
+  const navClient = readFileSync(join(root, "src", "web", "client", "navClient.ts"), "utf8");
   if (
     !nav.includes("data-locale-switch")
+    || !nav.includes("data-locale-option={option}")
     || !nav.includes("locales.length > 1")
     || !nav.includes("Intl.DisplayNames")
     || !nav.includes("bottom-full")
+    || !navClient.includes("mantle_locale=")
   ) {
     throw new Error(`${archetype} does not expose the shared locale switch`);
+  }
+}
+
+function assertLocaleRootSelection() {
+  const locales = ["en", "zh-TW", "ja"];
+  const detected = localeRootResponse(new Request("https://example.com/", {
+    headers: { "Accept-Language": "en-US;q=0.8, zh-TW;q=0.9" },
+  }), locales, "en");
+  const remembered = localeRootResponse(new Request("https://example.com/", {
+    headers: { Cookie: "mantle_locale=ja", "Accept-Language": "zh-TW" },
+  }), locales, "en");
+  const fallback = localeRootResponse(new Request("https://example.com/", {
+    headers: { Cookie: "mantle_locale=nl", "Accept-Language": "de" },
+  }), locales, "en");
+  if (detected.headers.get("location") !== "/zh-tw") throw new Error("root locale ignores weighted Accept-Language");
+  if (remembered.headers.get("location") !== "/ja") throw new Error("remembered root locale does not win");
+  if (fallback.headers.get("location") !== "/en") throw new Error("unsupported root locale does not fall back to canonical");
+  if (detected.headers.get("cache-control") !== "private, no-store"
+    || detected.headers.get("vary") !== "Cookie, Accept-Language") {
+    throw new Error("personalized root redirect is cacheable");
   }
 }
 

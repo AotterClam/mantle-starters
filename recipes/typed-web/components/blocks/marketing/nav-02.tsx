@@ -199,6 +199,7 @@ const LocaleSwitch: FC<{
       {locales.map((option) => (
         <a
           href={path.replace(':locale', option.toLowerCase())}
+          data-locale-option={option}
           aria-current={option === locale ? 'page' : undefined}
           class="flex min-h-9 min-w-0 items-center gap-3 rounded-md px-2.5 text-sm text-popover-foreground hover:bg-accent aria-[current=page]:bg-primary-soft aria-[current=page]:font-semibold"
         >

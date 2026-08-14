@@ -12,6 +12,7 @@ import { mountTypeRoutes } from "../web/typeRoutes.js";
 import { buildMediaStorage, buildSiteDefaults, type Env } from "./config.js";
 import { buildHandlers } from "./handlers/index.js";
 import { createSeededRuntime } from "./seed.js";
+import { localeRootResponse } from "../web/localeRoot.js";
 
 export const mantle = createMantleWorker<Env>({
   manifest,
@@ -22,6 +23,10 @@ export const mantle = createMantleWorker<Env>({
   extend: ({ getRuntime }) => ({
     handlers: buildHandlers(getRuntime),
     mount({ app, ref }) {
+      app.get("/", async (c) => {
+        const site = await (await ref.get()).siteConfig.load();
+        return localeRootResponse(c.req.raw, site.locales, site.canonicalLocale ?? site.locales[0] ?? "en");
+      });
       mountPublicRoutes(app as unknown as Parameters<typeof mountPublicRoutes>[0], ref, {
         collectionRoutes: publicCollectionRoutes,
         homeRenderer: renderPublicHome,
