@@ -723,7 +723,13 @@ function assertTransactionSeed(root) {
     .map((document) => document.toJSON());
   const schemas = atoms.filter((atom) => atom?.kind === "Schema");
   const pickingList = atoms.find((atom) => atom?.kind === "View" && atom.metadata?.name === "picking-list");
-  if (pickingList?.spec?.surface !== "staff" || !pickingList.spec.sql?.includes("json_each(o.items)")) {
+  if (
+    pickingList?.spec?.surface !== "staff"
+    || !pickingList.spec.sql?.includes("json_each(o.items)")
+    || JSON.stringify(pickingList.spec.uiSchema?.list?.columns) !== '["orderNumber","customerName","shippingAddress","productSlug","productTitle","quantity"]'
+    || JSON.stringify(pickingList.spec.uiSchema?.list?.searchFields) !== '["orderNumber","customerName","shippingAddress","productSlug","productTitle"]'
+    || JSON.stringify(pickingList.spec.uiSchema?.list?.filterFields) !== '["productSlug"]'
+  ) {
     throw new Error("transaction picking list must flatten paid order items through a staff SQL View");
   }
   for (const [childName, parentName] of [["page-translations", "page"], ["product-translations", "products"]]) {

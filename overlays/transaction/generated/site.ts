@@ -2013,6 +2013,28 @@ export const manifest = [
         "zh-TW": "揀貨單"
       },
       "surface": "staff",
+      "uiSchema": {
+        "list": {
+          "columns": [
+            "orderNumber",
+            "customerName",
+            "shippingAddress",
+            "productSlug",
+            "productTitle",
+            "quantity"
+          ],
+          "searchFields": [
+            "orderNumber",
+            "customerName",
+            "shippingAddress",
+            "productSlug",
+            "productTitle"
+          ],
+          "filterFields": [
+            "productSlug"
+          ]
+        }
+      },
       "sql": "SELECT\n  o.orderNumber,\n  o.customerName,\n  o.shippingAddress,\n  json_extract(item.value, '$.productSlug') AS productSlug,\n  json_extract(item.value, '$.title') AS productTitle,\n  json_extract(item.value, '$.quantity') AS quantity\nFROM orders AS o\nJOIN json_each(o.items) AS item\nWHERE o.orderStatus = 'paid'\nORDER BY o.createdAt ASC, o.orderNumber ASC, item.key ASC\n",
       "limit": 200
     }

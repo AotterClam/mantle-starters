@@ -512,6 +512,11 @@ spec:
     zh-CN: 拣货单
     zh-TW: 揀貨單
   surface: staff
+  uiSchema:
+    list:
+      columns: [orderNumber, customerName, shippingAddress, productSlug, productTitle, quantity]
+      searchFields: [orderNumber, customerName, shippingAddress, productSlug, productTitle]
+      filterFields: [productSlug]
   sql: |
     SELECT
       o.orderNumber,
