@@ -32,7 +32,7 @@
     "wrangler": "catalog:"
   },
   "engines": {
-    "node": ">=22",
+    "node": ">=22.13",
     "pnpm": ">=9"
   },
   "packageManager": "pnpm@9.15.0"

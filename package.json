@@ -12,7 +12,7 @@
   "type": "module",
   "mantleCoreSha": "48abc648f99299694c3dcb3e96784590689ae2c6",
   "engines": {
-    "node": ">=22",
+    "node": ">=22.13",
     "pnpm": ">=9"
   },
   "scripts": {

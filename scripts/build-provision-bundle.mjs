@@ -212,6 +212,9 @@ function assertBundle(bundle, archetype) {
     throw new Error(`${archetype} bundle missing applied manifest`);
   }
   const manifest = JSON.parse(bundle.files["package.json"]);
+  if (manifest.engines?.node !== ">=22.13") {
+    throw new Error(`${archetype} bundle must require Node >=22.13 for unflagged node:sqlite`);
+  }
   if (manifest.scripts?.build !== "pnpm check") {
     throw new Error(`${archetype} bundle build must run the complete check lifecycle`);
   }
