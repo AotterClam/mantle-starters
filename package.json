@@ -1,7 +1,7 @@
 {
   "name": "mantle-starters",
   "private": true,
-  "version": "0.1.0-alpha.4",
+  "version": "0.1.0-alpha.5",
   "description": "Workspace root for blank-first Mantle bundles, type overlays, and replaceable vendored UI source.",
   "license": "MIT",
   "homepage": "https://mantle.tools/",
@@ -10,7 +10,7 @@
     "url": "git+https://github.com/aotter/mantle-starters.git"
   },
   "type": "module",
-  "mantleCoreSha": "48abc648f99299694c3dcb3e96784590689ae2c6",
+  "mantleCoreSha": "c71fd17636ce25dd72f0ee1d6c343aa507114b2f",
   "engines": {
     "node": ">=22.13",
     "pnpm": ">=9"
