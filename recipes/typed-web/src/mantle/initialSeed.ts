@@ -32,15 +32,22 @@ export function createInitialSeedRuntime<Env extends { readonly DB: D1Database }
 }
 
 async function hasInitialSeed(db: D1Database): Promise<boolean> {
-  const [, marker] = await db.batch([
-    db.prepare("CREATE TABLE IF NOT EXISTS _mantle_starter_seed (id TEXT PRIMARY KEY)"),
-    db.prepare("SELECT 1 FROM _mantle_starter_seed WHERE id = ? LIMIT 1").bind(SEED_MARKER),
-  ]);
-  return (marker?.results.length ?? 0) > 0;
+  try {
+    return await db
+      .prepare("SELECT 1 FROM _mantle_starter_seed WHERE id = ? LIMIT 1")
+      .bind(SEED_MARKER)
+      .first() !== null;
+  } catch (error) {
+    if (String(error).includes("no such table: _mantle_starter_seed")) return false;
+    throw error;
+  }
 }
 
 async function markInitialSeed(db: D1Database): Promise<void> {
-  await db.prepare("INSERT OR IGNORE INTO _mantle_starter_seed (id) VALUES (?)").bind(SEED_MARKER).run();
+  await db.batch([
+    db.prepare("CREATE TABLE IF NOT EXISTS _mantle_starter_seed (id TEXT PRIMARY KEY)"),
+    db.prepare("INSERT OR IGNORE INTO _mantle_starter_seed (id) VALUES (?)").bind(SEED_MARKER),
+  ]);
 }
 
 async function seedInitialContent(runtime: CmsRuntime, seed: SeedFile): Promise<void> {
