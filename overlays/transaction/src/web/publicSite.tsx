@@ -2,8 +2,10 @@ import type { CollectionRouteConfig, PublicContentContext, PublicRouteContext } 
 import {
   TemplateRegistry,
   createPublicPathResolver,
-  pickPrimaryVariant,
   serializeEntryAsMarkdown,
+} from "@aotter/mantle/web";
+import {
+  pickPrimaryVariant,
   toUrlLocale,
   type MediaAsset,
 } from "@aotter/mantle/runtime";
