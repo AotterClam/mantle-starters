@@ -1,4 +1,4 @@
-import { bindMantleSite } from "../.mantle/generated/site.js";
+import { bindMantle } from "../.mantle/generated/mantle.js";
 import type { Env } from "./mantle/config.js";
 import { getRuntime, mantle } from "./mantle/worker.js";
 
@@ -11,9 +11,9 @@ export default {
   },
 
   async queue(batch: MessageBatch<unknown>, env: Env, ctx: ExecutionContext): Promise<void> {
-    let site: ReturnType<typeof bindMantleSite>;
+    let mantleApi: ReturnType<typeof bindMantle>;
     try {
-      site = bindMantleSite(await getRuntime(env));
+      mantleApi = bindMantle(await getRuntime(env));
     } catch (error) {
       console.error("[transaction queue] runtime unavailable", error);
       batch.retryAll();
@@ -27,7 +27,7 @@ export default {
         continue;
       }
       try {
-        const result = await site.procedures["expire-order"](
+        const result = await mantleApi.procedures.expireOrder(
           { orderToken: message.body.orderToken, now: Date.now() },
           internalContext(env, ctx),
         );
@@ -48,8 +48,8 @@ export default {
   },
 
   async scheduled(_controller: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
-    const site = bindMantleSite(await getRuntime(env));
-    const result = await site.procedures["sweep-expired-orders"]({ now: Date.now() }, internalContext(env, ctx));
+    const mantleApi = bindMantle(await getRuntime(env));
+    const result = await mantleApi.procedures.sweepExpiredOrders({ now: Date.now() }, internalContext(env, ctx));
     if (!result.ok) throw new Error(`scheduled expiry sweep failed: ${result.diagnostic.code}`);
   },
 } satisfies ExportedHandler<Env, unknown>;

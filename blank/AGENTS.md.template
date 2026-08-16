@@ -39,7 +39,7 @@ and seed files before making changes.
 
 - `pnpm dev` local preview on localhost:8787
 - `pnpm validate` manifest validation
-- `pnpm generate` regenerate machine-owned manifest/types
+- `pnpm generate` regenerate the machine-owned RuntimePlan/types module
 - `pnpm typecheck` TypeScript check
 - `pnpm check` validate + typecheck
 - `pnpm run deploy` deploy Worker after provider setup

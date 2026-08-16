@@ -1,4 +1,4 @@
-import type { AnyHandler, CmsRuntime } from "@aotter/mantle/runtime";
+import type { AnyHandler, MantleRuntime } from "@aotter/mantle/runtime";
 import { notifyIntake } from "../../worker/features/intake/notifyIntake.js";
 import { verifyIntakeTurnstile } from "../../worker/features/intake/verifyIntakeTurnstile.js";
 
@@ -6,7 +6,7 @@ import { verifyIntakeTurnstile } from "../../worker/features/intake/verifyIntake
  * Intake Procedure handler registry.
  */
 export function buildHandlers(
-  _getRuntime: () => Promise<CmsRuntime>,
+  _getRuntime: () => Promise<MantleRuntime>,
 ): Readonly<Record<string, AnyHandler>> {
   return {
     "notify-intake": notifyIntake,

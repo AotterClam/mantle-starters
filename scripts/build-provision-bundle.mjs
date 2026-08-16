@@ -267,8 +267,8 @@ function assertBundle(bundle, archetype) {
       throw new Error(`${archetype} initial seed must read the overlay seed`);
     }
     if (!bundle.files["src/mantle/worker.ts"]?.includes("createMantleWorker") ||
-        !bundle.files["src/mantle/worker.ts"]?.includes(".mantle/generated/site.js")) {
-      throw new Error(`${archetype} Worker must use Core's facade and generated manifest`);
+        !bundle.files["src/mantle/worker.ts"]?.includes(".mantle/generated/mantle.js")) {
+      throw new Error(`${archetype} Worker must use Core's facade and generated RuntimePlan`);
     }
     for (const path of Object.keys(bundle.files)) {
       if (!["src/", "components/", "lib/", "styles/"].some((prefix) => path.startsWith(prefix))) continue;
@@ -301,12 +301,12 @@ function assertHeadlessBlank(bundle) {
     }
   }
   const manifest = JSON.parse(bundle.files["package.json"]);
-  if (JSON.stringify(Object.keys(manifest.dependencies ?? {})) !== '["@aotter/mantle"]') {
-    throw new Error("blank production dependency must be @aotter/mantle only");
+  if (JSON.stringify(Object.keys(manifest.dependencies ?? {})) !== '["@aotter/mantle","@aotter/mantle-cloudflare"]') {
+    throw new Error("blank production dependencies must be Mantle Core plus Cloudflare");
   }
   const worker = bundle.files["src/index.ts"];
-  if (!worker.includes("createMantleWorker") || !worker.includes(".mantle/generated/site.js")) {
-    throw new Error("blank Worker must use the generated manifest and Core facade");
+  if (!worker.includes("createMantleWorker") || !worker.includes(".mantle/generated/mantle.js")) {
+    throw new Error("blank Worker must use the generated RuntimePlan and Core facade");
   }
   if (bundle.files["wrangler.toml"].includes("[[rules]]")) {
     throw new Error("blank must not ship runtime YAML/CSS loader rules");
@@ -433,12 +433,12 @@ function applyOverlaySeedContent(files, archetype, seedText) {
   const seedRuntimeImport = `../../.mantle/overlays/${archetype}/seed.json`;
   files["src/mantle/seed.ts"] = [
     `import seed from "${seedRuntimeImport}";`,
-    'import type { CmsRuntime } from "@aotter/mantle/runtime";',
+    'import type { MantleRuntime } from "@aotter/mantle/runtime";',
     'import { createInitialSeedRuntime } from "./initialSeed.js";',
     "",
     "export function createSeededRuntime<Env extends { readonly DB: D1Database }>(",
-    "  getRuntime: (env: Env) => Promise<CmsRuntime>,",
-    "): (env: Env) => Promise<CmsRuntime> {",
+    "  getRuntime: (env: Env) => Promise<MantleRuntime>,",
+    "): (env: Env) => Promise<MantleRuntime> {",
     "  return createInitialSeedRuntime(seed, getRuntime);",
     "}",
     "",
@@ -462,12 +462,12 @@ function applyOverlaySeedContent(files, archetype, seedText) {
   }
   files["src/web/content/homeContent.ts"] = [
     'import { DiagnosticError } from "@aotter/mantle/spec";',
-    'import type { CmsRuntime } from "@aotter/mantle/runtime";',
-    'import { bindMantleSite } from "../../../.mantle/generated/site.js";',
+    'import type { MantleRuntime } from "@aotter/mantle/runtime";',
+    'import { bindMantle } from "../../../.mantle/generated/mantle.js";',
     'import type { HomeContent, HomeSection } from "./types.js";',
     "",
-    "export async function resolveHomeContent(getRuntime: () => Promise<CmsRuntime>, _locale?: string): Promise<HomeContent> {",
-    '  const result = await bindMantleSite(await getRuntime()).views["home"]();',
+    "export async function resolveHomeContent(getRuntime: () => Promise<MantleRuntime>, _locale?: string): Promise<HomeContent> {",
+    "  const result = await bindMantle(await getRuntime()).views.home();",
     "  if (!result.ok) throw new DiagnosticError(result.diagnostic);",
     "  const sections = result.result.rows[0]?.sections as readonly HomeSection[] | undefined;",
     "  return { sections: sections ?? [] };",

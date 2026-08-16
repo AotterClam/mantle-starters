@@ -2,7 +2,7 @@
 
 {{DESCRIPTION}}
 
-This is the headless Mantle base: one authored manifest, one generated manifest
+This is the headless Mantle base: one authored manifest, one generated RuntimePlan
 module, Core's explicit-mode conventional Auth, and one Worker entry using the
 Cloudflare facade. It contains no visitor UI or component tree.
 

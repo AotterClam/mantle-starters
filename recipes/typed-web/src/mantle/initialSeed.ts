@@ -1,5 +1,5 @@
 import { DiagnosticError } from "@aotter/mantle/spec";
-import type { CmsRuntime } from "@aotter/mantle/runtime";
+import type { MantleRuntime } from "@aotter/mantle/runtime";
 
 type SeedEntry = Readonly<Record<string, unknown>>;
 type SeedFile = {
@@ -11,9 +11,9 @@ const SEED_MARKER = "initial-v1";
 
 export function createInitialSeedRuntime<Env extends { readonly DB: D1Database }>(
   seed: SeedFile,
-  getRuntime: (env: Env) => Promise<CmsRuntime>,
-): (env: Env) => Promise<CmsRuntime> {
-  let seeded: Promise<CmsRuntime> | null = null;
+  getRuntime: (env: Env) => Promise<MantleRuntime>,
+): (env: Env) => Promise<MantleRuntime> {
+  let seeded: Promise<MantleRuntime> | null = null;
   return (env) => {
     if (seeded) return seeded;
     seeded = getRuntime(env)
@@ -50,7 +50,7 @@ async function markInitialSeed(db: D1Database): Promise<void> {
   ]);
 }
 
-async function seedInitialContent(runtime: CmsRuntime, seed: SeedFile): Promise<void> {
+async function seedInitialContent(runtime: MantleRuntime, seed: SeedFile): Promise<void> {
   for (const [collection, entries] of seedEntries(seed)) {
     for (const entry of entries) await seedEntry(runtime, collection, entry);
   }
@@ -63,7 +63,7 @@ function seedEntries(seed: SeedFile): Array<readonly [string, readonly SeedEntry
   ];
 }
 
-async function seedEntry(runtime: CmsRuntime, collection: string, entry: SeedEntry): Promise<void> {
+async function seedEntry(runtime: MantleRuntime, collection: string, entry: SeedEntry): Promise<void> {
   const { status, ...data } = entry;
   if (status !== "draft" && status !== "published") {
     throw new Error(`Initial seed ${collection} entry must declare draft or published status.`);
@@ -82,19 +82,19 @@ async function seedEntry(runtime: CmsRuntime, collection: string, entry: SeedEnt
 }
 
 async function findSeedEntry(
-  runtime: CmsRuntime,
+  runtime: MantleRuntime,
   collection: string,
   data: Readonly<Record<string, unknown>>,
 ) {
   const locale = typeof data.locale === "string" ? data.locale : undefined;
   if (typeof data.slug === "string") {
-    return runtime.entryReader.readBySlug({ collection, slug: data.slug, locale });
+    return runtime.entries.readBySlug({ collection, slug: data.slug, locale });
   }
   if (typeof data.type === "string") {
-    return runtime.entryReader.readByDataField({ collection, field: "type", value: data.type, locale });
+    return runtime.entries.readByDataField({ collection, field: "type", value: data.type, locale });
   }
   if (typeof data.productSlug === "string") {
-    return runtime.entryReader.readByDataField({ collection, field: "productSlug", value: data.productSlug, locale });
+    return runtime.entries.readByDataField({ collection, field: "productSlug", value: data.productSlug, locale });
   }
   throw new Error(`Initial seed ${collection} entry needs a stable slug, type, or productSlug.`);
 }

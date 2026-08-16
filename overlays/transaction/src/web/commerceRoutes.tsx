@@ -1,9 +1,9 @@
 import type { MantleExtensionApp } from "@aotter/mantle/cloudflare";
-import { toUrlLocale, type CmsRuntime } from "@aotter/mantle/runtime";
+import { toUrlLocale, type MantleRuntime } from "@aotter/mantle/runtime";
 import type { SiteConfig } from "@aotter/mantle/spec";
 import type { Child } from "hono/jsx";
 import { renderToString } from "hono/jsx/dom/server";
-import type { MantleSite } from "../../.mantle/generated/types.js";
+import type { Mantle } from "../../.mantle/generated/mantle.js";
 import type { Env } from "../mantle/config.js";
 import { PageDocument } from "../renderer.js";
 import { commerceCopy } from "./messages.js";
@@ -22,9 +22,9 @@ type CatalogItem = {
   readonly coverUrl: string | undefined;
 };
 
-type OrderData = MantleSite.Entry_orders;
+type OrderData = Mantle.Entry_orders;
 type PageContext = {
-  readonly runtime: CmsRuntime;
+  readonly runtime: MantleRuntime;
   readonly site: SiteConfig;
   readonly locale: string;
   readonly catalog: readonly CatalogItem[];
@@ -32,7 +32,7 @@ type PageContext = {
 
 export function mountCommerceRoutes(
   app: MantleExtensionApp<Env>,
-  getRuntime: () => Promise<CmsRuntime>,
+  getRuntime: () => Promise<MantleRuntime>,
 ): void {
   app.get("/:locale/cart", async (c) => {
     const page = await pageContext(getRuntime, c.req.param("locale"));
@@ -122,14 +122,14 @@ export function mountCommerceRoutes(
 }
 
 async function renderOrderPage(
-  getRuntime: () => Promise<CmsRuntime>,
+  getRuntime: () => Promise<MantleRuntime>,
   localeParam: string,
   orderToken: string,
   payment: boolean,
 ): Promise<Response> {
   const page = await pageContext(getRuntime, localeParam);
   if (!page || !/^[0-9a-f-]{36}$/u.test(orderToken)) return new Response("Not found", { status: 404 });
-  const order = await page.runtime.entryReader.readByDataField({
+  const order = await page.runtime.entries.readByDataField({
     collection: "orders",
     field: "orderToken",
     value: orderToken,
@@ -204,16 +204,17 @@ function CatalogData({ items }: { readonly items: readonly CatalogItem[] }) {
   ))}</div>;
 }
 
-async function pageContext(getRuntime: () => Promise<CmsRuntime>, localeParam: string): Promise<PageContext | null> {
+async function pageContext(getRuntime: () => Promise<MantleRuntime>, localeParam: string): Promise<PageContext | null> {
   const runtime = await getRuntime();
+  if (!runtime.siteConfig) throw new Error("transaction starter requires the site-config port");
   const site = await runtime.siteConfig.load();
   const locale = site.locales.find((value) => toUrlLocale(value) === localeParam.toLowerCase());
   if (!locale) return null;
   return { runtime, site, locale, catalog: await catalog(runtime, locale) };
 }
 
-async function catalog(runtime: CmsRuntime, locale: string): Promise<readonly CatalogItem[]> {
-  const translations = await runtime.entryReader.readPublished({
+async function catalog(runtime: MantleRuntime, locale: string): Promise<readonly CatalogItem[]> {
+  const translations = await runtime.entries.readPublished({
     collection: "product-translations",
     locale,
     limit: 100,
@@ -221,7 +222,7 @@ async function catalog(runtime: CmsRuntime, locale: string): Promise<readonly Ca
   return (await Promise.all(translations.map(async (translation) => {
     const slug = translation.data["slug"];
     if (typeof slug !== "string") return null;
-    const parent = await runtime.entryReader.readBySlug({ collection: "products", slug, status: "published" });
+    const parent = await runtime.entries.readBySlug({ collection: "products", slug, status: "published" });
     const title = translation.data["title"];
     const priceMinor = parent?.data["priceMinor"];
     const currency = parent?.data["currency"];

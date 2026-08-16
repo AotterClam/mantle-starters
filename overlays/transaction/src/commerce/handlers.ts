@@ -1,16 +1,16 @@
-import type { CmsRuntime, HandlerContext } from "@aotter/mantle/runtime";
+import type { HandlerContext, MantleRuntime } from "@aotter/mantle/runtime";
 import { DiagnosticError, runtimeDiagnostic, type Entry } from "@aotter/mantle/spec";
-import type { MantleHandlers, MantleSite } from "../../.mantle/generated/types.js";
+import type { Mantle, MantleHandlers } from "../../.mantle/generated/mantle.js";
 import type { Env } from "../mantle/config.js";
 import type { StockItem, StockSnapshot, TransitionResult } from "./InventoryCoordinator.js";
 
 const CHECKOUT_TTL_MS = 15 * 60 * 1000;
 
-type RuntimeGetter = () => Promise<CmsRuntime>;
+type RuntimeGetter = () => Promise<MantleRuntime>;
 type Context = HandlerContext<Env>;
-type OrderData = MantleSite.Entry_orders;
+type OrderData = Mantle.Entry_orders;
 type OrderItem = OrderData["items"][number];
-type MovementKind = MantleSite.Entry_inventory_movements["kind"];
+type MovementKind = Mantle.Entry_inventory_movements["kind"];
 type PlaceOrderInput = {
   readonly locale: string;
   readonly customerName: string;
@@ -172,17 +172,18 @@ async function placePendingOrder(
     };
   }
 
+  if (!runtime.siteConfig) throw new Error("transaction starter requires the site-config port");
   const locales = await runtime.siteConfig.readLocales();
   if (!locales.includes(input.locale)) invalid("/locale", input.locale, "a configured site locale");
 
   const requested = combineItems(input.items);
   const priced = await Promise.all(requested.map(async (item): Promise<OrderItem & { currency: string }> => {
-    const product = await runtime.entryReader.readBySlug({
+    const product = await runtime.entries.readBySlug({
       collection: "products",
       slug: item.productSlug,
       status: "published",
     });
-    const translation = await runtime.entryReader.readBySlug({
+    const translation = await runtime.entries.readBySlug({
       collection: "product-translations",
       slug: item.productSlug,
       locale: input.locale,
@@ -276,7 +277,7 @@ async function expireOrder(
 }
 
 async function expirePersistedOrder(
-  runtime: CmsRuntime,
+  runtime: MantleRuntime,
   order: Entry,
   result: TransitionResult,
   ctx: Context,
@@ -289,7 +290,7 @@ async function expirePersistedOrder(
 }
 
 async function persistTransition(
-  runtime: CmsRuntime,
+  runtime: MantleRuntime,
   order: Entry,
   orderStatus: "paid" | "cancelled",
   result: TransitionResult,
@@ -304,7 +305,7 @@ async function persistTransition(
 }
 
 async function recordStockChange(
-  runtime: CmsRuntime,
+  runtime: MantleRuntime,
   snapshots: readonly StockSnapshot[],
   items: readonly StockItem[],
   kind: "reserve" | "sale" | "release" | "cancellation",
@@ -325,10 +326,10 @@ async function recordStockChange(
   }
 }
 
-async function persistSnapshots(runtime: CmsRuntime, values: readonly StockSnapshot[], ctx: Context): Promise<void> {
+async function persistSnapshots(runtime: MantleRuntime, values: readonly StockSnapshot[], ctx: Context): Promise<void> {
   for (const value of values) {
     for (;;) {
-      const existing = await runtime.entryReader.readByDataField({
+      const existing = await runtime.entries.readByDataField({
         collection: "inventory",
         field: "productSlug",
         value: value.productSlug,
@@ -341,7 +342,7 @@ async function persistSnapshots(runtime: CmsRuntime, values: readonly StockSnaps
           await runtime.createDraft.execute({ collection: "inventory", data, authorId: null, ctx });
           break;
         } catch (error) {
-          const raced = await runtime.entryReader.readByDataField({
+          const raced = await runtime.entries.readByDataField({
             collection: "inventory",
             field: "productSlug",
             value: value.productSlug,
@@ -361,12 +362,12 @@ async function persistSnapshots(runtime: CmsRuntime, values: readonly StockSnaps
 }
 
 async function ensureMovement(
-  runtime: CmsRuntime,
+  runtime: MantleRuntime,
   movementKey: string,
-  data: Omit<MantleSite.Entry_inventory_movements, "movementKey" | "occurredAt">,
+  data: Omit<Mantle.Entry_inventory_movements, "movementKey" | "occurredAt">,
   ctx: Context,
 ): Promise<void> {
-  const existing = await runtime.entryReader.readByDataField({
+  const existing = await runtime.entries.readByDataField({
     collection: "inventory-movements",
     field: "movementKey",
     value: movementKey,
@@ -380,7 +381,7 @@ async function ensureMovement(
         data: { movementKey, occurredAt: Date.now(), ...data },
       });
     } catch (error) {
-      const raced = await runtime.entryReader.readByDataField({
+      const raced = await runtime.entries.readByDataField({
         collection: "inventory-movements",
         field: "movementKey",
         value: movementKey,
@@ -391,7 +392,7 @@ async function ensureMovement(
 }
 
 async function updateOrder(
-  runtime: CmsRuntime,
+  runtime: MantleRuntime,
   orderToken: string,
   data: Record<string, unknown>,
   ctx: Context,
@@ -400,12 +401,12 @@ async function updateOrder(
   if (current) await runtime.updateDraft.execute({ id: current.id, expectedVersion: current.version, data, ctx });
 }
 
-async function orderByToken(runtime: CmsRuntime, orderToken: string): Promise<Entry | null> {
-  return runtime.entryReader.readByDataField({ collection: "orders", field: "orderToken", value: orderToken });
+async function orderByToken(runtime: MantleRuntime, orderToken: string): Promise<Entry | null> {
+  return runtime.entries.readByDataField({ collection: "orders", field: "orderToken", value: orderToken });
 }
 
-async function requireProduct(runtime: CmsRuntime, productSlug: string): Promise<void> {
-  if (!await runtime.entryReader.readByDataField({ collection: "products", field: "slug", value: productSlug })) {
+async function requireProduct(runtime: MantleRuntime, productSlug: string): Promise<void> {
+  if (!await runtime.entries.readByDataField({ collection: "products", field: "slug", value: productSlug })) {
     invalid("/productSlug", productSlug, "an existing product slug");
   }
 }
@@ -414,10 +415,10 @@ async function inspectItems(env: Env, items: readonly StockItem[]): Promise<read
   return Promise.all(items.map((item) => inventory(env).inspect(item.productSlug)));
 }
 
-async function initializeInventory(runtime: CmsRuntime, env: Env, items: readonly StockItem[]): Promise<void> {
+async function initializeInventory(runtime: MantleRuntime, env: Env, items: readonly StockItem[]): Promise<void> {
   const coordinator = inventory(env);
   for (const item of items) {
-    const entry = await runtime.entryReader.readByDataField({
+    const entry = await runtime.entries.readByDataField({
       collection: "inventory",
       field: "productSlug",
       value: item.productSlug,

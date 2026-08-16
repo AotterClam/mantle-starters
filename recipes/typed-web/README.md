@@ -43,7 +43,7 @@ src/
 manifests/site.yaml           # 4 atoms: Schema, View, Procedure, Trigger
 components/, lib/, styles/     # selected runtime-facing UI surface
 public/                        # Cloudflare Static Assets: site icon, CSS, JS, SVG
-.mantle/generated/            # generated manifest/types consumed by Worker
+.mantle/generated/            # generated RuntimePlan/types consumed by Worker
 public/_mantle/admin/          # generated Admin SPA (gitignored)
 .mantle/                      # launch state, overlay notes, handoff
 ```

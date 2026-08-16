@@ -145,7 +145,7 @@ export async function renderPublicHome(ctx: PublicRouteContext): Promise<Respons
 }
 
 export async function renderHomeMarkdown(ctx: PublicContentContext): Promise<string | null> {
-  const entry = await ctx.runtime.entryReader.readBySlug({
+  const entry = await ctx.runtime.entries.readBySlug({
     collection: "page-translations",
     slug: "home",
     locale: ctx.locale,

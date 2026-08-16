@@ -1,5 +1,5 @@
 import { createMantleWorker, mountPublicRoutes } from "@aotter/mantle/cloudflare";
-import { manifest } from "../../.mantle/generated/site.js";
+import { plan } from "../../.mantle/generated/mantle.js";
 import {
   publicCollectionRoutes,
   publicPathResolver,
@@ -15,7 +15,7 @@ import { createSeededRuntime } from "./seed.js";
 import { localeRootResponse } from "../web/localeRoot.js";
 
 export const mantle = createMantleWorker<Env>({
-  manifest,
+  plan,
   siteDefaults: buildSiteDefaults,
   bindings: (env, conventional) => ({ ...conventional, mediaStorage: buildMediaStorage(env) }),
   templates,
