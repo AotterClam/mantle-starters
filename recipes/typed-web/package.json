@@ -1,6 +1,6 @@
 {
   "name": "mantle-recipe-typed-web",
-  "version": "0.1.0-alpha.6",
+  "version": "0.1.0-alpha.7",
   "private": true,
   "description": "Mantle typed-site source recipe for Cloudflare Workers.",
   "type": "module",
@@ -25,7 +25,7 @@
     "deploy": "pnpm check && wrangler deploy"
   },
   "dependencies": {
-    "@aotter/mantle": "0.1.0-alpha.6",
+    "@aotter/mantle": "0.1.0-alpha.7",
     "@cloudflare/workers-oauth-provider": "catalog:",
     "aws4fetch": "catalog:",
     "better-auth": "catalog:",
