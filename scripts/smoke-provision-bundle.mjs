@@ -136,6 +136,7 @@ function assertProjectScripts(root, archetype) {
 
 function assertGeneratedOutputsAbsent(root, archetype) {
   const outputs = [
+    ".mantle/generated/mantle.ts",
     ".mantle/generated/site.ts",
     ".mantle/generated/types.d.ts",
     ...(archetype === "blank" ? [] : [
@@ -161,8 +162,11 @@ function prepareProject(targetRoot, archetype) {
   symlinkSync(nodeModules, join(targetRoot, "node_modules"), "dir");
   const result = spawnSync("pnpm", ["prepare"], { cwd: targetRoot, encoding: "utf8" });
   if (result.status !== 0) throw new Error(`${archetype} prepare failed: ${result.stderr || result.stdout}`);
+  if (!existsSync(join(targetRoot, ".mantle/generated/mantle.ts"))) {
+    throw new Error(`${archetype} prepare did not create .mantle/generated/mantle.ts`);
+  }
   for (const path of [".mantle/generated/site.ts", ".mantle/generated/types.d.ts"]) {
-    if (!existsSync(join(targetRoot, path))) throw new Error(`${archetype} prepare did not create ${path}`);
+    if (existsSync(join(targetRoot, path))) throw new Error(`${archetype} prepare kept obsolete ${path}`);
   }
 }
 
@@ -310,20 +314,19 @@ function assertHeadlessBlank(root) {
   const files = [
     "manifests/site.yaml",
     "src/index.ts",
-    ".mantle/generated/site.ts",
-    ".mantle/generated/types.d.ts",
+    ".mantle/generated/mantle.ts",
   ];
   for (const path of files) readFileSync(join(root, path), "utf8");
   const worker = readFileSync(join(root, "src", "index.ts"), "utf8");
-  if (!worker.includes("createMantleWorker") || !worker.includes(".mantle/generated/site.js")) {
-    throw new Error("blank Worker does not use the generated manifest and Core facade");
+  if (!worker.includes("createMantleWorker") || !worker.includes(".mantle/generated/mantle.js")) {
+    throw new Error("blank Worker does not use the generated RuntimePlan and Core facade");
   }
   if (existsSync(join(root, "src", "auth.ts")) || worker.includes("auth: buildAuth")) {
     throw new Error("blank Worker does not use Core conventional Auth");
   }
   const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
-  if (JSON.stringify(Object.keys(manifest.dependencies ?? {})) !== '["@aotter/mantle"]') {
-    throw new Error("blank production dependency must be @aotter/mantle only");
+  if (JSON.stringify(Object.keys(manifest.dependencies ?? {})) !== '["@aotter/mantle","@aotter/mantle-cloudflare"]') {
+    throw new Error("blank production dependencies must be Mantle Core plus Cloudflare");
   }
   for (const path of ["components", "kiwa", "lib", "scripts", "styles", "src/web", "src/worker", "src/mantle"]) {
     if (existsSync(join(root, path))) throw new Error(`blank includes typed/UI source: ${path}`);
@@ -464,7 +467,7 @@ function assertSectionImageContract(root, archetype) {
     throw new Error(`${archetype} seed does not reference the shared ocean hero`);
   }
   const homeContent = readFileSync(join(root, "src", "web", "content", "homeContent.ts"), "utf8");
-  if (!homeContent.includes('views["home"](')) {
+  if (!homeContent.includes("views.home(")) {
     throw new Error(`${archetype} homepage never reads its home View`);
   }
   const theme = readFileSync(join(root, "src", "web", "client", "themeClient.ts"), "utf8");
@@ -974,8 +977,8 @@ function assertTransactionPublicSurface(root) {
     if (!wrangler.includes(required)) throw new Error(`transaction Worker binding missing ${required}`);
   }
   for (const required of [
-    'procedures["expire-order"]',
-    'procedures["sweep-expired-orders"]',
+    "procedures.expireOrder",
+    "procedures.sweepExpiredOrders",
     "for (const message of batch.messages)",
     "async scheduled(",
     'result.diagnostic.code === "CONFLICT"',

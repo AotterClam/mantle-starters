@@ -11,14 +11,12 @@ import {
 import { toUrlLocale } from "@aotter/mantle/runtime";
 import type { Entry } from "@aotter/mantle/spec";
 import { renderToString } from "hono/jsx/dom/server";
-import { manifest } from "../../.mantle/generated/site.js";
+import { plan } from "../../.mantle/generated/mantle.js";
 import { PageDocument } from "../renderer.js";
 import { resolveHomeContent } from "./content/homeContent.js";
 import { HomePage, SitePage } from "./pages/HomePage.js";
 
-const schemaNames = new Set<string>(manifest
-  .filter((atom) => atom.kind === "Schema")
-  .map((atom) => atom.metadata.name));
+const schemaNames = new Set(Object.keys(plan.schemas));
 
 export const publicCollectionRoutes: readonly CollectionRouteConfig[] = [
   { collection: "post-translations", segment: "posts", listRoute: true },
@@ -55,7 +53,7 @@ export async function renderPublicHome(ctx: PublicRouteContext): Promise<Respons
 }
 
 export async function renderHomeMarkdown(ctx: PublicContentContext): Promise<string | null> {
-  const entry = await ctx.runtime.entryReader.readByDataField({
+  const entry = await ctx.runtime.entries.readByDataField({
     collection: "page",
     field: "type",
     value: "home",

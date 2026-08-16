@@ -1,5 +1,5 @@
 import type { SiteDefaults } from "@aotter/mantle/spec";
-import { R2MediaStorage, type CmsConfig, type MantleCloudflareEnv } from "@aotter/mantle/cloudflare";
+import { R2MediaStorage, type MantleCloudflareConfig, type MantleCloudflareEnv } from "@aotter/mantle/cloudflare";
 import { AwsClient } from "aws4fetch";
 import type { InventoryCoordinator } from "../commerce/InventoryCoordinator.js";
 
@@ -40,7 +40,7 @@ export function buildSiteDefaults(env: Env): SiteDefaults {
   };
 }
 
-export function buildMediaStorage(env: Env): CmsConfig["bindings"]["mediaStorage"] {
+export function buildMediaStorage(env: Env): MantleCloudflareConfig["bindings"]["mediaStorage"] {
   const media = mediaConfig(env);
   if (!media) return undefined;
   return new R2MediaStorage(
