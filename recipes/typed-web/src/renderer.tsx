@@ -1,6 +1,6 @@
 import type { Child } from "hono/jsx";
 import { raw } from "hono/html";
-import { renderSeoTagsHtml, type SeoMeta } from "@aotter/mantle/runtime";
+import { renderSeoTagsHtml, type SeoMeta } from "@aotter/mantle/web";
 import type { SiteIcon } from "@aotter/mantle/spec";
 import { siteContent } from "./web/content/siteContent.js";
 

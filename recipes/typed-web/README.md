@@ -157,6 +157,5 @@ once you've wired the bindings — bearer-token MCP auth, view executor,
 and HTTP Trigger dispatcher all come straight from the runtime packages.
 
 If your frontend renders posts (or anything you'd like to expose for
-LLM crawlers), the runtime can ship an `.md` mirror of any entry; see
-`@aotter/mantle/runtime/serializeEntryAsMarkdown` and
-`composeLlmsTxt`.
+LLM crawlers), optional `@aotter/mantle/web` can compose an `.md` mirror,
+`llms.txt`, sitemap, SEO, HTML, and preview without owning your routes.

@@ -5,10 +5,10 @@ import {
   getEntryDescription,
   getMarkdownBody,
   serializeEntryAsMarkdown,
-  toUrlLocale,
   type EntryContext,
   type ListContext,
-} from "@aotter/mantle/runtime";
+} from "@aotter/mantle/web";
+import { toUrlLocale } from "@aotter/mantle/runtime";
 import type { Entry } from "@aotter/mantle/spec";
 import { renderToString } from "hono/jsx/dom/server";
 import { manifest } from "../../.mantle/generated/site.js";
