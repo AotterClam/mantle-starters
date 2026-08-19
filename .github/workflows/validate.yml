@@ -39,7 +39,7 @@ jobs:
           ref: ${{ steps.core.outputs.sha }}
           path: core
 
-      - uses: pnpm/action-setup@v6.0.9
+      - uses: pnpm/action-setup@v6.0.10
         with:
           version: 9.15.0
 
@@ -67,7 +67,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7.0.1
 
-      - uses: pnpm/action-setup@v6.0.9
+      - uses: pnpm/action-setup@v6.0.10
 
       - uses: actions/setup-node@v7.0.0
         with:
