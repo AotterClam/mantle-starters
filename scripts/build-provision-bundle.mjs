@@ -23,6 +23,7 @@ for (const archetype of archetypes) {
   const bundleText = JSON.stringify({
     version,
     kind: "mantle-provision-bundle",
+    formatVersion: 1,
     archetype,
     ...(localizedFiles.length > 0 ? { localizedFiles } : {}),
     files: Object.fromEntries(Object.entries(files).sort(([a], [b]) => a.localeCompare(b))),
@@ -57,6 +58,9 @@ function buildBundleFiles(archetype) {
     selectTypedSurface(files, archetype);
     pruneRuntimeSource(files);
   }
+  files["wrangler.toml"] = files["wrangler.toml"]
+    .replace(/^name = ".*"$/m, 'name = "{{PROJECT_NAME}}"')
+    .replace(/^database_name = ".*"$/m, 'database_name = "{{PROJECT_NAME}}-db"');
   for (const path of Object.keys(files)) {
     if (isGeneratedOutput(path)) delete files[path];
   }
@@ -169,6 +173,9 @@ function isGeneratedOutput(path) {
 }
 
 function assertBundle(bundle, archetype) {
+  if (bundle.formatVersion !== 1) {
+    throw new Error(`${archetype} bundle must declare formatVersion 1`);
+  }
   for (const required of [
     "package.json",
     ".gitignore",
@@ -197,6 +204,10 @@ function assertBundle(bundle, archetype) {
   }
   if (!bundle.files["wrangler.toml"]?.includes('MANTLE_AUTH_MODE = "{{AUTH_MODE}}"')) {
     throw new Error(`${archetype} bundle must declare the explicit auth mode`);
+  }
+  if (!bundle.files["wrangler.toml"]?.includes('name = "{{PROJECT_NAME}}"')
+      || !bundle.files["wrangler.toml"]?.includes('database_name = "{{PROJECT_NAME}}-db"')) {
+    throw new Error(`${archetype} bundle must template its Wrangler project identity`);
   }
   if (!bundle.files["wrangler.toml"]?.includes('[assets]\ndirectory = "./public"\nbinding = "ASSETS"')) {
     throw new Error(`${archetype} bundle must use Cloudflare Static Assets`);
