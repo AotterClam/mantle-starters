@@ -13,14 +13,14 @@ const expected = [
 const failures = [];
 
 for (const [dir, name, sourcePath] of expected) {
-  const agentPath = join(root, "blank", ".agent", "skills", dir, "SKILL.md");
+  const agentPath = join(root, "blank", ".agents", "skills", dir, "SKILL.md");
   const claudePath = join(root, "blank", ".claude", "skills", dir, "SKILL.md");
   assertSkill(agentPath, name, sourcePath);
   assertSkill(claudePath, name, sourcePath);
   assertSame(agentPath, claudePath);
 }
 
-for (const base of [".agent", ".claude"]) {
+for (const base of [".agents", ".claude"]) {
   const skillsDir = join(root, "blank", base, "skills");
   const dirs = readdirSync(skillsDir, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
@@ -35,8 +35,8 @@ for (const base of [".agent", ".claude"]) {
 const agents = readFileSync(join(root, "blank", "AGENTS.md.template"), "utf8");
 const claude = readFileSync(join(root, "blank", "CLAUDE.md.template"), "utf8");
 for (const [dir] of expected) {
-  if (!agents.includes(`.agent/skills/${dir}/SKILL.md`)) {
-    failures.push(`AGENTS.md.template does not mention .agent/skills/${dir}/SKILL.md`);
+  if (!agents.includes(`.agents/skills/${dir}/SKILL.md`)) {
+    failures.push(`AGENTS.md.template does not mention .agents/skills/${dir}/SKILL.md`);
   }
   if (!claude.includes(`.claude/skills/${dir}/SKILL.md`)) {
     failures.push(`CLAUDE.md.template does not mention .claude/skills/${dir}/SKILL.md`);

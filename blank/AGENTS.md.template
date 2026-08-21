@@ -21,10 +21,10 @@ Use the installed package version and `node_modules/@aotter/mantle/docs/` for
 runtime/API behavior. `.mantle/*` files provide context, not a separate
 contract.
 
-- [`.agent/skills/mantle-develop/SKILL.md`](.agent/skills/mantle-develop/SKILL.md)
-- [`.agent/skills/mantle-plugin/SKILL.md`](.agent/skills/mantle-plugin/SKILL.md)
-- [`.agent/skills/mantle-theme/SKILL.md`](.agent/skills/mantle-theme/SKILL.md)
-- [`.agent/skills/mantle-update/SKILL.md`](.agent/skills/mantle-update/SKILL.md)
+- [`.agents/skills/mantle-develop/SKILL.md`](.agents/skills/mantle-develop/SKILL.md)
+- [`.agents/skills/mantle-plugin/SKILL.md`](.agents/skills/mantle-plugin/SKILL.md)
+- [`.agents/skills/mantle-theme/SKILL.md`](.agents/skills/mantle-theme/SKILL.md)
+- [`.agents/skills/mantle-update/SKILL.md`](.agents/skills/mantle-update/SKILL.md)
 
 First task after materialization:
 
