@@ -14,7 +14,6 @@
     "check:indexes": "mantle-harness indexes --manifests manifests --require-public --format text",
     "mantle:update": "mantle update",
     "skills": "mantle skills",
-    "introspect": "mantle introspect",
     "emit-openapi": "mantle emit-openapi --output openapi.json",
     "dev": "pnpm generate && wrangler dev --ip localhost --port 8787 --inspector-port 0 --persist-to .wrangler",
     "typecheck": "pnpm generate && tsc --noEmit -p tsconfig.json",
