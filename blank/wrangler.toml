@@ -28,6 +28,3 @@ MANTLE_AUTH_MODE = "{{AUTH_MODE}}"
 [[d1_databases]]
 binding = "DB"
 database_name = "mantle-blank-local"
-
-[[kv_namespaces]]
-binding = "OAUTH_KV"

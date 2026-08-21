@@ -26,7 +26,6 @@
   "dependencies": {
     "@aotter/mantle": "0.1.0-alpha.7",
     "@aotter/mantle-cloudflare": "0.1.0-alpha.7",
-    "@cloudflare/workers-oauth-provider": "catalog:",
     "aws4fetch": "catalog:",
     "better-auth": "catalog:",
     "clsx": "catalog:",
