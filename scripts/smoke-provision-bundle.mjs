@@ -325,8 +325,10 @@ function assertHeadlessBlank(root) {
     throw new Error("blank Worker does not use Core conventional Auth");
   }
   const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
-  if (JSON.stringify(Object.keys(manifest.dependencies ?? {})) !== '["@aotter/mantle","@aotter/mantle-cloudflare"]') {
-    throw new Error("blank production dependencies must be Mantle Core plus Cloudflare");
+  // Keep in step with the same list in build-provision-bundle.mjs.
+  if (JSON.stringify(Object.keys(manifest.dependencies ?? {}))
+    !== '["@aotter/mantle","@aotter/mantle-cloudflare","aws4fetch","better-auth","hono","zod"]') {
+    throw new Error("blank production dependencies must be Mantle Core, Cloudflare, and the adapter peers");
   }
   for (const path of ["components", "kiwa", "lib", "scripts", "styles", "src/web", "src/worker", "src/mantle"]) {
     if (existsSync(join(root, path))) throw new Error(`blank includes typed/UI source: ${path}`);

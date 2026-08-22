@@ -312,8 +312,14 @@ function assertHeadlessBlank(bundle) {
     }
   }
   const manifest = JSON.parse(bundle.files["package.json"]);
-  if (JSON.stringify(Object.keys(manifest.dependencies ?? {})) !== '["@aotter/mantle","@aotter/mantle-cloudflare"]') {
-    throw new Error("blank production dependencies must be Mantle Core plus Cloudflare");
+  // Core, the Cloudflare adapter, and the adapter's four required peers.
+  // The peers are not optional, so leaving them undeclared made the install
+  // depend on pnpm's auto-install-peers default and hid a stale `better-auth`
+  // pin from the lock refresh's range check. Declared peers keep blank
+  // headless while making its manifest complete.
+  if (JSON.stringify(Object.keys(manifest.dependencies ?? {}))
+    !== '["@aotter/mantle","@aotter/mantle-cloudflare","aws4fetch","better-auth","hono","zod"]') {
+    throw new Error("blank production dependencies must be Mantle Core, Cloudflare, and the adapter peers");
   }
   const worker = bundle.files["src/index.ts"];
   if (!worker.includes("createMantleWorker") || !worker.includes(".mantle/generated/mantle.js")) {

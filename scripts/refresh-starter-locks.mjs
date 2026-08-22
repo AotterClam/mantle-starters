@@ -30,6 +30,10 @@ for (const starterPath of ["blank", "recipes/typed-web"]) {
         "--ignore-scripts",
         "--no-frozen-lockfile",
         "--config.shared-workspace-lockfile=false",
+        // Fail closed on an unsatisfied peer. Without this, a locked peer that
+        // no longer matches its range survives the incremental refresh and the
+        // stale pin only surfaces when the generated project's bundler dies.
+        "--strict-peer-dependencies",
       ],
       { cwd: tempRoot, stdio: "inherit" },
     );
