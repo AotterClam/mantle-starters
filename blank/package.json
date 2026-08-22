@@ -23,7 +23,11 @@
   },
   "dependencies": {
     "@aotter/mantle": "0.1.0-alpha.8",
-    "@aotter/mantle-cloudflare": "0.1.0-alpha.8"
+    "@aotter/mantle-cloudflare": "0.1.0-alpha.8",
+    "aws4fetch": "catalog:",
+    "better-auth": "catalog:",
+    "hono": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "catalog:",
