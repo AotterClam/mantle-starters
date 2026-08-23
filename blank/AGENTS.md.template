@@ -30,13 +30,15 @@ First task after materialization:
 
 ```text
 Read .mantle/launch-state.json, .mantle/features.json, and .mantle/handoff.md.
-Run the local preview, open {{SITE_URL}}, and confirm the Worker boots. Then
+Install the pinned dependencies, run the local preview, open {{SITE_URL}}, and
+confirm the Worker boots. Then
 inspect the manifest. For a typed launch, also inspect its composed homepage
 and seed files before making changes.
 ```
 
 ## Commands
 
+- `pnpm install --frozen-lockfile` install the pinned dependencies (nothing is installed yet)
 - `pnpm dev` local preview on localhost:8787
 - `pnpm validate` manifest validation
 - `pnpm generate` regenerate the machine-owned RuntimePlan/types module

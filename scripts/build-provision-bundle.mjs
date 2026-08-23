@@ -105,6 +105,9 @@ function buildBundleFiles(archetype) {
     registry: {
       name: "mantle-starters",
       url: "https://mantle.tools/registry.json",
+      // `mantle update` reads this; without it the command a generated
+      // project ships cannot run without a hand-typed URL.
+      bundleBaseUrl: "https://raw.githubusercontent.com/aotter/mantle-starters/{ref}/provision-bundles",
       version: "{{STARTER_REF}}",
     },
     archetype: {
