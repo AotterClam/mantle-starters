@@ -203,15 +203,26 @@ function smokeLocalMaterializer() {
     if (!wrangler.includes('database_name = "northstar-db"')) throw new Error("local D1 name mismatch");
     if (!wrangler.includes('PUBLIC_ORIGIN = "http://localhost:8787"')) throw new Error("local origin missing");
     assertGeneratedOutputsAbsent(output, "presence");
+    const bilingualPresence = spawnSync(process.execPath, [
+      "scripts/dev-provision-bundle.mjs",
+      "presence",
+      "--out",
+      join(tempRoot, "bilingual-presence"),
+      "--locales",
+      "en,zh-TW",
+    ], { cwd: root, encoding: "utf8" });
+    if (bilingualPresence.status !== 0) {
+      throw new Error(`bilingual presence materializer failed: ${bilingualPresence.stderr || bilingualPresence.stdout}`);
+    }
     const unsupportedPresence = spawnSync(process.execPath, [
       "scripts/dev-provision-bundle.mjs",
       "presence",
       "--out",
       join(tempRoot, "unsupported-presence"),
       "--locales",
-      "en,zh-TW",
+      "en,nl",
     ], { cwd: root, encoding: "utf8" });
-    if (unsupportedPresence.status === 0 || !`${unsupportedPresence.stderr}${unsupportedPresence.stdout}`.includes("presence does not support locales: zh-TW")) {
+    if (unsupportedPresence.status === 0 || !`${unsupportedPresence.stderr}${unsupportedPresence.stdout}`.includes("does not support locales: nl")) {
       throw new Error("presence materializer accepted an unsupported locale");
     }
     const shop = spawnSync(process.execPath, [
