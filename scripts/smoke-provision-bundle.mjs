@@ -725,7 +725,13 @@ function assertIntakeForm(root) {
   ) {
     throw new Error("intake seed does not define localized chrome and reply language");
   }
-  if (!manifest.includes("required: [name, email, attendance, resultKey, replyLocale]")) {
+  // Parsed, not string-matched: rendering a localized manifest round-trips the
+  // YAML and normalizes flow-sequence spacing.
+  const submissions = parseAllDocuments(manifest).map((document) => document.toJSON()).find(
+    (atom) => atom?.kind === "Schema" && atom?.metadata?.name === "intake-submissions",
+  );
+  if (JSON.stringify(submissions?.spec?.schema?.required)
+    !== JSON.stringify(["name", "email", "attendance", "resultKey", "replyLocale"])) {
     throw new Error("intake manifest does not persist reply language");
   }
   assertIntakeOptionContract(JSON.parse(seed), manifest);
@@ -742,9 +748,11 @@ function assertIntakeOptionContract(seed, manifestText) {
   const input = atoms.find(
     (atom) => atom?.kind === "Procedure" && atom?.metadata?.name === "submit-intake",
   )?.spec?.input?.properties;
-  const section = seed.collections?.page?.[0]?.sections?.find(
-    (candidate) => candidate.type === "intake",
-  );
+  // Sections moved into the locale catalogs when intake gained page-translations.
+  const canonical = seed.locales?.[seed.canonicalLocale] ?? Object.values(seed.locales ?? {})[0];
+  const section = canonical?.["page-translations"]
+    ?.find((page) => page.slug === "home")
+    ?.sections?.find((candidate) => candidate.type === "intake");
   for (const field of section?.fields ?? []) {
     if (!field.options?.length) continue;
     const values = field.options.map((option) => option.value);

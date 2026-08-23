@@ -1,205 +1,893 @@
 {
-  "locale": "{{CANONICAL_LOCALE}}",
+  "canonicalLocale": "{{CANONICAL_LOCALE}}",
   "site": {
     "brand": "{{BRAND}}",
-    "description": "{{DESCRIPTION}}",
-    "chromeLabels": {
-      "openNavigation": "Open navigation",
-      "closeNavigation": "Close navigation",
-      "navigation": "Navigation",
-      "toggleTheme": "Toggle color theme",
-      "lightMode": "Light mode",
-      "darkMode": "Dark mode"
-    },
-    "navLinks": [
-      { "label": "Overview", "href": "#overview" },
-      { "label": "Dispatches", "href": "#dispatches" },
-      { "label": "System", "href": "#system" },
-      { "label": "FAQ", "href": "#faq" }
-    ],
-    "navAction": { "label": "Read latest", "href": "#dispatches" },
-    "footer": {
-      "tagline": "A Mantle publication starter with seeded editorial structure.",
-      "copyright": "Copyright {{BRAND}}.",
-      "columns": [
-        {
-          "title": "Publication",
-          "links": [
-            { "label": "Overview", "href": "#overview" },
-            { "label": "Dispatches", "href": "#dispatches" },
-            { "label": "Editorial system", "href": "#system" }
-          ]
-        },
-        {
-          "title": "Next",
-          "links": [
-            { "label": "Questions", "href": "#faq" },
-            { "label": "Subscribe placeholder", "href": "#next" }
-          ]
-        }
-      ],
-      "socialLinks": [
-        { "name": "GitHub", "href": "https://github.com", "icon": "github" }
-      ],
-      "bottomLinks": [
-        { "label": "Read latest", "href": "#dispatches" }
-      ]
-    }
+    "description": "{{DESCRIPTION}}"
   },
   "collections": {
     "page": [
       {
+        "slug": "home",
         "type": "home",
-        "title": "{{BRAND}}",
-        "summary": "{{DESCRIPTION}}",
-        "status": "published",
-        "sections": [
-          {
-            "type": "hero",
-            "title": "{{BRAND}} is ready to publish its first useful notes",
-            "body": "{{DESCRIPTION}}",
-            "image": {
-              "src": "/assets/mantle-ocean-hero-light.svg",
-              "alt": ""
-            },
-            "action": { "label": "Read latest", "href": "#dispatches" },
-            "secondaryAction": { "label": "See the system", "href": "#system" }
-          },
-          {
-            "type": "content",
-            "id": "overview",
-            "eyebrow": "Overview",
-            "title": "A clean publication shape before the archive gets large",
-            "body": "Use this starter when the first product is a readable stream of posts, changelogs, essays, notes, or documentation.",
-            "items": [
-              {
-                "body": "The public page starts with a small editorial promise and a few seeded pieces instead of an empty blog shell."
-              },
-              {
-                "body": "Mantle stores posts as structured content, so the owner can later add authors, tags, subscriptions, review flow, or member-only entries."
-              }
-            ]
-          },
-          {
-            "type": "features",
-            "id": "dispatches",
-            "eyebrow": "Dispatches",
-            "title": "Seeded pieces to replace after launch",
-            "body": "These cards mirror the starter posts in the manifest seed. Keep the shape, then rewrite the titles and excerpts.",
-            "items": [
-              {
-                "icon": "sparkles",
-                "title": "Welcome to {{BRAND}}",
-                "body": "A short opening note that explains what this publication will help readers understand."
-              },
-              {
-                "icon": "layout",
-                "title": "How this publication will grow",
-                "body": "A plain update that demonstrates the post model before richer editorial features exist."
-              },
-              {
-                "icon": "check",
-                "title": "Next dispatch draft",
-                "body": "A draft placeholder for the first real note the owner should write with their coding agent."
-              }
-            ]
-          },
-          {
-            "type": "bento",
-            "id": "system",
-            "eyebrow": "System",
-            "title": "The starter ships an editorial model, not a theme",
-            "body": "Publication keeps the same typed-web runtime as every other site type. The type-specific work lives in the manifest and seed.",
-            "items": [
-              {
-                "title": "Posts are the core",
-                "body": "The `posts` schema owns stable slugs; `post-translations` owns each locale's title and body."
-              },
-              {
-                "title": "A public view is ready",
-                "body": "`published-posts` exposes published entries for a future index or detail route."
-              },
-              {
-                "title": "Suggestions are optional",
-                "body": "The suggestion procedure is available when the owner wants a lightweight reader feedback path."
-              }
-            ]
-          },
-          {
-            "type": "faq",
-            "id": "faq",
-            "eyebrow": "FAQ",
-            "title": "Questions to answer before adding more publication code",
-            "body": "Use these as replacement prompts for the real editorial plan.",
-            "items": [
-              {
-                "title": "What should the first real post explain?",
-                "body": "Start with one useful note for the intended audience before adding categories or complex templates."
-              },
-              {
-                "title": "Does this need authors, tags, or subscriptions now?",
-                "body": "Not yet. Add them only when the owner has real content that needs those fields."
-              },
-              {
-                "title": "Where should the agent work next?",
-                "body": "Read `.mantle/launch-state.json`, inspect `manifests/site.yaml`, then replace this seed with real editorial content."
-              }
-            ]
-          },
-          {
-            "type": "cta",
-            "id": "next",
-            "eyebrow": "Next",
-            "title": "Turn {{BRAND}} into a real publication",
-            "body": "Replace the seeded posts, decide whether the home page should become an archive, and push the first real content update.",
-            "action": { "label": "Read latest", "href": "#dispatches" },
-            "secondaryAction": { "label": "Review model", "href": "#system" }
-          }
-        ]
+        "status": "published"
+      },
+      {
+        "slug": "about",
+        "type": "page",
+        "status": "published"
       }
     ],
     "posts": [
       {
         "slug": "welcome",
         "status": "published"
-      },
-      {
-        "slug": "how-this-publication-will-grow",
-        "status": "published"
-      },
-      {
-        "slug": "next-dispatch-draft",
-        "status": "draft"
-      }
-    ],
-    "post-translations": [
-      {
-        "slug": "welcome",
-        "locale": "{{CANONICAL_LOCALE}}",
-        "title": "Welcome to {{BRAND}}",
-        "excerpt": "{{DESCRIPTION}}",
-        "body": "{{DESCRIPTION}}\n\nThis first note is intentionally short. Replace it with the first useful article, update, or field note for the audience.",
-        "publishedAt": 1782130000000,
-        "status": "published"
-      },
-      {
-        "slug": "how-this-publication-will-grow",
-        "locale": "{{CANONICAL_LOCALE}}",
-        "title": "How this publication will grow",
-        "excerpt": "A starter update that shows the publication model before the archive gets complex.",
-        "body": "Mantle starts with a small posts schema and a public published-posts view. Add authors, tags, subscriptions, or gated posts only after the first real publishing workflow needs them.",
-        "publishedAt": 1782216400000,
-        "status": "published"
-      },
-      {
-        "slug": "next-dispatch-draft",
-        "locale": "{{CANONICAL_LOCALE}}",
-        "title": "Next dispatch draft",
-        "excerpt": "A draft placeholder for the first real editorial update.",
-        "body": "Use this draft to outline the next article before changing the homepage layout.",
-        "publishedAt": 1782302800000,
-        "status": "draft"
       }
     ]
+  },
+  "locales": {
+    "en": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "en",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Publish in every language from one contract",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Read the posts",
+                "href": "/posts"
+              },
+              "secondaryAction": {
+                "label": "About us",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "features",
+              "id": "posts",
+              "title": "Latest",
+              "items": [
+                {
+                  "icon": "sparkles",
+                  "title": "Welcome to {{BRAND}}",
+                  "body": "{{DESCRIPTION}}",
+                  "href": "/posts/welcome"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "en",
+          "title": "About {{BRAND}}",
+          "summary": "About {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "About {{BRAND}}",
+              "body": "This is a small publication built with Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ],
+      "post-translations": [
+        {
+          "slug": "welcome",
+          "locale": "en",
+          "title": "Welcome to {{BRAND}}",
+          "excerpt": "{{DESCRIPTION}}",
+          "body": "{{DESCRIPTION}}\n\nThis first note is intentionally short. Replace it with the first useful article for your audience.",
+          "publishedAt": 1782130000000,
+          "status": "published"
+        }
+      ]
+    },
+    "zh-TW": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "zh-TW",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "一份契約，發佈每一種語言",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "閱讀文章",
+                "href": "/posts"
+              },
+              "secondaryAction": {
+                "label": "關於我們",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "features",
+              "id": "posts",
+              "title": "最新文章",
+              "items": [
+                {
+                  "icon": "sparkles",
+                  "title": "歡迎來到 {{BRAND}}",
+                  "body": "{{DESCRIPTION}}",
+                  "href": "/posts/welcome"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "zh-TW",
+          "title": "關於 {{BRAND}}",
+          "summary": "關於 {{BRAND}}。",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "關於 {{BRAND}}",
+              "body": "這是一個以 Mantle 建立的小型出版站。",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ],
+      "post-translations": [
+        {
+          "slug": "welcome",
+          "locale": "zh-TW",
+          "title": "歡迎來到 {{BRAND}}",
+          "excerpt": "{{DESCRIPTION}}",
+          "body": "{{DESCRIPTION}}\n\n第一篇刻意寫得很短。把它換成對讀者真正有用的第一篇文章。",
+          "publishedAt": 1782130000000,
+          "status": "published"
+        }
+      ]
+    },
+    "zh-CN": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "zh-CN",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "一份契约，发布每一种语言",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "阅读文章",
+                "href": "/posts"
+              },
+              "secondaryAction": {
+                "label": "关于我们",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "features",
+              "id": "posts",
+              "title": "最新文章",
+              "items": [
+                {
+                  "icon": "sparkles",
+                  "title": "欢迎来到 {{BRAND}}",
+                  "body": "{{DESCRIPTION}}",
+                  "href": "/posts/welcome"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "zh-CN",
+          "title": "关于 {{BRAND}}",
+          "summary": "关于 {{BRAND}}。",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "关于 {{BRAND}}",
+              "body": "这是一个用 Mantle 构建的小型出版站。",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ],
+      "post-translations": [
+        {
+          "slug": "welcome",
+          "locale": "zh-CN",
+          "title": "欢迎来到 {{BRAND}}",
+          "excerpt": "{{DESCRIPTION}}",
+          "body": "{{DESCRIPTION}}\n\n第一篇刻意写得很短。把它换成对读者真正有用的第一篇文章。",
+          "publishedAt": 1782130000000,
+          "status": "published"
+        }
+      ]
+    },
+    "ja": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "ja",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "ひとつの契約から、すべての言語で公開する",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "記事を読む",
+                "href": "/posts"
+              },
+              "secondaryAction": {
+                "label": "私たちについて",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "features",
+              "id": "posts",
+              "title": "最新の記事",
+              "items": [
+                {
+                  "icon": "sparkles",
+                  "title": "{{BRAND}}へようこそ",
+                  "body": "{{DESCRIPTION}}",
+                  "href": "/posts/welcome"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "ja",
+          "title": "{{BRAND}}について",
+          "summary": "{{BRAND}}について。",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "{{BRAND}}について",
+              "body": "これはMantleで構築した小さなパブリケーションです。",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ],
+      "post-translations": [
+        {
+          "slug": "welcome",
+          "locale": "ja",
+          "title": "{{BRAND}}へようこそ",
+          "excerpt": "{{DESCRIPTION}}",
+          "body": "{{DESCRIPTION}}\n\n最初の記事はあえて短くしています。読者にとって本当に役立つ最初の記事に差し替えてください。",
+          "publishedAt": 1782130000000,
+          "status": "published"
+        }
+      ]
+    },
+    "ko": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "ko",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "하나의 계약으로 모든 언어에 발행하세요",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "글 읽기",
+                "href": "/posts"
+              },
+              "secondaryAction": {
+                "label": "소개",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "features",
+              "id": "posts",
+              "title": "최신 글",
+              "items": [
+                {
+                  "icon": "sparkles",
+                  "title": "{{BRAND}}에 오신 것을 환영합니다",
+                  "body": "{{DESCRIPTION}}",
+                  "href": "/posts/welcome"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "ko",
+          "title": "{{BRAND}} 소개",
+          "summary": "{{BRAND}} 소개.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "{{BRAND}} 소개",
+              "body": "Mantle로 만든 작은 퍼블리케이션입니다.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ],
+      "post-translations": [
+        {
+          "slug": "welcome",
+          "locale": "ko",
+          "title": "{{BRAND}}에 오신 것을 환영합니다",
+          "excerpt": "{{DESCRIPTION}}",
+          "body": "{{DESCRIPTION}}\n\n첫 글은 일부러 짧게 두었습니다. 독자에게 정말 유용한 첫 글로 바꾸세요.",
+          "publishedAt": 1782130000000,
+          "status": "published"
+        }
+      ]
+    },
+    "es": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "es",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Publica en todos los idiomas desde un solo contrato",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Leer los artículos",
+                "href": "/posts"
+              },
+              "secondaryAction": {
+                "label": "Sobre nosotros",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "features",
+              "id": "posts",
+              "title": "Lo último",
+              "items": [
+                {
+                  "icon": "sparkles",
+                  "title": "Bienvenido a {{BRAND}}",
+                  "body": "{{DESCRIPTION}}",
+                  "href": "/posts/welcome"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "es",
+          "title": "Sobre {{BRAND}}",
+          "summary": "Sobre {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "Sobre {{BRAND}}",
+              "body": "Esta es una pequeña publicación creada con Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ],
+      "post-translations": [
+        {
+          "slug": "welcome",
+          "locale": "es",
+          "title": "Bienvenido a {{BRAND}}",
+          "excerpt": "{{DESCRIPTION}}",
+          "body": "{{DESCRIPTION}}\n\nEsta primera nota es deliberadamente breve. Sustitúyela por el primer artículo útil para tu audiencia.",
+          "publishedAt": 1782130000000,
+          "status": "published"
+        }
+      ]
+    },
+    "fr": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "fr",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Publiez dans toutes les langues à partir d'un seul contrat",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Lire les articles",
+                "href": "/posts"
+              },
+              "secondaryAction": {
+                "label": "À propos",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "features",
+              "id": "posts",
+              "title": "Dernières publications",
+              "items": [
+                {
+                  "icon": "sparkles",
+                  "title": "Bienvenue sur {{BRAND}}",
+                  "body": "{{DESCRIPTION}}",
+                  "href": "/posts/welcome"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "fr",
+          "title": "À propos de {{BRAND}}",
+          "summary": "À propos de {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "À propos de {{BRAND}}",
+              "body": "Ceci est une petite publication créée avec Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ],
+      "post-translations": [
+        {
+          "slug": "welcome",
+          "locale": "fr",
+          "title": "Bienvenue sur {{BRAND}}",
+          "excerpt": "{{DESCRIPTION}}",
+          "body": "{{DESCRIPTION}}\n\nCette première note est volontairement courte. Remplacez-la par le premier article utile à votre audience.",
+          "publishedAt": 1782130000000,
+          "status": "published"
+        }
+      ]
+    },
+    "de": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "de",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Aus einem Vertrag in jeder Sprache veröffentlichen",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Beiträge lesen",
+                "href": "/posts"
+              },
+              "secondaryAction": {
+                "label": "Über uns",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "features",
+              "id": "posts",
+              "title": "Neueste Beiträge",
+              "items": [
+                {
+                  "icon": "sparkles",
+                  "title": "Willkommen bei {{BRAND}}",
+                  "body": "{{DESCRIPTION}}",
+                  "href": "/posts/welcome"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "de",
+          "title": "Über {{BRAND}}",
+          "summary": "Über {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "Über {{BRAND}}",
+              "body": "Dies ist eine kleine Publikation, erstellt mit Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ],
+      "post-translations": [
+        {
+          "slug": "welcome",
+          "locale": "de",
+          "title": "Willkommen bei {{BRAND}}",
+          "excerpt": "{{DESCRIPTION}}",
+          "body": "{{DESCRIPTION}}\n\nDiese erste Notiz ist bewusst kurz. Ersetzen Sie sie durch den ersten nützlichen Artikel für Ihr Publikum.",
+          "publishedAt": 1782130000000,
+          "status": "published"
+        }
+      ]
+    },
+    "it": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "it",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Pubblica in ogni lingua da un solo contratto",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Leggi gli articoli",
+                "href": "/posts"
+              },
+              "secondaryAction": {
+                "label": "Chi siamo",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "features",
+              "id": "posts",
+              "title": "Ultimi articoli",
+              "items": [
+                {
+                  "icon": "sparkles",
+                  "title": "Benvenuto su {{BRAND}}",
+                  "body": "{{DESCRIPTION}}",
+                  "href": "/posts/welcome"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "it",
+          "title": "Chi è {{BRAND}}",
+          "summary": "Chi è {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "Chi è {{BRAND}}",
+              "body": "Questa è una piccola pubblicazione creata con Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ],
+      "post-translations": [
+        {
+          "slug": "welcome",
+          "locale": "it",
+          "title": "Benvenuto su {{BRAND}}",
+          "excerpt": "{{DESCRIPTION}}",
+          "body": "{{DESCRIPTION}}\n\nQuesta prima nota è volutamente breve. Sostituiscila con il primo articolo utile per il tuo pubblico.",
+          "publishedAt": 1782130000000,
+          "status": "published"
+        }
+      ]
+    },
+    "ru": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "ru",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Публикуйте на всех языках из одного контракта",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Читать записи",
+                "href": "/posts"
+              },
+              "secondaryAction": {
+                "label": "О нас",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "features",
+              "id": "posts",
+              "title": "Последние записи",
+              "items": [
+                {
+                  "icon": "sparkles",
+                  "title": "Добро пожаловать в {{BRAND}}",
+                  "body": "{{DESCRIPTION}}",
+                  "href": "/posts/welcome"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "ru",
+          "title": "О {{BRAND}}",
+          "summary": "О {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "О {{BRAND}}",
+              "body": "Это небольшое издание, созданное с Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ],
+      "post-translations": [
+        {
+          "slug": "welcome",
+          "locale": "ru",
+          "title": "Добро пожаловать в {{BRAND}}",
+          "excerpt": "{{DESCRIPTION}}",
+          "body": "{{DESCRIPTION}}\n\nЭта первая заметка намеренно короткая. Замените её первой действительно полезной статьёй для вашей аудитории.",
+          "publishedAt": 1782130000000,
+          "status": "published"
+        }
+      ]
+    },
+    "id": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "id",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Terbitkan dalam setiap bahasa dari satu kontrak",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Baca artikel",
+                "href": "/posts"
+              },
+              "secondaryAction": {
+                "label": "Tentang kami",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "features",
+              "id": "posts",
+              "title": "Terbaru",
+              "items": [
+                {
+                  "icon": "sparkles",
+                  "title": "Selamat datang di {{BRAND}}",
+                  "body": "{{DESCRIPTION}}",
+                  "href": "/posts/welcome"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "id",
+          "title": "Tentang {{BRAND}}",
+          "summary": "Tentang {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "Tentang {{BRAND}}",
+              "body": "Ini publikasi kecil yang dibuat dengan Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ],
+      "post-translations": [
+        {
+          "slug": "welcome",
+          "locale": "id",
+          "title": "Selamat datang di {{BRAND}}",
+          "excerpt": "{{DESCRIPTION}}",
+          "body": "{{DESCRIPTION}}\n\nCatatan pertama ini sengaja dibuat singkat. Ganti dengan artikel pertama yang benar-benar berguna bagi pembaca Anda.",
+          "publishedAt": 1782130000000,
+          "status": "published"
+        }
+      ]
+    },
+    "pt-BR": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "pt-BR",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Publique em todos os idiomas a partir de um contrato",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Ler os artigos",
+                "href": "/posts"
+              },
+              "secondaryAction": {
+                "label": "Sobre nós",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "features",
+              "id": "posts",
+              "title": "Mais recentes",
+              "items": [
+                {
+                  "icon": "sparkles",
+                  "title": "Bem-vindo ao {{BRAND}}",
+                  "body": "{{DESCRIPTION}}",
+                  "href": "/posts/welcome"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "pt-BR",
+          "title": "Sobre {{BRAND}}",
+          "summary": "Sobre {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "Sobre {{BRAND}}",
+              "body": "Esta é uma pequena publicação criada com Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ],
+      "post-translations": [
+        {
+          "slug": "welcome",
+          "locale": "pt-BR",
+          "title": "Bem-vindo ao {{BRAND}}",
+          "excerpt": "{{DESCRIPTION}}",
+          "body": "{{DESCRIPTION}}\n\nEsta primeira nota é curta de propósito. Substitua pelo primeiro artigo realmente útil para o seu público.",
+          "publishedAt": 1782130000000,
+          "status": "published"
+        }
+      ]
+    }
   }
 }
