@@ -1,0 +1,149 @@
+{
+  "canonicalLocale": "{{CANONICAL_LOCALE}}",
+  "locales": {
+    "en": {
+      "nav.about": "About",
+      "nav.contact": "Contact",
+      "chrome.openNavigation": "Open navigation",
+      "chrome.closeNavigation": "Close navigation",
+      "chrome.navigation": "Navigation",
+      "chrome.toggleTheme": "Toggle color theme",
+      "chrome.lightMode": "Light mode",
+      "chrome.darkMode": "Dark mode",
+      "chrome.language": "Language",
+      "footer.builtWith": "Built with Mantle"
+    },
+    "zh-TW": {
+      "nav.about": "關於",
+      "nav.contact": "聯絡",
+      "chrome.openNavigation": "開啟導覽",
+      "chrome.closeNavigation": "關閉導覽",
+      "chrome.navigation": "導覽",
+      "chrome.toggleTheme": "切換色彩主題",
+      "chrome.lightMode": "淺色模式",
+      "chrome.darkMode": "深色模式",
+      "chrome.language": "語言",
+      "footer.builtWith": "使用 Mantle 建立"
+    },
+    "zh-CN": {
+      "nav.about": "关于",
+      "nav.contact": "联系",
+      "chrome.openNavigation": "打开导航",
+      "chrome.closeNavigation": "关闭导航",
+      "chrome.navigation": "导航",
+      "chrome.toggleTheme": "切换颜色主题",
+      "chrome.lightMode": "浅色模式",
+      "chrome.darkMode": "深色模式",
+      "chrome.language": "语言",
+      "footer.builtWith": "使用 Mantle 构建"
+    },
+    "ja": {
+      "nav.about": "概要",
+      "nav.contact": "お問い合わせ",
+      "chrome.openNavigation": "ナビゲーションを開く",
+      "chrome.closeNavigation": "ナビゲーションを閉じる",
+      "chrome.navigation": "ナビゲーション",
+      "chrome.toggleTheme": "カラーテーマを切り替える",
+      "chrome.lightMode": "ライトモード",
+      "chrome.darkMode": "ダークモード",
+      "chrome.language": "言語",
+      "footer.builtWith": "Mantleで構築"
+    },
+    "ko": {
+      "nav.about": "소개",
+      "nav.contact": "문의",
+      "chrome.openNavigation": "탐색 열기",
+      "chrome.closeNavigation": "탐색 닫기",
+      "chrome.navigation": "탐색",
+      "chrome.toggleTheme": "색상 테마 전환",
+      "chrome.lightMode": "라이트 모드",
+      "chrome.darkMode": "다크 모드",
+      "chrome.language": "언어",
+      "footer.builtWith": "Mantle로 제작"
+    },
+    "es": {
+      "nav.about": "Nosotros",
+      "nav.contact": "Contacto",
+      "chrome.openNavigation": "Abrir navegación",
+      "chrome.closeNavigation": "Cerrar navegación",
+      "chrome.navigation": "Navegación",
+      "chrome.toggleTheme": "Cambiar tema de color",
+      "chrome.lightMode": "Modo claro",
+      "chrome.darkMode": "Modo oscuro",
+      "chrome.language": "Idioma",
+      "footer.builtWith": "Creado con Mantle"
+    },
+    "fr": {
+      "nav.about": "À propos",
+      "nav.contact": "Contact",
+      "chrome.openNavigation": "Ouvrir la navigation",
+      "chrome.closeNavigation": "Fermer la navigation",
+      "chrome.navigation": "Navigation",
+      "chrome.toggleTheme": "Changer le thème",
+      "chrome.lightMode": "Mode clair",
+      "chrome.darkMode": "Mode sombre",
+      "chrome.language": "Langue",
+      "footer.builtWith": "Créé avec Mantle"
+    },
+    "de": {
+      "nav.about": "Über uns",
+      "nav.contact": "Kontakt",
+      "chrome.openNavigation": "Navigation öffnen",
+      "chrome.closeNavigation": "Navigation schließen",
+      "chrome.navigation": "Navigation",
+      "chrome.toggleTheme": "Farbschema wechseln",
+      "chrome.lightMode": "Heller Modus",
+      "chrome.darkMode": "Dunkler Modus",
+      "chrome.language": "Sprache",
+      "footer.builtWith": "Erstellt mit Mantle"
+    },
+    "it": {
+      "nav.about": "Chi siamo",
+      "nav.contact": "Contatti",
+      "chrome.openNavigation": "Apri navigazione",
+      "chrome.closeNavigation": "Chiudi navigazione",
+      "chrome.navigation": "Navigazione",
+      "chrome.toggleTheme": "Cambia tema colore",
+      "chrome.lightMode": "Modalità chiara",
+      "chrome.darkMode": "Modalità scura",
+      "chrome.language": "Lingua",
+      "footer.builtWith": "Creato con Mantle"
+    },
+    "ru": {
+      "nav.about": "О нас",
+      "nav.contact": "Контакты",
+      "chrome.openNavigation": "Открыть навигацию",
+      "chrome.closeNavigation": "Закрыть навигацию",
+      "chrome.navigation": "Навигация",
+      "chrome.toggleTheme": "Переключить цветовую тему",
+      "chrome.lightMode": "Светлая тема",
+      "chrome.darkMode": "Тёмная тема",
+      "chrome.language": "Язык",
+      "footer.builtWith": "Создано с Mantle"
+    },
+    "id": {
+      "nav.about": "Tentang",
+      "nav.contact": "Kontak",
+      "chrome.openNavigation": "Buka navigasi",
+      "chrome.closeNavigation": "Tutup navigasi",
+      "chrome.navigation": "Navigasi",
+      "chrome.toggleTheme": "Ubah tema warna",
+      "chrome.lightMode": "Mode terang",
+      "chrome.darkMode": "Mode gelap",
+      "chrome.language": "Bahasa",
+      "footer.builtWith": "Dibuat dengan Mantle"
+    },
+    "pt-BR": {
+      "nav.about": "Sobre",
+      "nav.contact": "Contato",
+      "chrome.openNavigation": "Abrir navegação",
+      "chrome.closeNavigation": "Fechar navegação",
+      "chrome.navigation": "Navegação",
+      "chrome.toggleTheme": "Alternar tema de cores",
+      "chrome.lightMode": "Modo claro",
+      "chrome.darkMode": "Modo escuro",
+      "chrome.language": "Idioma",
+      "footer.builtWith": "Criado com Mantle"
+    }
+  }
+}

@@ -1,112 +1,1199 @@
 {
-  "locale": "{{CANONICAL_LOCALE}}",
+  "canonicalLocale": "{{CANONICAL_LOCALE}}",
   "site": {
     "brand": "{{BRAND}}",
-    "description": "{{DESCRIPTION}}",
-    "chromeLabels": {
-      "openNavigation": "Open navigation",
-      "closeNavigation": "Close navigation",
-      "navigation": "Navigation",
-      "toggleTheme": "Toggle color theme",
-      "lightMode": "Light mode",
-      "darkMode": "Dark mode"
-    },
-    "navLinks": [
-      { "label": "Availability", "href": "#availability" },
-      { "label": "Request", "href": "#request" }
-    ],
-    "navAction": { "label": "Request a reservation", "href": "#request" },
-    "footer": {
-      "tagline": "Clear reservation requests without pretending availability is automatic.",
-      "copyright": "Copyright {{BRAND}}.",
-      "columns": [],
-      "socialLinks": [],
-      "bottomLinks": []
-    }
+    "description": "{{DESCRIPTION}}"
   },
   "collections": {
     "page": [
       {
+        "slug": "home",
         "type": "home",
-        "title": "{{BRAND}}",
-        "status": "published",
-        "sections": [
-          {
-            "type": "hero",
-            "eyebrow": "Reservation starter",
-            "title": "{{BRAND}}",
-            "body": "{{DESCRIPTION}}",
-            "image": {
-              "src": "/assets/mantle-ocean-hero-light.svg",
-              "alt": ""
-            }
-          },
-          {
-            "type": "features",
-            "id": "availability",
-            "title": "Make the reservation promise explicit",
-            "body": "Replace these starter notes with real availability, party limits, and confirmation expectations.",
-            "items": [
-              {
-                "icon": "clock",
-                "title": "Choose a time",
-                "body": "Start with a request flow; add live inventory only when the business needs it."
-              },
-              {
-                "icon": "check",
-                "title": "Confirm manually",
-                "body": "The starter records intent and does not imply an automatic booking."
-              }
-            ]
-          },
-          {
-            "type": "form",
-            "id": "request",
-            "eyebrow": "Request a reservation",
-            "title": "Tell us what you need",
-            "body": "Submitting this form records a request for the owner to review.",
-            "action": {
-              "label": "Send request",
-              "href": "/api/reservation-requests"
-            },
-            "formMessages": {
-              "pending": "Sending request…",
-              "success": "Reservation request received.",
-              "error": "Could not send the request. Please try again."
-            },
-            "fields": [
-              {
-                "name": "name",
-                "label": "Name",
-                "autocomplete": "name",
-                "required": true
-              },
-              {
-                "name": "email",
-                "label": "Email",
-                "type": "email",
-                "autocomplete": "email",
-                "required": true
-              },
-              {
-                "name": "requestedFor",
-                "label": "Requested date or time",
-                "required": true
-              },
-              {
-                "name": "partySize",
-                "label": "Party size",
-                "type": "number"
-              },
-              {
-                "name": "note",
-                "label": "Note",
-                "multiline": true
-              }
-            ]
-          }
-        ]
+        "status": "published"
+      },
+      {
+        "slug": "about",
+        "type": "page",
+        "status": "published"
       }
     ]
+  },
+  "locales": {
+    "en": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "en",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Take requests before you build a booking system",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Request",
+                "href": "#request"
+              },
+              "secondaryAction": {
+                "label": "About us",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "request",
+              "title": "Tell us what you need",
+              "body": "Submitting this records a request for the owner to confirm by hand.",
+              "action": {
+                "label": "Send request",
+                "href": "/api/reservation-requests"
+              },
+              "formMessages": {
+                "pending": "Sending request…",
+                "success": "Request received.",
+                "error": "Could not send the request. Please try again."
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Name",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "Your name",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "Email",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "requestedFor",
+                  "label": "Requested date or time",
+                  "placeholder": "Friday evening",
+                  "required": true
+                },
+                {
+                  "name": "partySize",
+                  "label": "Party size",
+                  "type": "number"
+                },
+                {
+                  "name": "note",
+                  "label": "Note",
+                  "placeholder": "Anything we should know.",
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "en",
+          "title": "About {{BRAND}}",
+          "summary": "About {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "About {{BRAND}}",
+              "body": "This is a small reservation site built with Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "zh-TW": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "zh-TW",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "先收預約，再考慮訂位系統",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "預約",
+                "href": "#request"
+              },
+              "secondaryAction": {
+                "label": "關於我們",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "request",
+              "title": "告訴我們你的需求",
+              "body": "送出後會記錄一筆請求，由負責人手動確認。",
+              "action": {
+                "label": "送出預約",
+                "href": "/api/reservation-requests"
+              },
+              "formMessages": {
+                "pending": "傳送中…",
+                "success": "已收到預約。",
+                "error": "預約傳送失敗，請再試一次。"
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "姓名",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "你的姓名",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "電子郵件",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "requestedFor",
+                  "label": "希望的日期或時間",
+                  "placeholder": "週五晚上",
+                  "required": true
+                },
+                {
+                  "name": "partySize",
+                  "label": "人數",
+                  "type": "number"
+                },
+                {
+                  "name": "note",
+                  "label": "備註",
+                  "placeholder": "有什麼需要我們知道的。",
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "zh-TW",
+          "title": "關於 {{BRAND}}",
+          "summary": "關於 {{BRAND}}。",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "關於 {{BRAND}}",
+              "body": "這是一個以 Mantle 建立的小型預約網站。",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "zh-CN": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "zh-CN",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "先收预约，再考虑订位系统",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "预约",
+                "href": "#request"
+              },
+              "secondaryAction": {
+                "label": "关于我们",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "request",
+              "title": "告诉我们你的需求",
+              "body": "提交后会记录一条请求，由负责人手动确认。",
+              "action": {
+                "label": "提交预约",
+                "href": "/api/reservation-requests"
+              },
+              "formMessages": {
+                "pending": "发送中…",
+                "success": "已收到预约。",
+                "error": "预约发送失败，请重试。"
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "姓名",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "你的姓名",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "电子邮件",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "requestedFor",
+                  "label": "希望的日期或时间",
+                  "placeholder": "周五晚上",
+                  "required": true
+                },
+                {
+                  "name": "partySize",
+                  "label": "人数",
+                  "type": "number"
+                },
+                {
+                  "name": "note",
+                  "label": "备注",
+                  "placeholder": "有什么需要我们知道的。",
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "zh-CN",
+          "title": "关于 {{BRAND}}",
+          "summary": "关于 {{BRAND}}。",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "关于 {{BRAND}}",
+              "body": "这是一个用 Mantle 构建的小型预约网站。",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "ja": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "ja",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "予約システムを作る前に、まず受け付ける",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "予約",
+                "href": "#request"
+              },
+              "secondaryAction": {
+                "label": "私たちについて",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "request",
+              "title": "ご希望をお聞かせください",
+              "body": "送信すると予約リクエストとして記録され、担当者が手動で確定します。",
+              "action": {
+                "label": "リクエストを送信",
+                "href": "/api/reservation-requests"
+              },
+              "formMessages": {
+                "pending": "送信中…",
+                "success": "リクエストを受け取りました。",
+                "error": "送信できませんでした。もう一度お試しください。"
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "お名前",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "お名前",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "メールアドレス",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "requestedFor",
+                  "label": "ご希望の日時",
+                  "placeholder": "金曜の夜",
+                  "required": true
+                },
+                {
+                  "name": "partySize",
+                  "label": "人数",
+                  "type": "number"
+                },
+                {
+                  "name": "note",
+                  "label": "備考",
+                  "placeholder": "ご要望があればご記入ください。",
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "ja",
+          "title": "{{BRAND}}について",
+          "summary": "{{BRAND}}について。",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "{{BRAND}}について",
+              "body": "これはMantleで構築した小さな予約サイトです。",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "ko": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "ko",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "예약 시스템을 만들기 전에 먼저 신청을 받으세요",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "예약",
+                "href": "#request"
+              },
+              "secondaryAction": {
+                "label": "소개",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "request",
+              "title": "필요한 내용을 알려 주세요",
+              "body": "제출하면 예약 요청으로 기록되며 담당자가 직접 확정합니다.",
+              "action": {
+                "label": "요청 보내기",
+                "href": "/api/reservation-requests"
+              },
+              "formMessages": {
+                "pending": "보내는 중…",
+                "success": "요청을 받았습니다.",
+                "error": "요청을 보내지 못했습니다. 다시 시도해 주세요."
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "이름",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "이름",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "이메일",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "requestedFor",
+                  "label": "희망 날짜 또는 시간",
+                  "placeholder": "금요일 저녁",
+                  "required": true
+                },
+                {
+                  "name": "partySize",
+                  "label": "인원",
+                  "type": "number"
+                },
+                {
+                  "name": "note",
+                  "label": "메모",
+                  "placeholder": "알려 주실 내용이 있으면 적어 주세요.",
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "ko",
+          "title": "{{BRAND}} 소개",
+          "summary": "{{BRAND}} 소개.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "{{BRAND}} 소개",
+              "body": "Mantle로 만든 작은 예약 사이트입니다.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "es": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "es",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Recibe solicitudes antes de crear un sistema de reservas",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Reservar",
+                "href": "#request"
+              },
+              "secondaryAction": {
+                "label": "Sobre nosotros",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "request",
+              "title": "Cuéntanos qué necesitas",
+              "body": "Al enviarlo se registra una solicitud que el responsable confirma a mano.",
+              "action": {
+                "label": "Enviar solicitud",
+                "href": "/api/reservation-requests"
+              },
+              "formMessages": {
+                "pending": "Enviando solicitud…",
+                "success": "Solicitud recibida.",
+                "error": "No se pudo enviar la solicitud. Inténtalo de nuevo."
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Nombre",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "Tu nombre",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "Correo electrónico",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "requestedFor",
+                  "label": "Fecha u hora solicitada",
+                  "placeholder": "Viernes por la noche",
+                  "required": true
+                },
+                {
+                  "name": "partySize",
+                  "label": "Número de personas",
+                  "type": "number"
+                },
+                {
+                  "name": "note",
+                  "label": "Nota",
+                  "placeholder": "Algo que debamos saber.",
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "es",
+          "title": "Sobre {{BRAND}}",
+          "summary": "Sobre {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "Sobre {{BRAND}}",
+              "body": "Este es un pequeño sitio de reservas creado con Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "fr": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "fr",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Recevez des demandes avant de créer un système de réservation",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Réserver",
+                "href": "#request"
+              },
+              "secondaryAction": {
+                "label": "À propos",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "request",
+              "title": "Dites-nous ce dont vous avez besoin",
+              "body": "L'envoi enregistre une demande que le responsable confirme manuellement.",
+              "action": {
+                "label": "Envoyer la demande",
+                "href": "/api/reservation-requests"
+              },
+              "formMessages": {
+                "pending": "Envoi de la demande…",
+                "success": "Demande reçue.",
+                "error": "Impossible d'envoyer la demande. Veuillez réessayer."
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Nom",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "Votre nom",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "E-mail",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "requestedFor",
+                  "label": "Date ou heure souhaitée",
+                  "placeholder": "Vendredi soir",
+                  "required": true
+                },
+                {
+                  "name": "partySize",
+                  "label": "Nombre de personnes",
+                  "type": "number"
+                },
+                {
+                  "name": "note",
+                  "label": "Note",
+                  "placeholder": "Ce que nous devrions savoir.",
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "fr",
+          "title": "À propos de {{BRAND}}",
+          "summary": "À propos de {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "À propos de {{BRAND}}",
+              "body": "Ceci est un petit site de réservation créé avec Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "de": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "de",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Anfragen annehmen, bevor Sie ein Buchungssystem bauen",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Anfragen",
+                "href": "#request"
+              },
+              "secondaryAction": {
+                "label": "Über uns",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "request",
+              "title": "Sagen Sie uns, was Sie brauchen",
+              "body": "Das Absenden erfasst eine Anfrage, die die Inhaberin manuell bestätigt.",
+              "action": {
+                "label": "Anfrage senden",
+                "href": "/api/reservation-requests"
+              },
+              "formMessages": {
+                "pending": "Anfrage wird gesendet…",
+                "success": "Anfrage erhalten.",
+                "error": "Anfrage konnte nicht gesendet werden. Bitte erneut versuchen."
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Name",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "Ihr Name",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "E-Mail",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "requestedFor",
+                  "label": "Gewünschtes Datum oder Uhrzeit",
+                  "placeholder": "Freitagabend",
+                  "required": true
+                },
+                {
+                  "name": "partySize",
+                  "label": "Personenzahl",
+                  "type": "number"
+                },
+                {
+                  "name": "note",
+                  "label": "Hinweis",
+                  "placeholder": "Was wir wissen sollten.",
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "de",
+          "title": "Über {{BRAND}}",
+          "summary": "Über {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "Über {{BRAND}}",
+              "body": "Dies ist eine kleine Reservierungs-Website, erstellt mit Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "it": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "it",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Raccogli richieste prima di costruire un sistema di prenotazione",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Prenota",
+                "href": "#request"
+              },
+              "secondaryAction": {
+                "label": "Chi siamo",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "request",
+              "title": "Dicci di cosa hai bisogno",
+              "body": "L'invio registra una richiesta che il titolare conferma manualmente.",
+              "action": {
+                "label": "Invia richiesta",
+                "href": "/api/reservation-requests"
+              },
+              "formMessages": {
+                "pending": "Invio della richiesta…",
+                "success": "Richiesta ricevuta.",
+                "error": "Impossibile inviare la richiesta. Riprova."
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Nome",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "Il tuo nome",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "E-mail",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "requestedFor",
+                  "label": "Data o ora richiesta",
+                  "placeholder": "Venerdì sera",
+                  "required": true
+                },
+                {
+                  "name": "partySize",
+                  "label": "Numero di persone",
+                  "type": "number"
+                },
+                {
+                  "name": "note",
+                  "label": "Nota",
+                  "placeholder": "Qualcosa che dovremmo sapere.",
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "it",
+          "title": "Chi è {{BRAND}}",
+          "summary": "Chi è {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "Chi è {{BRAND}}",
+              "body": "Questo è un piccolo sito di prenotazioni creato con Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "ru": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "ru",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Принимайте заявки до того, как строить систему бронирования",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Забронировать",
+                "href": "#request"
+              },
+              "secondaryAction": {
+                "label": "О нас",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "request",
+              "title": "Расскажите, что вам нужно",
+              "body": "Отправка создаёт заявку, которую владелец подтверждает вручную.",
+              "action": {
+                "label": "Отправить заявку",
+                "href": "/api/reservation-requests"
+              },
+              "formMessages": {
+                "pending": "Отправка заявки…",
+                "success": "Заявка получена.",
+                "error": "Не удалось отправить заявку. Попробуйте ещё раз."
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Имя",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "Ваше имя",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "Электронная почта",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "requestedFor",
+                  "label": "Желаемая дата или время",
+                  "placeholder": "Вечер пятницы",
+                  "required": true
+                },
+                {
+                  "name": "partySize",
+                  "label": "Количество гостей",
+                  "type": "number"
+                },
+                {
+                  "name": "note",
+                  "label": "Примечание",
+                  "placeholder": "Что нам стоит знать.",
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "ru",
+          "title": "О {{BRAND}}",
+          "summary": "О {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "О {{BRAND}}",
+              "body": "Это небольшой сайт бронирования, созданный с Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "id": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "id",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Terima permintaan sebelum membangun sistem pemesanan",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Pesan",
+                "href": "#request"
+              },
+              "secondaryAction": {
+                "label": "Tentang kami",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "request",
+              "title": "Beri tahu kami kebutuhan Anda",
+              "body": "Mengirim formulir ini mencatat permintaan yang dikonfirmasi pemilik secara manual.",
+              "action": {
+                "label": "Kirim permintaan",
+                "href": "/api/reservation-requests"
+              },
+              "formMessages": {
+                "pending": "Mengirim permintaan…",
+                "success": "Permintaan diterima.",
+                "error": "Permintaan gagal dikirim. Silakan coba lagi."
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Nama",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "Nama Anda",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "Email",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "requestedFor",
+                  "label": "Tanggal atau waktu yang diinginkan",
+                  "placeholder": "Jumat malam",
+                  "required": true
+                },
+                {
+                  "name": "partySize",
+                  "label": "Jumlah orang",
+                  "type": "number"
+                },
+                {
+                  "name": "note",
+                  "label": "Catatan",
+                  "placeholder": "Hal yang perlu kami ketahui.",
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "id",
+          "title": "Tentang {{BRAND}}",
+          "summary": "Tentang {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "Tentang {{BRAND}}",
+              "body": "Ini situs reservasi kecil yang dibuat dengan Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "pt-BR": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "pt-BR",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Receba pedidos antes de construir um sistema de reservas",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Reservar",
+                "href": "#request"
+              },
+              "secondaryAction": {
+                "label": "Sobre nós",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "request",
+              "title": "Conte o que você precisa",
+              "body": "O envio registra um pedido que o responsável confirma manualmente.",
+              "action": {
+                "label": "Enviar pedido",
+                "href": "/api/reservation-requests"
+              },
+              "formMessages": {
+                "pending": "Enviando pedido…",
+                "success": "Pedido recebido.",
+                "error": "Não foi possível enviar o pedido. Tente novamente."
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Nome",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "Seu nome",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "E-mail",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "requestedFor",
+                  "label": "Data ou horário desejado",
+                  "placeholder": "Sexta à noite",
+                  "required": true
+                },
+                {
+                  "name": "partySize",
+                  "label": "Número de pessoas",
+                  "type": "number"
+                },
+                {
+                  "name": "note",
+                  "label": "Observação",
+                  "placeholder": "Algo que devemos saber.",
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "pt-BR",
+          "title": "Sobre {{BRAND}}",
+          "summary": "Sobre {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "Sobre {{BRAND}}",
+              "body": "Este é um pequeno site de reservas criado com Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    }
   }
 }

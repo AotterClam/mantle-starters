@@ -3,155 +3,222 @@ kind: Schema
 metadata:
   name: page
 spec:
-  title: Pages
-  description: Public page content for an intake site.
+  title: { en: Pages, de: Seiten, es: Páginas, fr: Pages, id: Halaman, it: Pagine, ja: ページ, ko: 페이지, pt-BR: Páginas, ru: Страницы, zh-CN: 页面, zh-TW: 頁面 }
+  description:
+    en: Stable page identities shared by every language version.
+    de: Stabile Seitenidentitäten, die von allen Sprachversionen gemeinsam genutzt werden.
+    es: Identidades de página estables compartidas por todas las versiones lingüísticas.
+    fr: Identités de page stables partagées par toutes les versions linguistiques.
+    id: Identitas halaman stabil yang digunakan bersama oleh semua versi bahasa.
+    it: Identità di pagina stabili condivise da tutte le versioni linguistiche.
+    ja: すべての言語版で共有する安定したページ識別情報です。
+    ko: 모든 언어 버전이 공유하는 안정적인 페이지 식별 정보입니다.
+    pt-BR: Identidades de página estáveis compartilhadas por todas as versões de idioma.
+    ru: Стабильные идентификаторы страниц, общие для всех языковых версий.
+    zh-CN: 所有语言版本共享的稳定页面标识数据。
+    zh-TW: 所有語言版本共用的穩定頁面識別資料。
   schema:
     type: object
-    required: [type, title, sections]
+    required: [slug, type]
     properties:
+      slug:
+        type: string
+        pattern: "^[a-z0-9-]+$"
+        title: { en: URL slug, de: URL-Slug, es: Slug de URL, fr: Slug d’URL, id: Slug URL, it: Slug URL, ja: URL スラッグ, ko: URL 슬러그, pt-BR: Slug da URL, ru: URL-slug, zh-CN: 网址代称, zh-TW: 網址代稱 }
       type:
         type: string
-        enum: [home]
-      title:
+        enum: [home, page]
+        title: { en: Page type, de: Seitentyp, es: Tipo de página, fr: Type de page, id: Jenis halaman, it: Tipo di pagina, ja: ページ種別, ko: 페이지 유형, pt-BR: Tipo de página, ru: Тип страницы, zh-CN: 页面类型, zh-TW: 頁面類型 }
+  uniqueIndexes:
+    - [slug]
+  localized: false
+  lifecycle: publishing
+---
+apiVersion: cms.mantle.aotter.net/v1
+kind: Schema
+metadata:
+  name: page-translations
+spec:
+  title: { en: Page translations, de: Seitenübersetzungen, es: Traducciones de páginas, fr: Traductions de pages, id: Terjemahan halaman, it: Traduzioni delle pagine, ja: ページ翻訳, ko: 페이지 번역, pt-BR: Traduções de páginas, ru: Переводы страниц, zh-CN: 页面翻译, zh-TW: 頁面翻譯 }
+  description:
+    en: Localized page copy and sections.
+    de: Lokalisierte Seitentexte und Abschnitte.
+    es: Textos y secciones de página localizados.
+    fr: Textes et sections de page localisés.
+    id: Teks dan bagian halaman yang dilokalkan.
+    it: Testi e sezioni di pagina localizzati.
+    ja: 各言語のページ文言とセクションです。
+    ko: 언어별 페이지 문구와 섹션입니다.
+    pt-BR: Textos e seções de página localizados.
+    ru: Локализованные тексты и разделы страницы.
+    zh-CN: 各语言的页面文案和区块。
+    zh-TW: 各語言的頁面文案與區塊。
+  localized: true
+  translates:
+    parent: page
+    on: slug
+  schema:
+    type: object
+    required: [slug, locale, title, sections]
+    properties:
+      slug:
         type: string
-      summary:
+        pattern: "^[a-z0-9-]+$"
+        title: { en: URL slug, de: URL-Slug, es: Slug de URL, fr: Slug d’URL, id: Slug URL, it: Slug URL, ja: URL スラッグ, ko: URL 슬러그, pt-BR: Slug da URL, ru: URL-slug, zh-CN: 网址代称, zh-TW: 網址代稱 }
+      locale:
         type: string
+        title: { en: Language, de: Sprache, es: Idioma, fr: Langue, id: Bahasa, it: Lingua, ja: 言語, ko: 언어, pt-BR: Idioma, ru: Язык, zh-CN: 语言, zh-TW: 語言 }
+      title: { type: string, title: { en: Title, de: Titel, es: Título, fr: Titre, id: Judul, it: Titolo, ja: タイトル, ko: 제목, pt-BR: Título, ru: Заголовок, zh-CN: 标题, zh-TW: 標題 } }
+      summary: { type: string, title: { en: Summary, de: Zusammenfassung, es: Resumen, fr: Résumé, id: Ringkasan, it: Riepilogo, ja: 概要, ko: 요약, pt-BR: Resumo, ru: Краткое описание, zh-CN: 摘要, zh-TW: 摘要 } }
       sections:
         type: array
         minItems: 1
+        title: { en: Sections, de: Abschnitte, es: Secciones, fr: Sections, id: Bagian, it: Sezioni, ja: セクション, ko: 섹션, pt-BR: Seções, ru: Разделы, zh-CN: 区块, zh-TW: 區塊 }
         items:
           type: object
           required: [type, title]
           properties:
             type:
               type: string
-              enum:
-                - hero
-                - content
-                - features
-                - faq
-                - intake
-                - cta
-            id:
-              type: string
-            eyebrow:
-              type: string
-            title:
-              type: string
+              enum: [hero, content, intake, cta]
+              title: { en: Section type, de: Abschnittstyp, es: Tipo de sección, fr: Type de section, id: Jenis bagian, it: Tipo di sezione, ja: セクション種別, ko: 섹션 유형, pt-BR: Tipo de seção, ru: Тип раздела, zh-CN: 区块类型, zh-TW: 區塊類型 }
+            id: { type: string, title: { en: ID, de: ID, es: ID, fr: ID, id: ID, it: ID, ja: ID, ko: ID, pt-BR: ID, ru: ID, zh-CN: ID, zh-TW: ID } }
+            eyebrow: { type: string, title: { en: Eyebrow, de: Übertitel, es: Antetítulo, fr: Surtitre, id: Teks pengantar, it: Sopratitolo, ja: アイブロウ, ko: 아이브로우, pt-BR: Sobretítulo, ru: Надзаголовок, zh-CN: 引导文字, zh-TW: 引導文字 } }
+            title: { type: string, title: { en: Title, de: Titel, es: Título, fr: Titre, id: Judul, it: Titolo, ja: タイトル, ko: 제목, pt-BR: Título, ru: Заголовок, zh-CN: 标题, zh-TW: 標題 } }
             body:
               type: string
               x-mcp-hint: markdown
-            showImage:
-              type: boolean
+              title: { en: Body, de: Inhalt, es: Contenido, fr: Contenu, id: Isi, it: Contenuto, ja: 本文, ko: 본문, pt-BR: Conteúdo, ru: Содержимое, zh-CN: 正文, zh-TW: 內文 }
+            showImage: { type: boolean, title: { en: Show image, de: Bild anzeigen, es: Mostrar imagen, fr: Afficher l’image, id: Tampilkan gambar, it: Mostra immagine, ja: 画像を表示, ko: 이미지 표시, pt-BR: Exibir imagem, ru: Показывать изображение, zh-CN: 显示图片, zh-TW: 顯示圖片 } }
             image:
               type: object
               required: [src, alt]
+              title: { en: Image, de: Bild, es: Imagen, fr: Image, id: Gambar, it: Immagine, ja: 画像, ko: 이미지, pt-BR: Imagem, ru: Изображение, zh-CN: 图片, zh-TW: 圖片 }
               properties:
-                src: { type: string }
-                alt: { type: string }
+                src: { type: string, title: { en: Image URL, de: Bild-URL, es: URL de la imagen, fr: URL de l’image, id: URL gambar, it: URL immagine, ja: 画像 URL, ko: 이미지 URL, pt-BR: URL da imagem, ru: URL изображения, zh-CN: 图片网址, zh-TW: 圖片網址 } }
+                alt: { type: string, title: { en: Alternative text, de: Alternativtext, es: Texto alternativo, fr: Texte alternatif, id: Teks alternatif, it: Testo alternativo, ja: 代替テキスト, ko: 대체 텍스트, pt-BR: Texto alternativo, ru: Альтернативный текст, zh-CN: 替代文字, zh-TW: 替代文字 } }
             action:
               type: object
+              title: { en: Primary action, de: Primäre Aktion, es: Acción principal, fr: Action principale, id: Tindakan utama, it: Azione principale, ja: メインアクション, ko: 기본 동작, pt-BR: Ação principal, ru: Основное действие, zh-CN: 主要操作, zh-TW: 主要動作 }
               properties:
-                label: { type: string }
-                href: { type: string }
+                label: { type: string, title: { en: Label, de: Beschriftung, es: Etiqueta, fr: Libellé, id: Label, it: Etichetta, ja: ラベル, ko: 레이블, pt-BR: Rótulo, ru: Метка, zh-CN: 标签, zh-TW: 標籤 } }
+                href: { type: string, title: { en: Link, de: Link, es: Enlace, fr: Lien, id: Tautan, it: Link, ja: リンク, ko: 링크, pt-BR: Link, ru: Ссылка, zh-CN: 链接, zh-TW: 連結 } }
             secondaryAction:
               type: object
+              title: { en: Secondary action, de: Sekundäre Aktion, es: Acción secundaria, fr: Action secondaire, id: Tindakan sekunder, it: Azione secondaria, ja: サブアクション, ko: 보조 동작, pt-BR: Ação secundária, ru: Дополнительное действие, zh-CN: 次要操作, zh-TW: 次要動作 }
               properties:
-                label: { type: string }
-                href: { type: string }
-            intakeLabels:
-              type: object
-              required: [back, next, submit, progressTemplate]
-              properties:
-                back: { type: string }
-                next: { type: string }
-                submit: { type: string }
-                progressTemplate: { type: string }
+                label: { type: string, title: { en: Label, de: Beschriftung, es: Etiqueta, fr: Libellé, id: Label, it: Etichetta, ja: ラベル, ko: 레이블, pt-BR: Rótulo, ru: Метка, zh-CN: 标签, zh-TW: 標籤 } }
+                href: { type: string, title: { en: Link, de: Link, es: Enlace, fr: Lien, id: Tautan, it: Link, ja: リンク, ko: 링크, pt-BR: Link, ru: Ссылка, zh-CN: 链接, zh-TW: 連結 } }
             formMessages:
               type: object
               required: [pending, success, error]
+              title: { en: Form messages, de: Formularmeldungen, es: Mensajes del formulario, fr: Messages du formulaire, id: Pesan formulir, it: Messaggi del modulo, ja: フォームメッセージ, ko: 양식 메시지, pt-BR: Mensagens do formulário, ru: Сообщения формы, zh-CN: 表单消息, zh-TW: 表單訊息 }
               properties:
-                pending: { type: string }
-                success: { type: string }
-                error: { type: string }
-            items:
-              type: array
-              items:
-                type: object
-                properties:
-                  title: { type: string }
-                  body:
-                    type: string
-                    x-mcp-hint: markdown
-                  icon: { type: string }
+                pending: { type: string, title: { en: Sending, de: Wird gesendet, es: Enviando, fr: Envoi en cours, id: Mengirim, it: Invio in corso, ja: 送信中, ko: 보내는 중, pt-BR: Enviando, ru: Отправка, zh-CN: 发送中, zh-TW: 傳送中 } }
+                success: { type: string, title: { en: Success, de: Erfolg, es: Éxito, fr: Succès, id: Berhasil, it: Successo, ja: 成功, ko: 성공, pt-BR: Sucesso, ru: Успешно, zh-CN: 成功, zh-TW: 成功 } }
+                error: { type: string, title: { en: Error, de: Fehler, es: Error, fr: Erreur, id: Kesalahan, it: Errore, ja: エラー, ko: 오류, pt-BR: Erro, ru: Ошибка, zh-CN: 错误, zh-TW: 錯誤 } }
+            intakeLabels:
+              type: object
+              required: [back, next, submit, progressTemplate]
+              title: { en: Wizard labels, de: Assistenten-Beschriftungen, es: Etiquetas del asistente, fr: Libellés de l’assistant, id: Label wizard, it: Etichette procedura guidata, ja: ウィザードのラベル, ko: 마법사 레이블, pt-BR: Rótulos do assistente, ru: Подписи мастера, zh-CN: 向导标签, zh-TW: 精靈標籤 }
+              properties:
+                back: { type: string, title: { en: Back, de: Zurück, es: Atrás, fr: Retour, id: Kembali, it: Indietro, ja: 戻る, ko: 뒤로, pt-BR: Voltar, ru: Назад, zh-CN: 上一步, zh-TW: 上一步 } }
+                next: { type: string, title: { en: Next, de: Weiter, es: Siguiente, fr: Suivant, id: Berikutnya, it: Avanti, ja: 次へ, ko: 다음, pt-BR: Avançar, ru: Далее, zh-CN: 下一步, zh-TW: 下一步 } }
+                submit: { type: string, title: { en: Submit, de: Absenden, es: Enviar, fr: Envoyer, id: Kirim, it: Invia, ja: 送信, ko: 제출, pt-BR: Enviar, ru: Отправить, zh-CN: 提交, zh-TW: 送出 } }
+                progressTemplate: { type: string, title: { en: Progress template, de: Fortschrittsvorlage, es: Plantilla de progreso, fr: Modèle de progression, id: Templat progres, it: Modello di avanzamento, ja: 進捗テンプレート, ko: 진행 표시 형식, pt-BR: Modelo de progresso, ru: Шаблон прогресса, zh-CN: 进度模板, zh-TW: 進度範本 } }
             steps:
               type: array
+              title: { en: Steps, de: Schritte, es: Pasos, fr: Étapes, id: Langkah, it: Passaggi, ja: ステップ, ko: 단계, pt-BR: Etapas, ru: Шаги, zh-CN: 步骤, zh-TW: 步驟 }
               items:
                 type: object
                 required: [id, title]
                 properties:
-                  id: { type: string }
-                  title: { type: string }
+                  id: { type: string, title: { en: ID, de: ID, es: ID, fr: ID, id: ID, it: ID, ja: ID, ko: ID, pt-BR: ID, ru: ID, zh-CN: ID, zh-TW: ID } }
+                  title: { type: string, title: { en: Title, de: Titel, es: Título, fr: Titre, id: Judul, it: Titolo, ja: タイトル, ko: 제목, pt-BR: Título, ru: Заголовок, zh-CN: 标题, zh-TW: 標題 } }
                   body:
                     type: string
                     x-mcp-hint: markdown
-            fields:
-              type: array
-              items:
-                type: object
-                required: [name, label]
-                properties:
-                  name: { type: string }
-                  label: { type: string }
-                  type: { type: string }
-                  step: { type: string }
-                  placeholder: { type: string }
-                  autocomplete: { type: string }
-                  required: { type: boolean }
-                  multiline: { type: boolean }
-                  options:
-                    type: array
-                    items:
-                      type: object
-                      required: [label, value]
-                      properties:
-                        label: { type: string }
-                        value: { type: string }
-                        body:
-                          type: string
-                          x-mcp-hint: markdown
-                  when:
-                    type: object
-                    required: [field]
-                    properties:
-                      field: { type: string }
-                      equals: { type: string }
-                      oneOf:
-                        type: array
-                        items: { type: string }
+                    title: { en: Body, de: Inhalt, es: Contenido, fr: Contenu, id: Isi, it: Contenuto, ja: 本文, ko: 본문, pt-BR: Conteúdo, ru: Содержимое, zh-CN: 正文, zh-TW: 內文 }
             results:
               type: array
+              title: { en: Results, de: Ergebnisse, es: Resultados, fr: Résultats, id: Hasil, it: Risultati, ja: 結果, ko: 결과, pt-BR: Resultados, ru: Результаты, zh-CN: 结果, zh-TW: 結果 }
               items:
                 type: object
                 required: [key, title]
                 properties:
-                  key: { type: string }
-                  title: { type: string }
+                  key: { type: string, title: { en: Key, de: Schlüssel, es: Clave, fr: Clé, id: Kunci, it: Chiave, ja: キー, ko: 키, pt-BR: Chave, ru: Ключ, zh-CN: 键, zh-TW: 鍵 } }
+                  title: { type: string, title: { en: Title, de: Titel, es: Título, fr: Titre, id: Judul, it: Titolo, ja: タイトル, ko: 제목, pt-BR: Título, ru: Заголовок, zh-CN: 标题, zh-TW: 標題 } }
                   body:
                     type: string
                     x-mcp-hint: markdown
+                    title: { en: Body, de: Inhalt, es: Contenido, fr: Contenu, id: Isi, it: Contenuto, ja: 本文, ko: 본문, pt-BR: Conteúdo, ru: Содержимое, zh-CN: 正文, zh-TW: 內文 }
                   when:
                     type: object
                     required: [field]
+                    title: { en: Condition, de: Bedingung, es: Condición, fr: Condition, id: Kondisi, it: Condizione, ja: 条件, ko: 조건, pt-BR: Condição, ru: Условие, zh-CN: 条件, zh-TW: 條件 }
                     properties:
-                      field: { type: string }
-                      equals: { type: string }
+                      field: { type: string, title: { en: Field, de: Feld, es: Campo, fr: Champ, id: Bidang, it: Campo, ja: 項目, ko: 필드, pt-BR: Campo, ru: Поле, zh-CN: 字段, zh-TW: 欄位 } }
+                      equals: { type: string, title: { en: Equals, de: Gleich, es: Igual a, fr: Égal à, id: Sama dengan, it: Uguale a, ja: 一致する値, ko: 같음, pt-BR: Igual a, ru: Равно, zh-CN: 等于, zh-TW: 等於 } }
                       oneOf:
                         type: array
+                        title: { en: One of, de: Einer von, es: Uno de, fr: L’un de, id: Salah satu dari, it: Uno di, ja: いずれか, ko: 다음 중 하나, pt-BR: Um de, ru: Одно из, zh-CN: 其中之一, zh-TW: 其中之一 }
                         items: { type: string }
+            fields:
+              type: array
+              title: { en: Fields, de: Felder, es: Campos, fr: Champs, id: Bidang, it: Campi, ja: 項目, ko: 필드, pt-BR: Campos, ru: Поля, zh-CN: 字段, zh-TW: 欄位 }
+              items:
+                type: object
+                required: [name, label]
+                properties:
+                  name: { type: string, title: { en: Field name, de: Feldname, es: Nombre del campo, fr: Nom du champ, id: Nama bidang, it: Nome del campo, ja: 項目名, ko: 필드 이름, pt-BR: Nome do campo, ru: Имя поля, zh-CN: 字段名称, zh-TW: 欄位名稱 } }
+                  label: { type: string, title: { en: Label, de: Beschriftung, es: Etiqueta, fr: Libellé, id: Label, it: Etichetta, ja: ラベル, ko: 레이블, pt-BR: Rótulo, ru: Метка, zh-CN: 标签, zh-TW: 標籤 } }
+                  type: { type: string, title: { en: Input type, de: Eingabetyp, es: Tipo de entrada, fr: Type de champ, id: Jenis masukan, it: Tipo di campo, ja: 入力種別, ko: 입력 유형, pt-BR: Tipo de entrada, ru: Тип поля, zh-CN: 输入类型, zh-TW: 輸入類型 } }
+                  step: { type: string, title: { en: Step, de: Schritt, es: Paso, fr: Étape, id: Langkah, it: Passaggio, ja: ステップ, ko: 단계, pt-BR: Etapa, ru: Шаг, zh-CN: 步骤, zh-TW: 步驟 } }
+                  placeholder: { type: string, title: { en: Placeholder, de: Platzhalter, es: Marcador de posición, fr: Texte indicatif, id: Placeholder, it: Segnaposto, ja: プレースホルダー, ko: 자리 표시자, pt-BR: Espaço reservado, ru: Подсказка, zh-CN: 占位文字, zh-TW: 佔位文字 } }
+                  autocomplete: { type: string, title: { en: Autocomplete, de: Autovervollständigung, es: Autocompletar, fr: Saisie automatique, id: Isi otomatis, it: Completamento automatico, ja: 自動入力, ko: 자동 완성, pt-BR: Preenchimento automático, ru: Автозаполнение, zh-CN: 自动填充, zh-TW: 自動填入 } }
+                  required: { type: boolean, title: { en: Required, de: Pflichtfeld, es: Obligatorio, fr: Obligatoire, id: Wajib, it: Obbligatorio, ja: 必須, ko: 필수, pt-BR: Obrigatório, ru: Обязательное, zh-CN: 必填, zh-TW: 必填 } }
+                  multiline: { type: boolean, title: { en: Multiline, de: Mehrzeilig, es: Multilínea, fr: Multiligne, id: Multibaris, it: Multiriga, ja: 複数行, ko: 여러 줄, pt-BR: Multilinha, ru: Многострочное, zh-CN: 多行, zh-TW: 多行 } }
+                  options:
+                    type: array
+                    title: { en: Options, de: Optionen, es: Opciones, fr: Options, id: Pilihan, it: Opzioni, ja: 選択肢, ko: 선택지, pt-BR: Opções, ru: Варианты, zh-CN: 选项, zh-TW: 選項 }
+                    items:
+                      type: object
+                      required: [label, value]
+                      properties:
+                        label: { type: string, title: { en: Label, de: Beschriftung, es: Etiqueta, fr: Libellé, id: Label, it: Etichetta, ja: ラベル, ko: 레이블, pt-BR: Rótulo, ru: Метка, zh-CN: 标签, zh-TW: 標籤 } }
+                        value: { type: string, title: { en: Value, de: Wert, es: Valor, fr: Valeur, id: Nilai, it: Valore, ja: 値, ko: 값, pt-BR: Valor, ru: Значение, zh-CN: 值, zh-TW: 值 } }
+                        body:
+                          type: string
+                          x-mcp-hint: markdown
+                          title: { en: Body, de: Inhalt, es: Contenido, fr: Contenu, id: Isi, it: Contenuto, ja: 本文, ko: 본문, pt-BR: Conteúdo, ru: Содержимое, zh-CN: 正文, zh-TW: 內文 }
+                  when:
+                    type: object
+                    required: [field]
+                    title: { en: Condition, de: Bedingung, es: Condición, fr: Condition, id: Kondisi, it: Condizione, ja: 条件, ko: 조건, pt-BR: Condição, ru: Условие, zh-CN: 条件, zh-TW: 條件 }
+                    properties:
+                      field: { type: string, title: { en: Field, de: Feld, es: Campo, fr: Champ, id: Bidang, it: Campo, ja: 項目, ko: 필드, pt-BR: Campo, ru: Поле, zh-CN: 字段, zh-TW: 欄位 } }
+                      equals: { type: string, title: { en: Equals, de: Gleich, es: Igual a, fr: Égal à, id: Sama dengan, it: Uguale a, ja: 一致する値, ko: 같음, pt-BR: Igual a, ru: Равно, zh-CN: 等于, zh-TW: 等於 } }
+                      oneOf:
+                        type: array
+                        title: { en: One of, de: Einer von, es: Uno de, fr: L’un de, id: Salah satu dari, it: Uno di, ja: いずれか, ko: 다음 중 하나, pt-BR: Um de, ru: Одно из, zh-CN: 其中之一, zh-TW: 其中之一 }
+                        items: { type: string }
+            items:
+              type: array
+              title: { en: Items, de: Positionen, es: Artículos, fr: Éléments, id: Item, it: Articoli, ja: 項目, ko: 항목, pt-BR: Itens, ru: Позиции, zh-CN: 项目, zh-TW: 項目 }
+              items:
+                type: object
+                properties:
+                  title: { type: string, title: { en: Title, de: Titel, es: Título, fr: Titre, id: Judul, it: Titolo, ja: タイトル, ko: 제목, pt-BR: Título, ru: Заголовок, zh-CN: 标题, zh-TW: 標題 } }
+                  body:
+                    type: string
+                    x-mcp-hint: markdown
+                    title: { en: Body, de: Inhalt, es: Contenido, fr: Contenu, id: Isi, it: Contenuto, ja: 本文, ko: 본문, pt-BR: Conteúdo, ru: Содержимое, zh-CN: 正文, zh-TW: 內文 }
+                  icon: { type: string, title: { en: Icon, de: Symbol, es: Icono, fr: Icône, id: Ikon, it: Icona, ja: アイコン, ko: 아이콘, pt-BR: Ícone, ru: Значок, zh-CN: 图标, zh-TW: 圖示 } }
+                  href: { type: string, title: { en: Link, de: Link, es: Enlace, fr: Lien, id: Tautan, it: Link, ja: リンク, ko: 링크, pt-BR: Link, ru: Ссылка, zh-CN: 链接, zh-TW: 連結 } }
   uniqueIndexes:
-    - [type]
-  localized: false
+    - [slug, locale]
+  indexes:
+    - [locale, slug]
   lifecycle: publishing
 ---
 apiVersion: cms.mantle.aotter.net/v1
@@ -160,11 +227,42 @@ metadata:
   name: home
 spec:
   surface: public
-  from: page
-  fields: [id, type, title, summary, sections, updatedAt]
+  from: page-translations
+  params:
+    type: object
+    additionalProperties: false
+    required: [locale]
+    properties:
+      locale: { type: string }
+  fields: [id, slug, locale, title, summary, sections, updatedAt]
   filter:
-    eq: { field: status, value: published }
+    and:
+      - eq: { field: status, value: published }
+      - eq: { field: slug, value: home }
+      - eq: { field: locale, value: { $param: locale } }
   limit: 1
+---
+apiVersion: cms.mantle.aotter.net/v1
+kind: View
+metadata:
+  name: public-pages
+spec:
+  surface: public
+  from: page-translations
+  params:
+    type: object
+    additionalProperties: false
+    required: [locale]
+    properties:
+      locale: { type: string }
+  fields: [id, slug, locale, title, summary, sections, updatedAt]
+  filter:
+    and:
+      - eq: { field: status, value: published }
+      - eq: { field: locale, value: { $param: locale } }
+  orderBy:
+    - { field: slug, direction: asc }
+  limit: 100
 ---
 apiVersion: cms.mantle.aotter.net/v1
 kind: Schema
@@ -184,7 +282,7 @@ spec:
         format: email
       attendance:
         type: string
-        enum: [yes, maybe, no]
+        enum: [yes, no]
       role:
         type: string
       session:
@@ -197,7 +295,7 @@ spec:
         type: string
       resultKey:
         type: string
-        enum: [reserved, follow-up, updates]
+        enum: [joined, updates]
       replyLocale:
         type: string
       createdAt:
@@ -218,12 +316,12 @@ spec:
     properties:
       name: { type: string }
       email: { type: string, format: email }
-      attendance: { type: string, enum: [yes, maybe, no] }
+      attendance: { type: string, enum: [yes, no] }
       role: { type: string }
       session: { type: string, enum: [morning, afternoon, either] }
       updates: { type: string, enum: [future-dates, notes] }
       note: { type: string }
-      resultKey: { type: string, enum: [reserved, follow-up, updates] }
+      resultKey: { type: string, enum: [joined, updates] }
       replyLocale: { type: string }
       "cf-turnstile-response": { type: string }
       turnstileToken: { type: string }

@@ -203,15 +203,26 @@ function smokeLocalMaterializer() {
     if (!wrangler.includes('database_name = "northstar-db"')) throw new Error("local D1 name mismatch");
     if (!wrangler.includes('PUBLIC_ORIGIN = "http://localhost:8787"')) throw new Error("local origin missing");
     assertGeneratedOutputsAbsent(output, "presence");
+    const bilingualPresence = spawnSync(process.execPath, [
+      "scripts/dev-provision-bundle.mjs",
+      "presence",
+      "--out",
+      join(tempRoot, "bilingual-presence"),
+      "--locales",
+      "en,zh-TW",
+    ], { cwd: root, encoding: "utf8" });
+    if (bilingualPresence.status !== 0) {
+      throw new Error(`bilingual presence materializer failed: ${bilingualPresence.stderr || bilingualPresence.stdout}`);
+    }
     const unsupportedPresence = spawnSync(process.execPath, [
       "scripts/dev-provision-bundle.mjs",
       "presence",
       "--out",
       join(tempRoot, "unsupported-presence"),
       "--locales",
-      "en,zh-TW",
+      "en,nl",
     ], { cwd: root, encoding: "utf8" });
-    if (unsupportedPresence.status === 0 || !`${unsupportedPresence.stderr}${unsupportedPresence.stdout}`.includes("presence does not support locales: zh-TW")) {
+    if (unsupportedPresence.status === 0 || !`${unsupportedPresence.stderr}${unsupportedPresence.stdout}`.includes("does not support locales: nl")) {
       throw new Error("presence materializer accepted an unsupported locale");
     }
     const shop = spawnSync(process.execPath, [
@@ -714,7 +725,13 @@ function assertIntakeForm(root) {
   ) {
     throw new Error("intake seed does not define localized chrome and reply language");
   }
-  if (!manifest.includes("required: [name, email, attendance, resultKey, replyLocale]")) {
+  // Parsed, not string-matched: rendering a localized manifest round-trips the
+  // YAML and normalizes flow-sequence spacing.
+  const submissions = parseAllDocuments(manifest).map((document) => document.toJSON()).find(
+    (atom) => atom?.kind === "Schema" && atom?.metadata?.name === "intake-submissions",
+  );
+  if (JSON.stringify(submissions?.spec?.schema?.required)
+    !== JSON.stringify(["name", "email", "attendance", "resultKey", "replyLocale"])) {
     throw new Error("intake manifest does not persist reply language");
   }
   assertIntakeOptionContract(JSON.parse(seed), manifest);
@@ -731,9 +748,11 @@ function assertIntakeOptionContract(seed, manifestText) {
   const input = atoms.find(
     (atom) => atom?.kind === "Procedure" && atom?.metadata?.name === "submit-intake",
   )?.spec?.input?.properties;
-  const section = seed.collections?.page?.[0]?.sections?.find(
-    (candidate) => candidate.type === "intake",
-  );
+  // Sections moved into the locale catalogs when intake gained page-translations.
+  const canonical = seed.locales?.[seed.canonicalLocale] ?? Object.values(seed.locales ?? {})[0];
+  const section = canonical?.["page-translations"]
+    ?.find((page) => page.slug === "home")
+    ?.sections?.find((candidate) => candidate.type === "intake");
   for (const field of section?.fields ?? []) {
     if (!field.options?.length) continue;
     const values = field.options.map((option) => option.value);

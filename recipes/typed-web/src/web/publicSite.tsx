@@ -18,7 +18,9 @@ import { HomePage, SitePage } from "./pages/HomePage.js";
 
 const schemaNames = new Set(Object.keys(plan.schemas));
 
+// Schema-gated: an archetype without the collection simply drops its route.
 export const publicCollectionRoutes: readonly CollectionRouteConfig[] = [
+  { collection: "page-translations", segment: "pages", listRoute: true, homeSlug: "home" },
   { collection: "post-translations", segment: "posts", listRoute: true },
   { collection: "community-updates", segment: "updates", listRoute: true },
 ].filter((route) => schemaNames.has(route.collection));
@@ -26,13 +28,13 @@ export const publicCollectionRoutes: readonly CollectionRouteConfig[] = [
 export const publicPathResolver = createPublicPathResolver({
   collectionRoutes: Object.fromEntries(publicCollectionRoutes.map((route) => [
     route.collection,
-    { segment: route.segment },
+    { segment: route.segment, ...("homeSlug" in route ? { homeSlug: route.homeSlug } : {}) },
   ])),
 });
 
 export const templates = new TemplateRegistry();
 
-for (const collection of ["post-translations", "community-updates"]) {
+for (const collection of ["page-translations", "post-translations", "community-updates"]) {
   templates.registerEntryTemplate(collection, renderEntry);
   templates.registerListTemplate(collection, renderList);
 }

@@ -1,304 +1,1079 @@
 {
-  "locale": "{{CANONICAL_LOCALE}}",
+  "canonicalLocale": "{{CANONICAL_LOCALE}}",
   "site": {
     "brand": "{{BRAND}}",
-    "description": "{{DESCRIPTION}}",
-    "chromeLabels": {
-      "openNavigation": "Open navigation",
-      "closeNavigation": "Close navigation",
-      "navigation": "Navigation",
-      "toggleTheme": "Toggle color theme",
-      "lightMode": "Light mode",
-      "darkMode": "Dark mode"
-    },
-    "navLinks": [
-      { "label": "About", "href": "#about" },
-      { "label": "Services", "href": "#services" },
-      { "label": "Work", "href": "#work" },
-      { "label": "Contact", "href": "#contact" }
-    ],
-    "navAction": { "label": "Start a conversation", "href": "#contact" },
-    "footer": {
-      "tagline": "A Mantle-shaped starter page with practical slots for real content.",
-      "copyright": "Copyright {{BRAND}}.",
-      "columns": [
-        {
-          "title": "Site",
-          "links": [
-            { "label": "About", "href": "#about" },
-            { "label": "Services", "href": "#services" },
-            { "label": "Work", "href": "#work" },
-            { "label": "Contact", "href": "#contact" }
-          ]
-        },
-        {
-          "title": "Contact",
-          "links": [
-            { "label": "Email", "href": "mailto:hello@example.com" },
-            { "label": "Inquiry form", "href": "#contact-form" }
-          ]
-        }
-      ],
-      "socialLinks": [
-        { "name": "GitHub", "href": "https://github.com", "icon": "github" }
-      ],
-      "bottomLinks": [
-        { "label": "Contact", "href": "#contact" }
-      ]
-    }
+    "description": "{{DESCRIPTION}}"
   },
   "collections": {
     "page": [
       {
+        "slug": "home",
         "type": "home",
-        "title": "{{BRAND}}",
-        "summary": "{{DESCRIPTION}}",
-        "status": "published",
-        "sections": [
-          {
-            "type": "hero",
-            "title": "{{BRAND}} starts here",
-            "body": "{{DESCRIPTION}}",
-            "image": {
-              "src": "/assets/mantle-ocean-hero-light.svg",
-              "alt": ""
-            },
-            "action": { "label": "Start a conversation", "href": "#contact" },
-            "secondaryAction": { "label": "See the work", "href": "#work" }
-          },
-          {
-            "type": "socialProof",
-            "title": "Placeholder proof slots for clients, partners, press, or community signals.",
-            "items": [
-              { "title": "Studio", "mark": 1 },
-              { "title": "Clients", "mark": 2 },
-              { "title": "Partners", "mark": 3 },
-              { "title": "Press", "mark": 4 }
-            ]
-          },
-          {
-            "type": "content",
-            "id": "about",
-            "eyebrow": "About",
-            "title": "{{BRAND}} starts with a clean Mantle content shape",
-            "body": "Use this block for the short positioning paragraph every useful presence site needs.",
-            "items": [
-              {
-                "body": "{{BRAND}} can explain the offer, audience, and next step here without committing to a final visual direction."
-              },
-              {
-                "body": "The copy is intentionally plain so the owner can replace it with real voice, proof, and details after launch."
-              }
-            ]
-          },
-          {
-            "type": "features",
-            "id": "services",
-            "eyebrow": "Services",
-            "title": "What this Mantle starter is ready to hold",
-            "body": "Each item is a placeholder for a common presence-site section, not a fixed theme.",
-            "items": [
-              {
-                "icon": "layout",
-                "title": "Positioning",
-                "body": "A concise statement of who this is for and what the site should make obvious."
-              },
-              {
-                "icon": "sparkles",
-                "title": "Offer",
-                "body": "A place for services, packages, products, or the first useful thing to understand."
-              },
-              {
-                "icon": "chat",
-                "title": "Contact path",
-                "body": "A simple route for serious inquiries before richer workflows are added."
-              },
-              {
-                "icon": "handshake",
-                "title": "Proof",
-                "body": "Slots for outcomes, client names, quotes, partners, or lightweight case notes."
-              },
-              {
-                "icon": "shield",
-                "title": "Trust",
-                "body": "Short answers to visitor doubts before they decide to reach out."
-              },
-              {
-                "icon": "check",
-                "title": "Editable structure",
-                "body": "A section model that is easy for the owner or team to rewrite."
-              }
-            ]
-          },
-          {
-            "type": "bento",
-            "id": "work",
-            "eyebrow": "Work",
-            "title": "A compact set of starter blocks, not a finished brand",
-            "body": "Use this area to decide which pieces stay, which become real content, and which should disappear.",
-            "items": [
-              {
-                "title": "Main story",
-                "body": "The hero and about blocks establish the first plain-English narrative."
-              },
-              {
-                "title": "Offer snapshot",
-                "body": "Feature cards can become services, capabilities, product lines, or use cases."
-              },
-              {
-                "title": "Proof snapshot",
-                "body": "Proof blocks give Mantle something concrete to refine instead of an empty page."
-              }
-            ]
-          },
-          {
-            "type": "metrics",
-            "eyebrow": "Signals",
-            "title": "Small signals show where real numbers can land",
-            "body": "These are placeholder counters for reach, work, speed, outcomes, or other honest proof.",
-            "action": { "label": "Open contact", "href": "#contact" },
-            "items": [
-              { "value": "1", "title": "Home view" },
-              { "value": "4", "title": "Proof slots" },
-              { "value": "3", "title": "Contact fields" },
-              { "value": "1", "title": "Next step" }
-            ]
-          },
-          {
-            "type": "testimonials",
-            "eyebrow": "Proof",
-            "title": "Quote placeholders with a real replacement shape",
-            "body": "Keep the structure, then swap in honest quotes, partner blurbs, or short outcome notes.",
-            "items": [
-              {
-                "quote": "This placeholder quote should become a concrete sentence from a real client, partner, or user.",
-                "name": "Mia Chen",
-                "role": "Example client",
-                "company": "Placeholder Studio"
-              },
-              {
-                "quote": "Use this card for a short proof point that makes the offer easier to trust.",
-                "name": "Alex Rivera",
-                "role": "Example partner",
-                "company": "Sample Collective"
-              },
-              {
-                "quote": "Mantle keeps the first draft plain so the site can become specific quickly.",
-                "name": "Sam Patel",
-                "role": "Example operator",
-                "company": "Demo Desk"
-              }
-            ]
-          },
-          {
-            "type": "faq",
-            "eyebrow": "FAQ",
-            "title": "Starter questions to replace with real visitor concerns",
-            "body": "Use this block for clear answers before adding heavier support or content flows.",
-            "items": [
-              {
-                "title": "What should this site explain first?",
-                "body": "{{BRAND}} should answer the visitor's first practical question before asking them to take action."
-              },
-              {
-                "title": "What should the first call to action be?",
-                "body": "Keep one obvious next step: contact, book, subscribe, join, or read more."
-              },
-              {
-                "title": "Where does proof belong?",
-                "body": "Use logos, metrics, quotes, or work examples only when they help visitors decide."
-              },
-              {
-                "title": "Can this grow after launch?",
-                "body": "Yes. Start with the presence page, then add richer Mantle features only when the site needs them."
-              }
-            ]
-          },
-          {
-            "type": "contact",
-            "id": "contact",
-            "eyebrow": "Contact",
-            "title": "Give the placeholder site one useful action",
-            "body": "This section can become an email card, booking path, intake form, or simple contact surface.",
-            "footerTitle": "Keep the first action focused",
-            "footerBody": "Ask only for the details needed to reply well; add richer intake later.",
-            "footerAction": { "label": "Send a message", "href": "#contact-form" },
-            "items": [
-              {
-                "icon": "email",
-                "title": "Email",
-                "body": "Swap in the inbox that should receive first inquiries.",
-                "value": "hello@example.com",
-                "href": "mailto:hello@example.com"
-              },
-              {
-                "icon": "phone",
-                "title": "Response",
-                "body": "Set a realistic response expectation for visitors.",
-                "value": "Within one business day"
-              },
-              {
-                "icon": "location",
-                "title": "Location",
-                "body": "Keep this broad for remote-first or service-area businesses.",
-                "value": "Remote-friendly"
-              }
-            ]
-          },
-          {
-            "type": "form",
-            "id": "contact-form",
-            "eyebrow": "Inquiry",
-            "title": "A minimal form for the first serious message",
-            "body": "Use these fields as a placeholder intake shape before adding validation, routing, or richer workflows.",
-            "footerBody": "The first version stores the message. Connect email delivery when the owner is ready.",
-            "action": { "label": "Send message", "href": "/api/contact" },
-            "formMessages": {
-              "pending": "Sending message…",
-              "success": "Message received.",
-              "error": "Could not send the message. Please try again."
-            },
-            "items": [
-              { "icon": "mail", "body": "Only ask for the essentials" },
-              { "icon": "clock", "body": "Set a simple response promise" },
-              { "icon": "map", "body": "Add real routing details later" }
-            ],
-            "fields": [
-              {
-                "name": "name",
-                "label": "Name",
-                "type": "text",
-                "autocomplete": "name",
-                "placeholder": "Your name",
-                "required": true
-              },
-              {
-                "name": "email",
-                "label": "Email",
-                "type": "email",
-                "autocomplete": "email",
-                "placeholder": "you@example.com",
-                "required": true
-              },
-              {
-                "name": "message",
-                "label": "Message",
-                "placeholder": "Tell us what you want to build.",
-                "required": true,
-                "multiline": true
-              }
-            ]
-          },
-          {
-            "type": "cta",
-            "eyebrow": "Next",
-            "title": "Turn this Mantle placeholder into {{BRAND}}",
-            "body": "Keep the useful blocks, delete the rest, and replace every placeholder with real words.",
-            "action": { "label": "Start contact", "href": "#contact" },
-            "secondaryAction": { "label": "Review sections", "href": "#about" }
-          }
-        ]
+        "status": "published"
+      },
+      {
+        "slug": "about",
+        "type": "page",
+        "status": "published"
       }
     ]
+  },
+  "locales": {
+    "en": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "en",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "A small site that says who you are",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Get in touch",
+                "href": "#contact-form"
+              },
+              "secondaryAction": {
+                "label": "About us",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "contact-form",
+              "title": "Send a message",
+              "body": "Replace these fields with the details you actually need.",
+              "action": {
+                "label": "Send message",
+                "href": "/api/contact"
+              },
+              "formMessages": {
+                "pending": "Sending message…",
+                "success": "Message received.",
+                "error": "Could not send the message. Please try again."
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Name",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "Your name",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "Email",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "message",
+                  "label": "Message",
+                  "placeholder": "Tell us what you need.",
+                  "required": true,
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "en",
+          "title": "About {{BRAND}}",
+          "summary": "About {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "About {{BRAND}}",
+              "body": "This is a small site built with Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "zh-TW": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "zh-TW",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "一個說清楚你是誰的小網站",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "聯絡我們",
+                "href": "#contact-form"
+              },
+              "secondaryAction": {
+                "label": "關於我們",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "contact-form",
+              "title": "傳送訊息",
+              "body": "把這些欄位換成你真正需要的資訊。",
+              "action": {
+                "label": "送出訊息",
+                "href": "/api/contact"
+              },
+              "formMessages": {
+                "pending": "傳送中…",
+                "success": "已收到訊息。",
+                "error": "訊息傳送失敗，請再試一次。"
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "姓名",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "你的姓名",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "電子郵件",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "message",
+                  "label": "訊息",
+                  "placeholder": "告訴我們你的需求。",
+                  "required": true,
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "zh-TW",
+          "title": "關於 {{BRAND}}",
+          "summary": "關於 {{BRAND}}。",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "關於 {{BRAND}}",
+              "body": "這是一個以 Mantle 建立的小網站。",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "zh-CN": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "zh-CN",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "一个说清楚你是谁的小网站",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "联系我们",
+                "href": "#contact-form"
+              },
+              "secondaryAction": {
+                "label": "关于我们",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "contact-form",
+              "title": "发送消息",
+              "body": "把这些字段换成你真正需要的信息。",
+              "action": {
+                "label": "发送消息",
+                "href": "/api/contact"
+              },
+              "formMessages": {
+                "pending": "发送中…",
+                "success": "已收到消息。",
+                "error": "消息发送失败，请重试。"
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "姓名",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "你的姓名",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "电子邮件",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "message",
+                  "label": "消息",
+                  "placeholder": "告诉我们你的需求。",
+                  "required": true,
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "zh-CN",
+          "title": "关于 {{BRAND}}",
+          "summary": "关于 {{BRAND}}。",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "关于 {{BRAND}}",
+              "body": "这是一个用 Mantle 构建的小网站。",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "ja": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "ja",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "あなたが何者かを伝える小さなサイト",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "お問い合わせ",
+                "href": "#contact-form"
+              },
+              "secondaryAction": {
+                "label": "私たちについて",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "contact-form",
+              "title": "メッセージを送る",
+              "body": "これらの項目は、実際に必要な内容に置き換えてください。",
+              "action": {
+                "label": "送信",
+                "href": "/api/contact"
+              },
+              "formMessages": {
+                "pending": "送信中…",
+                "success": "メッセージを受け取りました。",
+                "error": "送信できませんでした。もう一度お試しください。"
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "お名前",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "お名前",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "メールアドレス",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "message",
+                  "label": "メッセージ",
+                  "placeholder": "ご要望をお知らせください。",
+                  "required": true,
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "ja",
+          "title": "{{BRAND}}について",
+          "summary": "{{BRAND}}について。",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "{{BRAND}}について",
+              "body": "これはMantleで構築した小さなサイトです。",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "ko": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "ko",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "당신이 누구인지 전하는 작은 사이트",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "문의하기",
+                "href": "#contact-form"
+              },
+              "secondaryAction": {
+                "label": "소개",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "contact-form",
+              "title": "메시지 보내기",
+              "body": "이 항목들을 실제로 필요한 내용으로 바꾸세요.",
+              "action": {
+                "label": "메시지 보내기",
+                "href": "/api/contact"
+              },
+              "formMessages": {
+                "pending": "보내는 중…",
+                "success": "메시지를 받았습니다.",
+                "error": "메시지를 보내지 못했습니다. 다시 시도해 주세요."
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "이름",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "이름",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "이메일",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "message",
+                  "label": "메시지",
+                  "placeholder": "필요한 내용을 알려 주세요.",
+                  "required": true,
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "ko",
+          "title": "{{BRAND}} 소개",
+          "summary": "{{BRAND}} 소개.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "{{BRAND}} 소개",
+              "body": "Mantle로 만든 작은 사이트입니다.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "es": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "es",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Un sitio pequeño que dice quién eres",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Contáctanos",
+                "href": "#contact-form"
+              },
+              "secondaryAction": {
+                "label": "Sobre nosotros",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "contact-form",
+              "title": "Enviar un mensaje",
+              "body": "Sustituye estos campos por los datos que realmente necesitas.",
+              "action": {
+                "label": "Enviar mensaje",
+                "href": "/api/contact"
+              },
+              "formMessages": {
+                "pending": "Enviando mensaje…",
+                "success": "Mensaje recibido.",
+                "error": "No se pudo enviar el mensaje. Inténtalo de nuevo."
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Nombre",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "Tu nombre",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "Correo electrónico",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "message",
+                  "label": "Mensaje",
+                  "placeholder": "Cuéntanos qué necesitas.",
+                  "required": true,
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "es",
+          "title": "Sobre {{BRAND}}",
+          "summary": "Sobre {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "Sobre {{BRAND}}",
+              "body": "Este es un sitio pequeño creado con Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "fr": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "fr",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Un petit site qui dit qui vous êtes",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Nous contacter",
+                "href": "#contact-form"
+              },
+              "secondaryAction": {
+                "label": "À propos",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "contact-form",
+              "title": "Envoyer un message",
+              "body": "Remplacez ces champs par les informations dont vous avez réellement besoin.",
+              "action": {
+                "label": "Envoyer le message",
+                "href": "/api/contact"
+              },
+              "formMessages": {
+                "pending": "Envoi du message…",
+                "success": "Message reçu.",
+                "error": "Impossible d'envoyer le message. Veuillez réessayer."
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Nom",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "Votre nom",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "E-mail",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "message",
+                  "label": "Message",
+                  "placeholder": "Dites-nous ce dont vous avez besoin.",
+                  "required": true,
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "fr",
+          "title": "À propos de {{BRAND}}",
+          "summary": "À propos de {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "À propos de {{BRAND}}",
+              "body": "Ceci est un petit site créé avec Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "de": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "de",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Eine kleine Website, die sagt, wer Sie sind",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Kontakt aufnehmen",
+                "href": "#contact-form"
+              },
+              "secondaryAction": {
+                "label": "Über uns",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "contact-form",
+              "title": "Nachricht senden",
+              "body": "Ersetzen Sie diese Felder durch die Angaben, die Sie wirklich brauchen.",
+              "action": {
+                "label": "Nachricht senden",
+                "href": "/api/contact"
+              },
+              "formMessages": {
+                "pending": "Nachricht wird gesendet…",
+                "success": "Nachricht erhalten.",
+                "error": "Nachricht konnte nicht gesendet werden. Bitte erneut versuchen."
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Name",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "Ihr Name",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "E-Mail",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "message",
+                  "label": "Nachricht",
+                  "placeholder": "Sagen Sie uns, was Sie brauchen.",
+                  "required": true,
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "de",
+          "title": "Über {{BRAND}}",
+          "summary": "Über {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "Über {{BRAND}}",
+              "body": "Dies ist eine kleine Website, erstellt mit Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "it": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "it",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Un piccolo sito che dice chi sei",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Contattaci",
+                "href": "#contact-form"
+              },
+              "secondaryAction": {
+                "label": "Chi siamo",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "contact-form",
+              "title": "Invia un messaggio",
+              "body": "Sostituisci questi campi con i dati che ti servono davvero.",
+              "action": {
+                "label": "Invia messaggio",
+                "href": "/api/contact"
+              },
+              "formMessages": {
+                "pending": "Invio del messaggio…",
+                "success": "Messaggio ricevuto.",
+                "error": "Impossibile inviare il messaggio. Riprova."
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Nome",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "Il tuo nome",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "E-mail",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "message",
+                  "label": "Messaggio",
+                  "placeholder": "Dicci di cosa hai bisogno.",
+                  "required": true,
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "it",
+          "title": "Chi è {{BRAND}}",
+          "summary": "Chi è {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "Chi è {{BRAND}}",
+              "body": "Questo è un piccolo sito creato con Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "ru": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "ru",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Небольшой сайт, который говорит, кто вы",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Связаться с нами",
+                "href": "#contact-form"
+              },
+              "secondaryAction": {
+                "label": "О нас",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "contact-form",
+              "title": "Отправить сообщение",
+              "body": "Замените эти поля теми данными, которые вам действительно нужны.",
+              "action": {
+                "label": "Отправить сообщение",
+                "href": "/api/contact"
+              },
+              "formMessages": {
+                "pending": "Отправка сообщения…",
+                "success": "Сообщение получено.",
+                "error": "Не удалось отправить сообщение. Попробуйте ещё раз."
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Имя",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "Ваше имя",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "Электронная почта",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "message",
+                  "label": "Сообщение",
+                  "placeholder": "Расскажите, что вам нужно.",
+                  "required": true,
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "ru",
+          "title": "О {{BRAND}}",
+          "summary": "О {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "О {{BRAND}}",
+              "body": "Это небольшой сайт, созданный с Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "id": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "id",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Situs kecil yang menyatakan siapa Anda",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Hubungi kami",
+                "href": "#contact-form"
+              },
+              "secondaryAction": {
+                "label": "Tentang kami",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "contact-form",
+              "title": "Kirim pesan",
+              "body": "Ganti kolom ini dengan detail yang benar-benar Anda perlukan.",
+              "action": {
+                "label": "Kirim pesan",
+                "href": "/api/contact"
+              },
+              "formMessages": {
+                "pending": "Mengirim pesan…",
+                "success": "Pesan diterima.",
+                "error": "Pesan gagal dikirim. Silakan coba lagi."
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Nama",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "Nama Anda",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "Email",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "message",
+                  "label": "Pesan",
+                  "placeholder": "Beri tahu kami apa yang Anda butuhkan.",
+                  "required": true,
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "id",
+          "title": "Tentang {{BRAND}}",
+          "summary": "Tentang {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "Tentang {{BRAND}}",
+              "body": "Ini situs kecil yang dibuat dengan Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "pt-BR": {
+      "page-translations": [
+        {
+          "slug": "home",
+          "locale": "pt-BR",
+          "title": "{{BRAND}}",
+          "summary": "{{DESCRIPTION}}",
+          "status": "published",
+          "sections": [
+            {
+              "type": "hero",
+              "title": "Um site pequeno que diz quem você é",
+              "body": "{{DESCRIPTION}}",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              },
+              "action": {
+                "label": "Fale conosco",
+                "href": "#contact-form"
+              },
+              "secondaryAction": {
+                "label": "Sobre nós",
+                "href": "/pages/about"
+              }
+            },
+            {
+              "type": "form",
+              "id": "contact-form",
+              "title": "Enviar uma mensagem",
+              "body": "Substitua estes campos pelos dados de que você realmente precisa.",
+              "action": {
+                "label": "Enviar mensagem",
+                "href": "/api/contact"
+              },
+              "formMessages": {
+                "pending": "Enviando mensagem…",
+                "success": "Mensagem recebida.",
+                "error": "Não foi possível enviar a mensagem. Tente novamente."
+              },
+              "fields": [
+                {
+                  "name": "name",
+                  "label": "Nome",
+                  "type": "text",
+                  "autocomplete": "name",
+                  "placeholder": "Seu nome",
+                  "required": true
+                },
+                {
+                  "name": "email",
+                  "label": "E-mail",
+                  "type": "email",
+                  "autocomplete": "email",
+                  "placeholder": "you@example.com",
+                  "required": true
+                },
+                {
+                  "name": "message",
+                  "label": "Mensagem",
+                  "placeholder": "Conte o que você precisa.",
+                  "required": true,
+                  "multiline": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "slug": "about",
+          "locale": "pt-BR",
+          "title": "Sobre {{BRAND}}",
+          "summary": "Sobre {{BRAND}}.",
+          "status": "published",
+          "sections": [
+            {
+              "type": "content",
+              "title": "Sobre {{BRAND}}",
+              "body": "Este é um site pequeno criado com Mantle.",
+              "image": {
+                "src": "/assets/mantle-ocean-hero-light.svg",
+                "alt": ""
+              }
+            }
+          ]
+        }
+      ]
+    }
   }
 }
