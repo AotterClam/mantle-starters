@@ -36,7 +36,7 @@ catalog:
   tailwindcss: 4.3.3
   worker-mailer: ^1.2.1
   yaml: ^2.9.0
-  zod: ^4.4.2
+  zod: ^4.5.4
   # Toolchain — every starter and (most) packages/.
   '@cloudflare/workers-types': ^5.20260804.1
   '@types/node': ^26
