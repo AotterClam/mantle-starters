@@ -5,6 +5,8 @@ import { navClientJs } from "./navClient.js";
 import { themeClientJs } from "./themeClient.js";
 
 export const homeClientJs = [
+  "import { bindWebMcp } from '/assets/mantle-webmcp.js';",
+  "void bindWebMcp();",
   ...enhanceClientJs,
   ...themeClientJs,
   ...navClientJs,

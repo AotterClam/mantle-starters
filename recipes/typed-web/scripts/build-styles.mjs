@@ -35,6 +35,7 @@ const browserAssets = await compileBrowserAssets(root);
 const outputs = new Map([
   ["assets/styles.css", css],
   ["assets/kiwa-home.js", browserAssets.homeClientJs],
+  ["assets/mantle-webmcp.js", readFileSync(new URL(import.meta.resolve("@aotter/mantle-web/webmcp")), "utf8").replace(/\n\/\/# sourceMappingURL=.*\n?$/u, "\n")],
   ["assets/mantle-ocean-hero-light.svg", browserAssets.mantleOceanHeroLightSvg],
   ["assets/mantle-ocean-hero-dark.svg", browserAssets.mantleOceanHeroDarkSvg],
   ...Object.entries(browserAssets.kiwaEnhanceAssets).map(([name, source]) => [`enhance/${name}`, source]),
