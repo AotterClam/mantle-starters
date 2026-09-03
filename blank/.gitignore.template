@@ -12,6 +12,7 @@ public/_mantle/
 .mantle/generated/
 public/assets/styles.css
 public/assets/kiwa-home.js
+public/assets/mantle-webmcp.js
 public/assets/mantle-ocean-hero-light.svg
 public/assets/mantle-ocean-hero-dark.svg
 public/enhance/*.js

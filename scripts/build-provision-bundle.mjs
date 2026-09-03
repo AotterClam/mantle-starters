@@ -169,6 +169,7 @@ function isGeneratedOutput(path) {
     || [
       "public/assets/styles.css",
       "public/assets/kiwa-home.js",
+      "public/assets/mantle-webmcp.js",
       "public/assets/mantle-ocean-hero-light.svg",
       "public/assets/mantle-ocean-hero-dark.svg",
     ].includes(path)
@@ -248,6 +249,7 @@ function assertBundle(bundle, archetype) {
     "public/_mantle/",
     "public/assets/styles.css",
     "public/assets/kiwa-home.js",
+    "public/assets/mantle-webmcp.js",
     "public/assets/mantle-ocean-hero-light.svg",
     "public/assets/mantle-ocean-hero-dark.svg",
     "public/enhance/*.js",
@@ -283,6 +285,10 @@ function assertBundle(bundle, archetype) {
     if (!bundle.files["src/mantle/worker.ts"]?.includes("createMantleWorker") ||
         !bundle.files["src/mantle/worker.ts"]?.includes(".mantle/generated/mantle.js")) {
       throw new Error(`${archetype} Worker must use Core's facade and generated RuntimePlan`);
+    }
+    if (!bundle.files["src/web/client/homeClient.ts"]?.includes("bindWebMcp") ||
+        !JSON.parse(bundle.files["package.json"]).dependencies?.["@aotter/mantle-web"]) {
+      throw new Error(`${archetype} frontend must opt in to Core WebMCP`);
     }
     for (const path of Object.keys(bundle.files)) {
       if (!["src/", "components/", "lib/", "styles/"].some((prefix) => path.startsWith(prefix))) continue;
@@ -548,6 +554,8 @@ function selectTypedSurface(files, archetype) {
     ...clients.map((name) => `import { ${name}ClientJs } from "./${name}Client.js";`),
     "",
     "export const homeClientJs = [",
+    '  "import { bindWebMcp } from \'/assets/mantle-webmcp.js\';",',
+    '  "void bindWebMcp();",',
     ...clients.map((name) => `  ...${name}ClientJs,`),
     '  "",',
     '].join("\\n");',
