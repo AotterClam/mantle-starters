@@ -28,11 +28,14 @@ jobs:
 
       # Keep approval scoped to the same low-risk updates as auto-merge so a
       # future review rule does not broaden Dependabot's authority.
+      # Better Auth must match Core's exact peer. Keep update/security PRs
+      # visible, but require coordinated review instead of automatic approval.
       - name: Auto-approve patch + minor + digest
         if: |
-          steps.meta.outputs.update-type == 'version-update:semver-patch' ||
+          (steps.meta.outputs.update-type == 'version-update:semver-patch' ||
           steps.meta.outputs.update-type == 'version-update:semver-minor' ||
-          steps.meta.outputs.update-type == 'version-update:semver-digest'
+          steps.meta.outputs.update-type == 'version-update:semver-digest') &&
+          !contains(steps.meta.outputs.dependency-names, 'better-auth')
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -40,9 +43,10 @@ jobs:
 
       - name: Auto-merge patch + minor + digest
         if: |
-          steps.meta.outputs.update-type == 'version-update:semver-patch' ||
+          (steps.meta.outputs.update-type == 'version-update:semver-patch' ||
           steps.meta.outputs.update-type == 'version-update:semver-minor' ||
-          steps.meta.outputs.update-type == 'version-update:semver-digest'
+          steps.meta.outputs.update-type == 'version-update:semver-digest') &&
+          !contains(steps.meta.outputs.dependency-names, 'better-auth')
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

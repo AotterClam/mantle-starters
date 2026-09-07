@@ -51,7 +51,7 @@ updates:
         patterns: ["typescript", "tsx", "vitest"]
         update-types: ["minor", "patch"]
       runtime-libs:
-        patterns: ["aws4fetch", "better-auth", "hono", "marked", "yaml", "zod"]
+        patterns: ["aws4fetch", "hono", "marked", "yaml", "zod"]
         update-types: ["minor", "patch"]
       sharp:
         patterns: ["sharp"]
