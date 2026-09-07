@@ -78,6 +78,9 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      - name: Check dependency update gates
+        run: node scripts/check-dependency-updates.mjs
+
       - name: Check standalone starter lockfiles
         run: pnpm check:starter-locks
 
